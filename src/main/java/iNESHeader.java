@@ -11,7 +11,7 @@ public class iNESHeader {
     }
 
     public final int prg_rom_size;
-    private final int chr_rom_size;
+    public final int chr_rom_size;
     private final int mapper;
     private final Mirroring mirrorType;
     private final boolean battery_prg_ram;

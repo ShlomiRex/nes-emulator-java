@@ -1,6 +1,6 @@
 import java.util.HexFormat;
 
-public class Hex {
+public class Common {
     public static byte[] hexStringToByteArray(String s) {
         StringBuilder new_s = new StringBuilder();
         for (int i = 0; i < s.length(); i+=5) {
@@ -15,18 +15,24 @@ public class Hex {
         ARRAY,
     }
 
-    public static String bytesToHexString(byte[] bytes, BytesToHexStringFormat format) {
+    public static String bytesToHexString(byte[] bytes, BytesToHexStringFormat format, boolean leading_0x) {
         if (format == BytesToHexStringFormat.NO_FORMAT) {
             StringBuilder sb = new StringBuilder();
             for (byte b : bytes) {
-                sb.append(String.format("%02x", b));
+                if (leading_0x)
+                    sb.append(String.format("0x%02x", b));
+                else
+                    sb.append(String.format("%02x", b));
             }
             return sb.toString();
         } else {
             StringBuilder sb = new StringBuilder();
             sb.append("[");
             for (int i = 0; i < bytes.length; i++) {
-                sb.append(String.format("0x%02X", bytes[i]));
+                if (leading_0x)
+                    sb.append(String.format("0x%02X", bytes[i]));
+                else
+                    sb.append(String.format("%02X", bytes[i]));
                 if (i < bytes.length - 1) {
                     sb.append(", ");
                 }
@@ -34,5 +40,17 @@ public class Hex {
             sb.append("]");
             return sb.toString();
         }
+    }
+
+    public static String byteToBinaryString(byte b) {
+        return String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0');
+    }
+
+    public static String byteToHexString(byte b) {
+        return String.format("%02X", b & 0xFF);
+    }
+
+    public static String shortToHexString(short s) {
+        return String.format("%04X", s & 0xFFFF);
     }
 }

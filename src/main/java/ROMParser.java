@@ -8,9 +8,11 @@ import java.util.Arrays;
 
 public class ROMParser {
 
-    private Logger logger = LoggerFactory.getLogger(ROMParser.class);
+    private final Logger logger = LoggerFactory.getLogger(ROMParser.class);
 
-    private iNESHeader header;
+    private final iNESHeader header;
+    private final byte[] prg_rom; // Size: 16KB exactly, because I only intend to support mapper 0 only. No banks needed
+    private final byte[] chr_rom; // Size: 8KB exactly, like above.
 
     class ParsingException extends Exception {
         public ParsingException(String message) {
@@ -22,13 +24,14 @@ public class ROMParser {
         File file = new File(path);
         FileInputStream fileInputStream = new FileInputStream(file);
 
-        // Original size: 24592
-        // After parsing header: 24576
-        // Diff: 16
-
-        // Parse iNES header
         header = parseHeader(fileInputStream);
-        parse_prg_rom(fileInputStream);
+        prg_rom = parse_prg_rom(fileInputStream);
+        chr_rom = parse_chr_rom(fileInputStream);
+
+        byte[] bytes_left = fileInputStream.readAllBytes();
+        if (bytes_left.length > 0)
+            throw new ParsingException("Expected that I read all the bytes, however there are " +
+                    bytes_left.length +" bytes left");
     }
 
     private iNESHeader parseHeader(FileInputStream fileInputStream) throws ParsingException, IOException {
@@ -115,11 +118,46 @@ public class ROMParser {
         return iNESHeader;
     }
 
-    private void parse_prg_rom(FileInputStream fileInputStream) throws IOException {
+    private byte[] parse_prg_rom(FileInputStream fileInputStream) throws IOException, ParsingException {
         int prg_rom_size_bytes = 1024 * 16 * this.header.prg_rom_size;
+
         byte[] prg_rom = fileInputStream.readNBytes(prg_rom_size_bytes);
+        if (prg_rom.length != 16*1024) {
+            throw new ParsingException("Expected PRG ROM of size 16KB, currently only supporting mapper 0");
+        }
         logger.info("PRG ROM size: " + prg_rom.length / 1024 + "KB");
+
+        byte[] first_16_bytes = Arrays.copyOfRange(prg_rom, 0, 16);
+        logger.info("First 16 bytes of PRG ROM: " +
+                Common.bytesToHexString(first_16_bytes, Common.BytesToHexStringFormat.ARRAY, false));
+
         byte[] last_16_bytes = Arrays.copyOfRange(prg_rom, prg_rom.length - 16, prg_rom.length);
-        logger.info("Last 16 bytes of PRG ROM: " + Hex.bytesToHexString(last_16_bytes, Hex.BytesToHexStringFormat.ARRAY));
+        logger.info("Last 16 bytes of PRG ROM: " +
+                Common.bytesToHexString(last_16_bytes, Common.BytesToHexStringFormat.ARRAY, false));
+
+        return prg_rom;
+    }
+
+    private byte[] parse_chr_rom(FileInputStream fileInputStream) throws ParsingException, IOException {
+        int chr_rom_bytes = 1024 * 8 * header.chr_rom_size;
+        logger.debug("CHR ROM size: " + chr_rom_bytes/1024 + "KB");
+        if (chr_rom_bytes != 8*1024) {
+            throw new ParsingException("Expected CHR ROM of size 8KB in mapper 0.");
+        }
+
+        byte[] chr_rom = fileInputStream.readNBytes(8 * 1024);
+        return chr_rom;
+    }
+
+    public byte[] getPrg_rom() {
+        return prg_rom;
+    }
+
+    public iNESHeader getHeader() {
+        return header;
+    }
+
+    public byte[] getChr_rom() {
+        return chr_rom;
     }
 }
