@@ -1,6 +1,3 @@
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Scanner;
 
@@ -16,10 +13,9 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
 
         while(true) {
+            nes.cpu.clock_tick();
             if (allow_stepping)
                 scanner.nextLine();
-
-            nes.cpu.clock_tick();
         }
     }
 

@@ -50,7 +50,10 @@ public class Common {
         return String.format("%02X", b & 0xFF);
     }
 
-    public static String shortToHexString(short s) {
-        return String.format("%04X", s & 0xFFFF);
+    public static String shortToHexString(short s, boolean leading_0x) {
+        if (!leading_0x)
+            return String.format("%04X", s & 0xFFFF);
+        else
+            return String.format("0x%04X", s & 0xFFFF);
     }
 }
