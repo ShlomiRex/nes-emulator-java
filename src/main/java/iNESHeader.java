@@ -10,7 +10,7 @@ public class iNESHeader {
         DUAL
     }
 
-    private final int prg_rom_size;
+    public final int prg_rom_size;
     private final int chr_rom_size;
     private final int mapper;
     private final Mirroring mirrorType;
@@ -26,13 +26,21 @@ public class iNESHeader {
     private final boolean prg_ram_not_present;
     private final boolean bus_conflicts;
 
-    public iNESHeader(int prg_rom_size, int chr_rom_size, int mapper,
-                      Mirroring mirrorType, boolean battery_prg_ram,
-                      boolean trainer, boolean ignore_mirroring_control,
-                      boolean vs_unit_system, boolean play_choise_10,
-                      boolean nes2_format, int prg_ram_size,
-                      TVSystem flags9_tv_system, TVSystem flags10_tv_system,
-                      boolean prg_ram_not_present, boolean bus_conflicts) {
+    public iNESHeader(int prg_rom_size,
+                      int chr_rom_size,
+                      int mapper,
+                      Mirroring mirrorType,
+                      boolean battery_prg_ram,
+                      boolean trainer,
+                      boolean ignore_mirroring_control,
+                      boolean vs_unit_system,
+                      boolean play_choise_10,
+                      boolean nes2_format,
+                      int prg_ram_size,
+                      TVSystem flags9_tv_system,
+                      TVSystem flags10_tv_system,
+                      boolean prg_ram_not_present,
+                      boolean bus_conflicts) {
         this.prg_rom_size = prg_rom_size;
         this.chr_rom_size = chr_rom_size;
         this.mapper = mapper;

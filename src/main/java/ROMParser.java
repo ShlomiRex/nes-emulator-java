@@ -1,10 +1,16 @@
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
 
 public class ROMParser {
+
+    private Logger logger = LoggerFactory.getLogger(ROMParser.class);
+
+    private iNESHeader header;
 
     class ParsingException extends Exception {
         public ParsingException(String message) {
@@ -16,12 +22,16 @@ public class ROMParser {
         File file = new File(path);
         FileInputStream fileInputStream = new FileInputStream(file);
 
-        // Parse iNES header
-        parseHeader(fileInputStream);
+        // Original size: 24592
+        // After parsing header: 24576
+        // Diff: 16
 
+        // Parse iNES header
+        header = parseHeader(fileInputStream);
+        parse_prg_rom(fileInputStream);
     }
 
-    private void parseHeader(FileInputStream fileInputStream) throws ParsingException, IOException {
+    private iNESHeader parseHeader(FileInputStream fileInputStream) throws ParsingException, IOException {
         byte[] header_bytes = fileInputStream.readNBytes(16);
 
         // Check magic bytes
@@ -101,10 +111,15 @@ public class ROMParser {
                 mirrorType, battery_prg_ram, trainer, ignore_mirroring_control,
                 vs_unit_system, play_choise_10, nes2_format, prg_ram_size, flags9_tv_system,
                 flags10_tv_system, prg_ram_not_present, bus_conflicts);
-        System.out.println(iNESHeader);
+        logger.debug(iNESHeader.toString());
+        return iNESHeader;
     }
 
-    private void parse_prg_rom(FileInputStream fileInputStream) {
-
+    private void parse_prg_rom(FileInputStream fileInputStream) throws IOException {
+        int prg_rom_size_bytes = 1024 * 16 * this.header.prg_rom_size;
+        byte[] prg_rom = fileInputStream.readNBytes(prg_rom_size_bytes);
+        logger.info("PRG ROM size: " + prg_rom.length / 1024 + "KB");
+        byte[] last_16_bytes = Arrays.copyOfRange(prg_rom, prg_rom.length - 16, prg_rom.length);
+        logger.info("Last 16 bytes of PRG ROM: " + Hex.bytesToHexString(last_16_bytes, Hex.BytesToHexStringFormat.ARRAY));
     }
 }
