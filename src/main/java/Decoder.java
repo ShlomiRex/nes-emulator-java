@@ -96,7 +96,7 @@ public class Decoder {
     }
 
     public InstructionInfo decode_opcode(byte opcode) {
-        switch (opcode) {
+        switch (opcode & 0xFF) {
             case 0x00:
                 return new InstructionInfo(Instructions.BRK, AddressingMode.IMPLIED, 1, 2, OopsCycle.NONE);
             case 0x01:
@@ -137,8 +137,8 @@ public class Decoder {
                 return new InstructionInfo(Instructions.AND, AddressingMode.INDIRECT_X, 2, 6, OopsCycle.NONE);
             case 0x24:
                 return new InstructionInfo(Instructions.BIT, AddressingMode.ZEROPAGE, 2, 3, OopsCycle.NONE);
-            Case 0x25:
-            return new InstructionInfo(Instructions.AND, AddressingMode.ZEROPAGE, 2, 3, OopsCycle.NONE);
+            case 0x25:
+                return new InstructionInfo(Instructions.AND, AddressingMode.ZEROPAGE, 2, 3, OopsCycle.NONE);
             case 0x26:
                 return new InstructionInfo(Instructions.ROL, AddressingMode.ZEROPAGE, 2, 5, OopsCycle.NONE);
             case 0x28:
@@ -267,8 +267,6 @@ public class Decoder {
                 return new InstructionInfo(Instructions.STA, AddressingMode.INDIRECT_Y, 2, 6, OopsCycle.NONE);
             case 0x94:
                 return new InstructionInfo(Instructions.STY, AddressingMode.ZEROPAGE_X, 2, 4, OopsCycle.NONE);
-            case 0x94:
-                return new InstructionInfo(Instructions.STY, AddressingMode.ZEROPAGE_X, 2, 4, OopsCycle.NONE);
             case 0x95:
                 return new InstructionInfo(Instructions.STA, AddressingMode.ZEROPAGE_X, 2, 4, OopsCycle.NONE);
             case 0x96:
@@ -277,7 +275,132 @@ public class Decoder {
                 return new InstructionInfo(Instructions.TYA, AddressingMode.IMPLIED, 1, 2, OopsCycle.NONE);
             case 0x99:
                 return new InstructionInfo(Instructions.STA, AddressingMode.ABSOLUTE_Y, 3, 5, OopsCycle.NONE);
-            //TODO: COMPLETE
+            case 0x9A:
+                return new InstructionInfo(Instructions.TXS, AddressingMode.IMPLIED, 1, 2, OopsCycle.NONE);
+            case 0x9D:
+                return new InstructionInfo(Instructions.STA, AddressingMode.ABSOLUTE_X, 3, 5, OopsCycle.NONE);
+            case 0xA0:
+                return new InstructionInfo(Instructions.LDY, AddressingMode.IMMEDIATE, 2, 2, OopsCycle.NONE);
+            case 0xA1:
+                return new InstructionInfo(Instructions.LDA, AddressingMode.INDIRECT_X, 2, 6, OopsCycle.NONE);
+            case 0xA2:
+                return new InstructionInfo(Instructions.LDX, AddressingMode.IMMEDIATE, 2, 2, OopsCycle.NONE);
+            case 0xA4:
+                return new InstructionInfo(Instructions.LDY, AddressingMode.ZEROPAGE, 2, 3, OopsCycle.NONE);
+            case 0xA5:
+                return new InstructionInfo(Instructions.LDA, AddressingMode.ZEROPAGE, 2, 3, OopsCycle.NONE);
+            case 0xA6:
+                return new InstructionInfo(Instructions.LDX, AddressingMode.ZEROPAGE, 2, 3, OopsCycle.NONE);
+            case 0xA8:
+                return new InstructionInfo(Instructions.TAY, AddressingMode.IMPLIED, 1, 2, OopsCycle.NONE);
+            case 0xA9:
+                return new InstructionInfo(Instructions.LDA, AddressingMode.IMMEDIATE, 2, 2, OopsCycle.NONE);
+            case 0xAA:
+                return new InstructionInfo(Instructions.TAX, AddressingMode.IMPLIED, 1, 2, OopsCycle.NONE);
+            case 0xAC:
+                return new InstructionInfo(Instructions.LDY, AddressingMode.ABSOLUTE, 3, 4, OopsCycle.NONE);
+            case 0xAD:
+                return new InstructionInfo(Instructions.LDA, AddressingMode.ABSOLUTE, 3, 4, OopsCycle.NONE);
+            case 0xAE:
+                return new InstructionInfo(Instructions.LDX, AddressingMode.ABSOLUTE, 3, 4, OopsCycle.NONE);
+            case 0xB0:
+                return new InstructionInfo(Instructions.BCS, AddressingMode.RELATIVE, 2, 2, OopsCycle.BranchOccursOn);
+            case 0xB1:
+                return new InstructionInfo(Instructions.LDA, AddressingMode.INDIRECT_Y, 2, 5, OopsCycle.PageBoundaryCrossed);
+            case 0xB4:
+                return new InstructionInfo(Instructions.LDY, AddressingMode.ZEROPAGE_X, 2, 4, OopsCycle.NONE);
+            case 0xB5:
+                return new InstructionInfo(Instructions.LDA, AddressingMode.ZEROPAGE_X, 2, 4, OopsCycle.NONE);
+            case 0xB6:
+                return new InstructionInfo(Instructions.LDX, AddressingMode.ZEROPAGE_Y, 2, 4, OopsCycle.NONE);
+            case 0xB8:
+                return new InstructionInfo(Instructions.CLV, AddressingMode.IMPLIED, 1, 2, OopsCycle.NONE);
+            case 0xB9:
+                return new InstructionInfo(Instructions.LDA, AddressingMode.ABSOLUTE_Y, 3, 4, OopsCycle.PageBoundaryCrossed);
+            case 0xBA:
+                return new InstructionInfo(Instructions.TSX, AddressingMode.IMPLIED, 1, 2, OopsCycle.NONE);
+            case 0xBC:
+                return new InstructionInfo(Instructions.LDY, AddressingMode.ABSOLUTE_X, 3, 4, OopsCycle.PageBoundaryCrossed);
+            case 0xBD:
+                return new InstructionInfo(Instructions.LDA, AddressingMode.ABSOLUTE_X, 3, 4, OopsCycle.PageBoundaryCrossed);
+            case 0xBE:
+                return new InstructionInfo(Instructions.LDX, AddressingMode.ABSOLUTE_Y, 3, 4, OopsCycle.PageBoundaryCrossed);
+            case 0xC0:
+                return new InstructionInfo(Instructions.CPY, AddressingMode.IMMEDIATE, 2, 2, OopsCycle.NONE);
+            case 0xC1:
+                return new InstructionInfo(Instructions.CMP, AddressingMode.INDIRECT_X, 2, 6, OopsCycle.NONE);
+            case 0xC4:
+                return new InstructionInfo(Instructions.CPY, AddressingMode.ZEROPAGE, 2, 3, OopsCycle.NONE);
+            case 0xC5:
+                return new InstructionInfo(Instructions.CMP, AddressingMode.ZEROPAGE, 2, 2, OopsCycle.NONE);
+            case 0xC6:
+                return new InstructionInfo(Instructions.DEC, AddressingMode.ZEROPAGE, 2, 5, OopsCycle.NONE);
+            case 0xC8:
+                return new InstructionInfo(Instructions.INY, AddressingMode.IMPLIED, 1, 2, OopsCycle.NONE);
+            case 0xC9:
+                return new InstructionInfo(Instructions.CMP, AddressingMode.IMMEDIATE, 2, 2, OopsCycle.NONE);
+            case 0xCA:
+                return new InstructionInfo(Instructions.DEX, AddressingMode.IMPLIED, 1, 2, OopsCycle.NONE);
+            case 0xCC:
+                return new InstructionInfo(Instructions.CPY, AddressingMode.ABSOLUTE, 3, 4, OopsCycle.NONE);
+            case 0xCD:
+                return new InstructionInfo(Instructions.CMP, AddressingMode.ABSOLUTE, 3, 4, OopsCycle.NONE);
+            case 0xCE:
+                return new InstructionInfo(Instructions.DEC, AddressingMode.ABSOLUTE, 3, 6, OopsCycle.NONE);
+            case 0xD0:
+                return new InstructionInfo(Instructions.BNE, AddressingMode.RELATIVE, 2, 2, OopsCycle.BranchOccursOn);
+            case 0xD1:
+                return new InstructionInfo(Instructions.CMP, AddressingMode.INDIRECT_Y, 2, 5, OopsCycle.PageBoundaryCrossed);
+            case 0xD5:
+                return new InstructionInfo(Instructions.CMP, AddressingMode.ZEROPAGE_X, 2, 4, OopsCycle.NONE);
+            case 0xD6:
+                return new InstructionInfo(Instructions.DEC, AddressingMode.ZEROPAGE_X, 2, 6, OopsCycle.NONE);
+            case 0xD8:
+                return new InstructionInfo(Instructions.CLD, AddressingMode.IMPLIED, 1, 2, OopsCycle.NONE);
+            case 0xD9:
+                return new InstructionInfo(Instructions.CMP, AddressingMode.ABSOLUTE_Y, 3, 4, OopsCycle.PageBoundaryCrossed);
+            case 0xDD:
+                return new InstructionInfo(Instructions.CMP, AddressingMode.ABSOLUTE_X, 3, 4, OopsCycle.PageBoundaryCrossed);
+            case 0xDE:
+                return new InstructionInfo(Instructions.DEC, AddressingMode.ABSOLUTE_X, 3, 7, OopsCycle.NONE);
+            case 0xE0:
+                return new InstructionInfo(Instructions.CPX, AddressingMode.IMMEDIATE, 2, 2, OopsCycle.NONE);
+            case 0xE1:
+                return new InstructionInfo(Instructions.SBC, AddressingMode.INDIRECT_X, 2, 6, OopsCycle.NONE);
+            case 0xE4:
+                return new InstructionInfo(Instructions.CPX, AddressingMode.ZEROPAGE, 2, 3, OopsCycle.NONE);
+            case 0xE5:
+                return new InstructionInfo(Instructions.SBC, AddressingMode.ZEROPAGE, 2, 3, OopsCycle.NONE);
+            case 0xE6:
+                return new InstructionInfo(Instructions.INC, AddressingMode.ZEROPAGE, 2, 5, OopsCycle.NONE);
+            case 0xE8:
+                return new InstructionInfo(Instructions.INX, AddressingMode.IMPLIED, 1, 2, OopsCycle.NONE);
+            case 0xE9:
+                return new InstructionInfo(Instructions.SBC, AddressingMode.IMMEDIATE, 2, 2, OopsCycle.NONE);
+            case 0xEA:
+                return new InstructionInfo(Instructions.NOP, AddressingMode.IMPLIED, 1, 2, OopsCycle.NONE);
+            case 0xEC:
+                return new InstructionInfo(Instructions.CPX, AddressingMode.ABSOLUTE, 3, 4, OopsCycle.NONE);
+            case 0xED:
+                return new InstructionInfo(Instructions.SBC, AddressingMode.ABSOLUTE, 3, 4, OopsCycle.NONE);
+            case 0xEE:
+                return new InstructionInfo(Instructions.INC, AddressingMode.ABSOLUTE, 3, 6, OopsCycle.NONE);
+            case 0xF0:
+                return new InstructionInfo(Instructions.BEQ, AddressingMode.RELATIVE, 2, 2, OopsCycle.BranchOccursOn);
+            case 0xF1:
+                return new InstructionInfo(Instructions.SBC, AddressingMode.INDIRECT_Y, 2, 5, OopsCycle.PageBoundaryCrossed);
+            case 0xF5:
+                return new InstructionInfo(Instructions.SBC, AddressingMode.ZEROPAGE_X, 2, 4, OopsCycle.NONE);
+            case 0xF6:
+                return new InstructionInfo(Instructions.INC, AddressingMode.ZEROPAGE_X, 2, 6, OopsCycle.NONE);
+            case 0xF8:
+                return new InstructionInfo(Instructions.SED, AddressingMode.IMPLIED, 1, 2, OopsCycle.NONE);
+            case 0xF9:
+                return new InstructionInfo(Instructions.SBC, AddressingMode.ABSOLUTE_Y, 3, 4, OopsCycle.PageBoundaryCrossed);
+            case 0xFD:
+                return new InstructionInfo(Instructions.SBC, AddressingMode.ABSOLUTE_X, 3, 4, OopsCycle.PageBoundaryCrossed);
+            case 0xFE:
+                return new InstructionInfo(Instructions.INC, AddressingMode.ABSOLUTE_X, 3, 7, OopsCycle.NONE);
         }
         throw new RuntimeException("Couldn't decode instruction: " + Common.byteToHexString(opcode));
     }
