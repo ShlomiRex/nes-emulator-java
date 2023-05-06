@@ -46,8 +46,11 @@ public class Common {
         return String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0');
     }
 
-    public static String byteToHexString(byte b) {
-        return String.format("%02X", b & 0xFF);
+    public static String byteToHexString(byte b, boolean leading_0x) {
+        if (leading_0x)
+            return String.format("0x%02X", b & 0xFF);
+        else
+            return String.format("%02X", b & 0xFF);
     }
 
     public static String shortToHexString(short s, boolean leading_0x) {
@@ -55,5 +58,22 @@ public class Common {
             return String.format("%04X", s & 0xFFFF);
         else
             return String.format("0x%04X", s & 0xFFFF);
+    }
+
+    public class Bits {
+        public static boolean getBit(byte variable, int bitIndex) {
+            if (bitIndex < 0 || bitIndex > 7)
+                throw new IllegalArgumentException("Bit index must be between 0 and 7");
+            return ((variable >> bitIndex) & 1) == 1;
+        }
+
+        public static byte setBit(byte variable, int bitIndex, boolean value) {
+            if (bitIndex < 0 || bitIndex > 7)
+                throw new IllegalArgumentException("Bit index must be between 0 and 7");
+            if (value)
+                return (byte) (variable | (1 << bitIndex));
+            else
+                return (byte) (variable & ~(1 << bitIndex));
+        }
     }
 }

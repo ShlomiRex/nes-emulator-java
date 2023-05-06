@@ -402,6 +402,6 @@ public class Decoder {
             case 0xFE:
                 return new InstructionInfo(Instructions.INC, AddressingMode.ABSOLUTE_X, 3, 7, OopsCycle.NONE);
         }
-        throw new RuntimeException("Couldn't decode instruction: " + Common.byteToHexString(opcode));
+        throw new RuntimeException("Couldn't decode instruction: " + Common.byteToHexString(opcode, true));
     }
 }
