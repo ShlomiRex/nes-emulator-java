@@ -1,27 +1,27 @@
 package NES;
 
-import NES.UI.Debugger.DebuggerWin;
+import NES.Cartridge.ROMParser;
+import NES.UI.Debugger.DebuggerWindow;
 
 import java.io.IOException;
-import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Main {
     public static void main(String[] args) throws IOException, ROMParser.ParsingException {
-        //Window window = new Window();
+        // This latch is used both in UI thread and in main thread.
+        // It synchronizes the UI to update itself after instruction has been executed.
+        AtomicBoolean next_tick = new AtomicBoolean();
 
         ROMParser romParser = new ROMParser("6502_programs/nestest/nestest.nes");
 
         NES nes = new NES(romParser);
-        DebuggerWin debuggerWin = new DebuggerWin(nes);
-
-        // Step instructions by clicking on "Enter", or run continuously
-        boolean allow_stepping = true;
-        Scanner scanner = new Scanner(System.in);
+        DebuggerWindow debuggerWindow = new DebuggerWindow(nes, next_tick);
 
         while(true) {
-            nes.cpu.clock_tick();
-            if (allow_stepping)
-                scanner.nextLine();
+            if (next_tick.get()) {
+                nes.cpu.clock_tick();
+                next_tick.set(false); // Reset latch
+            }
         }
     }
 

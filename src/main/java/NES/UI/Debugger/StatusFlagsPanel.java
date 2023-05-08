@@ -15,6 +15,7 @@ public class StatusFlagsPanel extends JPanel {
         this.statusFlags = statusFlags;
 
         setBorder(new TitledBorder("Status Flags"));
+        setLayout(new GridLayout(2, 4));
 
         c = new JCheckBox("C");
         c.setEnabled(false);
@@ -58,7 +59,6 @@ public class StatusFlagsPanel extends JPanel {
         c.setSelected(statusFlags.getCarry());
         z.setSelected(statusFlags.getZero());
         i.setSelected(statusFlags.getInterruptDisable());
-        System.out.println(statusFlags.getInterruptDisable());
         d.setSelected(statusFlags.getDecimal());
 
         // Both bits are not used really

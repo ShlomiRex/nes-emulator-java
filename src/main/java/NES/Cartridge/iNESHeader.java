@@ -1,4 +1,4 @@
-package NES;
+package NES.Cartridge;
 
 public class iNESHeader {
     public enum Mirroring {
@@ -63,7 +63,7 @@ public class iNESHeader {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("NES.iNESHeader {\n");
+        sb.append("NES.Cartridge.iNESHeader {\n");
             sb.append("\tprg_rom_size: ").append(prg_rom_size).append(",\n");
             sb.append("\tchr_rom_size: ").append(chr_rom_size).append(",\n");
             sb.append("\tmapper: ").append(mapper).append(",\n");

@@ -1,5 +1,6 @@
-package NES;
+package NES.Cartridge;
 
+import NES.Common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +17,7 @@ public class ROMParser {
     private final byte[] prg_rom; // Size: 16KB exactly, because I only intend to support mapper 0 only. No banks needed
     private final byte[] chr_rom; // Size: 8KB exactly, like above.
 
-    class ParsingException extends Exception {
+    public class ParsingException extends Exception {
         public ParsingException(String message) {
             super(message);
         }

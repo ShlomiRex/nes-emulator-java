@@ -10,7 +10,7 @@ public class CPU {
     private final Logger logger = LoggerFactory.getLogger(CPU.class);
 
     public final CPURegisters registers;
-    private long cycles;
+    public long cycles;
     private final byte[] memory; // All addressable memory (64KB)
 
     private final Decoder decoder;

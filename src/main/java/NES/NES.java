@@ -2,6 +2,7 @@ package NES;
 
 
 import NES.CPU.CPU;
+import NES.Cartridge.ROMParser;
 
 public class NES {
 
