@@ -1,3 +1,5 @@
+package NES;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +67,7 @@ public class ROMParser {
         boolean vs_unit_system = ((flags7 & 1)) == 1;
         // PlayChoice-10 (8KB of Hint Screen data stored after CHR data)
         boolean play_choise_10 = ((flags7 >> 1) & 1) == 1;
-        // NES 2.0 format
+        // NES.NES 2.0 format
         boolean nes2_format = ((flags7 >> 2) & 0b0000_0011) == 2;
         byte msb_mapper = (byte) (flags7 & 0b1111_0000);
 

@@ -1,4 +1,4 @@
-
+package NES;
 
 public class CPURegisters {
 

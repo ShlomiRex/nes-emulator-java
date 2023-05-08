@@ -1,4 +1,4 @@
-import java.util.Arrays;
+package NES;
 
 public class NES {
 

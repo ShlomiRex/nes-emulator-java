@@ -1,3 +1,5 @@
+package NES;
+
 import java.util.HexFormat;
 
 public class Common {

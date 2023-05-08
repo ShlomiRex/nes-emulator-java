@@ -1,3 +1,5 @@
+package NES;
+
 public class Decoder {
     public enum Instructions {
         ADC, // add with carry

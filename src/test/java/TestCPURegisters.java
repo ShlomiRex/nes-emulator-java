@@ -1,3 +1,5 @@
+import NES.CPURegisters;
+import NES.Common;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
