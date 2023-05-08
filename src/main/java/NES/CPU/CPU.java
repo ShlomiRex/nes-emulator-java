@@ -1,5 +1,7 @@
-package NES;
+package NES.CPU;
 
+import NES.CPU.Registers.CPURegisters;
+import NES.Common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -7,7 +9,7 @@ public class CPU {
 
     private final Logger logger = LoggerFactory.getLogger(CPU.class);
 
-    private final CPURegisters registers;
+    public final CPURegisters registers;
     private long cycles;
     private final byte[] memory; // All addressable memory (64KB)
 
@@ -111,25 +113,25 @@ public class CPU {
                 registers.p_modify_z(fetched_memory);
                 break;
             case SEC:
-                registers.P = Common.Bits.setBit(registers.P, 0, true);
+                registers.P.setCarry(true);
                 break;
             case CLC:
-                registers.P = Common.Bits.setBit(registers.P, 0, false);
+                registers.P.setCarry(false);
                 break;
             case SEI:
-                registers.P = Common.Bits.setBit(registers.P, 2, true);
+                registers.P.setInterruptDisable(true);
                 break;
             case CLI:
-                registers.P = Common.Bits.setBit(registers.P, 2, false);
+                registers.P.setInterruptDisable(false);
                 break;
             case SED:
-                registers.P = Common.Bits.setBit(registers.P, 3, true);
+                registers.P.setDecimal(true);
                 break;
             case CLD:
-                registers.P = Common.Bits.setBit(registers.P, 3, false);
+                registers.P.setDecimal(false);
                 break;
             case CLV:
-                registers.P = Common.Bits.setBit(registers.P, 6, false);
+                registers.P.setOverflow(false);
                 break;
             case ADC:
                 // TODO: 08-May-23

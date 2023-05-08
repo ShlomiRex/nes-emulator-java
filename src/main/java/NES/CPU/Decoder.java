@@ -1,4 +1,6 @@
-package NES;
+package NES.CPU;
+
+import NES.Common;
 
 public class Decoder {
     public enum Instructions {

@@ -1,9 +1,6 @@
 package NES;
 
-import NES.NES;
-import NES.ROMParser;
-import NES.UI.Window.DebuggerWin;
-import NES.Window;
+import NES.UI.Debugger.DebuggerWin;
 
 import java.io.IOException;
 import java.util.Scanner;
@@ -11,11 +8,11 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) throws IOException, ROMParser.ParsingException {
         //Window window = new Window();
-        DebuggerWin debuggerWin = new DebuggerWin();
 
         ROMParser romParser = new ROMParser("6502_programs/nestest/nestest.nes");
 
         NES nes = new NES(romParser);
+        DebuggerWin debuggerWin = new DebuggerWin(nes);
 
         // Step instructions by clicking on "Enter", or run continuously
         boolean allow_stepping = true;

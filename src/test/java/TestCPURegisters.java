@@ -1,4 +1,4 @@
-import NES.CPURegisters;
+import NES.CPU.Registers.CPURegisters;
 import NES.Common;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -9,13 +9,13 @@ public class TestCPURegisters {
         CPURegisters cpuRegisters = new CPURegisters();
 
         cpuRegisters.p_modify_z((byte) 0);
-        assertEquals(Common.Bits.getBit(cpuRegisters.P, 1), true);
+        assertEquals(cpuRegisters.P.getZero(), true);
 
         cpuRegisters.p_modify_z((byte) 0xFF);
-        assertEquals(Common.Bits.getBit(cpuRegisters.P, 1), false);
+        assertEquals(cpuRegisters.P.getZero(), false);
 
         cpuRegisters.p_modify_z((byte) 0);
-        assertEquals(Common.Bits.getBit(cpuRegisters.P, 1), true);
+        assertEquals(cpuRegisters.P.getZero(), true);
     }
 
     @Test
@@ -23,21 +23,21 @@ public class TestCPURegisters {
         CPURegisters cpuRegisters = new CPURegisters();
 
         cpuRegisters.p_modify_n((byte) 0);
-        assertEquals(Common.Bits.getBit(cpuRegisters.P, 7), false);
+        assertEquals(cpuRegisters.P.getNegative(), false);
 
         cpuRegisters.p_modify_n((byte) 0xAA);
-        assertEquals(Common.Bits.getBit(cpuRegisters.P, 7), true);
+        assertEquals(cpuRegisters.P.getNegative(), true);
 
         cpuRegisters.p_modify_n((byte) 0x56);
-        assertEquals(Common.Bits.getBit(cpuRegisters.P, 7), false);
+        assertEquals(cpuRegisters.P.getNegative(), false);
 
         cpuRegisters.p_modify_n((byte) 0xFF);
-        assertEquals(Common.Bits.getBit(cpuRegisters.P, 7), true);
+        assertEquals(cpuRegisters.P.getNegative(), true);
 
         cpuRegisters.p_modify_n((byte) 0x7F);
-        assertEquals(Common.Bits.getBit(cpuRegisters.P, 7), false);
+        assertEquals(cpuRegisters.P.getNegative(), false);
 
         cpuRegisters.p_modify_n((byte) 0x80);
-        assertEquals(Common.Bits.getBit(cpuRegisters.P, 7), true);
+        assertEquals(cpuRegisters.P.getNegative(), true);
     }
 }

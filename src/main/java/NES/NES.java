@@ -1,5 +1,8 @@
 package NES;
 
+
+import NES.CPU.CPU;
+
 public class NES {
 
     private ROMParser romParser;

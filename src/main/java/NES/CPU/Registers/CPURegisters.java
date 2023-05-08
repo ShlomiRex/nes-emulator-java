@@ -1,11 +1,16 @@
-package NES;
+package NES.CPU.Registers;
+
+import NES.Common;
 
 public class CPURegisters {
 
-    public byte A, X, Y, S, P;
+    public byte A, X, Y, S;
     public short PC;
 
+    public StatusFlags P;
+
     public CPURegisters() {
+        P = new StatusFlags();
         reset();
     }
 
@@ -16,7 +21,7 @@ public class CPURegisters {
         String y = "Y: " + Common.byteToHexString(Y, false);
         String s = "S: " + Common.byteToHexString(S, false);
         String pc = "PC: " + Common.shortToHexString(PC, false);
-        String p = "P: NV-BDIZC " + Common.byteToBinaryString(P);
+        String p = "P: NV-BDIZC " + Common.byteToBinaryString(P.getAllFlags());
 
         StringBuilder sb = new StringBuilder();
         sb.append(a).append("\t");
@@ -30,17 +35,17 @@ public class CPURegisters {
 
     public void reset() {
         A = X = Y = 0;
-        P = 0b0010_0000; // Set 'UNUSED' flag to 1
+        P.reset();
         S = (byte) 0xFF;
         PC = 0;
     }
 
     public void p_modify_n(byte value) {
-        P = Common.Bits.setBit(P, 7, Common.Bits.getBit(value, 7));
+        P.setNegative(Common.Bits.getBit(value, 7));
     }
 
     public void p_modify_z(byte value) {
-        P = Common.Bits.setBit(P, 1, (value == 0));
+        P.setZero(value == 0);
     }
 
 }
