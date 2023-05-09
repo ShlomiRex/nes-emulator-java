@@ -8,13 +8,13 @@ public class TestCPURegisters {
     public void test_p_modify_z() {
         CPURegisters cpuRegisters = new CPURegisters();
 
-        cpuRegisters.p_modify_z((byte) 0);
+        cpuRegisters.P.modify_z((byte) 0);
         assertEquals(cpuRegisters.P.getZero(), true);
 
-        cpuRegisters.p_modify_z((byte) 0xFF);
+        cpuRegisters.P.modify_z((byte) 0xFF);
         assertEquals(cpuRegisters.P.getZero(), false);
 
-        cpuRegisters.p_modify_z((byte) 0);
+        cpuRegisters.P.modify_z((byte) 0);
         assertEquals(cpuRegisters.P.getZero(), true);
     }
 
@@ -22,22 +22,22 @@ public class TestCPURegisters {
     public void test_p_modify_n() {
         CPURegisters cpuRegisters = new CPURegisters();
 
-        cpuRegisters.p_modify_n((byte) 0);
+        cpuRegisters.P.modify_n((byte) 0);
         assertEquals(cpuRegisters.P.getNegative(), false);
 
-        cpuRegisters.p_modify_n((byte) 0xAA);
+        cpuRegisters.P.modify_n((byte) 0xAA);
         assertEquals(cpuRegisters.P.getNegative(), true);
 
-        cpuRegisters.p_modify_n((byte) 0x56);
+        cpuRegisters.P.modify_n((byte) 0x56);
         assertEquals(cpuRegisters.P.getNegative(), false);
 
-        cpuRegisters.p_modify_n((byte) 0xFF);
+        cpuRegisters.P.modify_n((byte) 0xFF);
         assertEquals(cpuRegisters.P.getNegative(), true);
 
-        cpuRegisters.p_modify_n((byte) 0x7F);
+        cpuRegisters.P.modify_n((byte) 0x7F);
         assertEquals(cpuRegisters.P.getNegative(), false);
 
-        cpuRegisters.p_modify_n((byte) 0x80);
+        cpuRegisters.P.modify_n((byte) 0x80);
         assertEquals(cpuRegisters.P.getNegative(), true);
     }
 }

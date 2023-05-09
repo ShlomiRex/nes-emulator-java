@@ -70,4 +70,14 @@ public class StatusFlags {
         return p;
     }
 
+
+    public void modify_n(byte value) {
+        setNegative(Common.Bits.getBit(value, 7));
+    }
+
+    public void modify_z(byte value) {
+        setZero(value == 0);
+    }
+
+
 }

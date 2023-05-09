@@ -84,7 +84,7 @@ public class Decoder {
         BranchOccursOn
     }
 
-    class InstructionInfo {
+    public class InstructionInfo {
         public final Instructions instr;
         public final AddressingMode addrmode;
         public final int bytes, cycles;

@@ -15,7 +15,6 @@ public class DebuggerWindow extends JFrame {
 
         setTitle("6502 Debugger");
         //setSize(800, 600);
-        setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JPanel main_pane = new JPanel();
@@ -23,32 +22,18 @@ public class DebuggerWindow extends JFrame {
         JPanel reg_pane = new RegistersPanel(nes.cpu.registers);
         JPanel stack_pane = new StackPanel();
         JPanel button_pane = new ButtonPane(next_tick_event, main_pane);
-        //JPanel cycles_pane = new CyclesPane();
+        JPanel cycles_pane = new CyclesPane(nes.cpu);
+        JPanel instr_pane = new InstructionsPane(nes.cpu, nes.cpu_memory);
 
         main_pane.add(button_pane);
         main_pane.add(reg_pane);
         main_pane.add(stack_pane);
-        //main_pane.add(cycles_pane);
+        main_pane.add(cycles_pane);
+        main_pane.add(instr_pane);
 
         add(main_pane);
         pack();
         setVisible(true);
-    }
-
-    class CyclesPane extends JPanel {
-        private final JLabel cpu_cycles;
-
-        public CyclesPane() {
-            this.cpu_cycles = new JLabel("0");
-
-            add(new JLabel("CPU Cycles: "));
-            add(cpu_cycles);
-        }
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            cpu_cycles.setText(""+nes.cpu.cycles);
-        }
+        setLocationRelativeTo(null);
     }
 }

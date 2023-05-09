@@ -9,7 +9,7 @@ public class NES {
     private ROMParser romParser;
     public CPU cpu;
 
-    private byte[] cpu_memory; // All 64KB addressable memory
+    public byte[] cpu_memory; // All 64KB addressable memory
 
     public NES(ROMParser romParser) {
         this.romParser = romParser;

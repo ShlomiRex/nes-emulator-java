@@ -84,6 +84,7 @@ public class CPU {
     private void execute_instruction(Decoder.Instructions instr, Decoder.AddressingMode addrmode) {
         byte fetched_memory;
         short addr;
+        byte result;
 
         switch(instr) {
             case LDX:
@@ -96,8 +97,8 @@ public class CPU {
                     registers.Y = fetched_memory;
                 else
                     registers.A = fetched_memory;
-                registers.p_modify_n(fetched_memory);
-                registers.p_modify_z(fetched_memory);
+                registers.P.modify_n(fetched_memory);
+                registers.P.modify_z(fetched_memory);
                 break;
             case PHA:
                 push_stack(registers.A);
@@ -109,8 +110,8 @@ public class CPU {
                 fetched_memory = fetch_instruction_memory(addrmode);
                 registers.A = fetched_memory;
 
-                registers.p_modify_n(fetched_memory);
-                registers.p_modify_z(fetched_memory);
+                registers.P.modify_n(fetched_memory);
+                registers.P.modify_z(fetched_memory);
                 break;
             case SEC:
                 registers.P.setCarry(true);
@@ -150,13 +151,13 @@ public class CPU {
                 break;
             case INX:
                 registers.X += 1;
-                registers.p_modify_n(registers.X);
-                registers.p_modify_z(registers.X);
+                registers.P.modify_n(registers.X);
+                registers.P.modify_z(registers.X);
                 break;
             case INY:
                 registers.Y += 1;
-                registers.p_modify_n(registers.Y);
-                registers.p_modify_z(registers.Y);
+                registers.P.modify_n(registers.Y);
+                registers.P.modify_z(registers.Y);
                 break;
             case INC:
             case DEC:
@@ -167,8 +168,8 @@ public class CPU {
                     fetched_memory -= 1;
                 addr = fetch_instruction_address(addrmode);
                 write_memory(addr, fetched_memory);
-                registers.p_modify_n(fetched_memory);
-                registers.p_modify_z(fetched_memory);
+                registers.P.modify_n(fetched_memory);
+                registers.P.modify_z(fetched_memory);
                 break;
             case JMP:
                 addr = fetch_instruction_address(addrmode);
@@ -190,7 +191,109 @@ public class CPU {
                 // Idk, but its important to emulate this exactly, because some games use this feature.
 
                 push_pc((short) 2);
+                addr = fetch_instruction_address(addrmode);
+                registers.PC = addr;
+                break;
+            case CMP:
+                exec_cmp(addrmode, registers.A);
+                break;
+            case CPX:
+                exec_cmp(addrmode, registers.X);
+                break;
+            case CPY:
+                exec_cmp(addrmode, registers.Y);
+                break;
+            case TAX:
+                registers.X = registers.A;
+                registers.P.modify_n(registers.X);
+                registers.P.modify_z(registers.X);
+                break;
+            case TAY:
+                registers.Y = registers.A;
+                registers.P.modify_n(registers.Y);
+                registers.P.modify_z(registers.Y);
+                break;
+            case TSX:
+                registers.X = registers.S;
+                registers.P.modify_n(registers.X);
+                registers.P.modify_z(registers.X);
+                break;
+            case TXA:
+                registers.A = registers.X;
+                registers.P.modify_n(registers.A);
+                registers.P.modify_z(registers.A);
+                break;
+            case TXS:
+                registers.S = registers.X;
+                // We don't modify N or Z bits
+                break;
+            case TYA:
+                registers.A = registers.Y;
+                registers.P.modify_n(registers.A);
+                registers.P.modify_z(registers.A);
+                break;
+            case AND:
+                fetched_memory = fetch_instruction_memory(addrmode);
+                registers.A = (byte) (registers.A & fetched_memory);
+                registers.P.modify_n(registers.A);
+                registers.P.modify_z(registers.A);
+                break;
+            case ASL:
+            case LSR:
+                fetched_memory = fetch_instruction_memory(addrmode);
+                result = fetched_memory;
+                if (instr == Decoder.Instructions.ASL) {
+                    result <<= 1;
+                } else {
+                    result >>= 1;
+                }
+                // Determine if shift overflowed (if yes, then set carry)
+                // If last bit is 1, and we left shift, then that bit is the carry.
+                boolean new_carry = Common.Bits.getBit(fetched_memory, 7);
 
+                // Now we need to know where to put the result. Register or memory?
+                if (addrmode == Decoder.AddressingMode.ACCUMULATOR) {
+                    registers.A = result;
+                } else {
+                    addr = fetch_instruction_address(addrmode);
+                    write_memory(addr, result);
+                }
+
+                registers.P.modify_n(result);
+                registers.P.modify_z(result);
+                registers.P.setCarry(new_carry);
+                break;
+            case BIT:
+                // Test Bits in Memory with Accumulator
+                fetched_memory = fetch_instruction_memory(addrmode);
+                result = (byte) (registers.A & fetched_memory);
+                boolean bit7 = Common.Bits.getBit(fetched_memory, 7);
+                boolean bit6 = Common.Bits.getBit(fetched_memory, 6);
+
+                registers.P.setNegative(bit7);
+                registers.P.setOverflow(bit6);
+                registers.P.modify_z(result);
+                break;
+            case BMI:
+            case BPL:
+            case BNE:
+            case BVC:
+            case BVS:
+            case BEQ:
+            case BCS:
+            case BCC:
+                if (
+                        (instr == Decoder.Instructions.BMI && registers.P.getNegative()     == true)    ||
+                        (instr == Decoder.Instructions.BPL && registers.P.getNegative()     == false)   ||
+                        (instr == Decoder.Instructions.BNE && registers.P.getZero()         == false)   ||
+                        (instr == Decoder.Instructions.BVC && registers.P.getOverflow()     == false)   ||
+                        (instr == Decoder.Instructions.BVS && registers.P.getOverflow()     == true)    ||
+                        (instr == Decoder.Instructions.BEQ && registers.P.getZero()         == true)    ||
+                        (instr == Decoder.Instructions.BCS && registers.P.getCarry()        == true)    ||
+                        (instr == Decoder.Instructions.BCC && registers.P.getCarry()        == false)) {
+                    byte offset = read_memory((short) (registers.PC + 1));
+                    registers.PC = (short) (registers.PC + offset);
+                }
                 break;
             default:
                 throw new RuntimeException("Not implemented yet");
@@ -213,6 +316,12 @@ public class CPU {
             case ACCUMULATOR -> {
                 byte res = registers.A;
                 logger.debug("Fetched accumulator: "+Common.byteToHexString(res, true));
+                return res;
+            }
+            case ABSOLUTE -> {
+                short addr = read_address_from_memory((short) (registers.PC + 1));
+                byte res = read_memory(addr);
+                logger.debug("Fetched absolute: "+Common.byteToHexString(res, true));
                 return res;
             }
             default -> throw new RuntimeException("Not implemented yet");
@@ -255,11 +364,48 @@ public class CPU {
         write_memory((short)(0x100 + registers.S), data);
     }
 
-    /// Push PC onto stack, adding offset to PC.
+    /**
+     * Push PC onto stack, adding offset to PC.
+     * @param offset
+     */
     private void push_pc(short offset) {
         byte pc_msb = (byte) ((registers.PC += offset) >> 8);
         byte pc_lsb = (byte) (registers.PC += offset);
         push_stack(pc_msb); // store high
         push_stack(pc_lsb); // store low
+    }
+
+    /**
+     * Execute cmp instruction
+     */
+    private void exec_cmp(Decoder.AddressingMode addrmode, byte register) {
+		/*
+		Link: http://www.6502.org/tutorials/compare_instructions.html
+		Compare Results | N | Z | C
+		---------------------------
+		A, X, or Y < M  | * | 0 | 0
+		A, X, or Y = M  | 0 | 1 | 1
+		A, X, or Y > M  | * | 0 | 1
+
+		*The N flag will be bit 7 of A, X, or Y - Memory
+		*/
+        byte fetched_memory = fetch_instruction_memory(addrmode);
+        byte sub = (byte) (register - fetched_memory);
+        boolean last_bit = Common.Bits.getBit(sub, 7);
+
+        boolean new_n = false, new_z = false, new_c = false;
+
+        if (register < fetched_memory) {
+            new_n = last_bit;
+        } else if (register == fetched_memory) {
+            new_z = new_c = true;
+        } else {
+            new_n = last_bit;
+            new_c = true;
+        }
+
+        registers.P.setNegative(new_n);
+        registers.P.setZero(new_z);
+        registers.P.setCarry(new_c);
     }
 }

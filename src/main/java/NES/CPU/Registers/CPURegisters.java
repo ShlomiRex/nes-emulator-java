@@ -40,12 +40,4 @@ public class CPURegisters {
         PC = 0;
     }
 
-    public void p_modify_n(byte value) {
-        P.setNegative(Common.Bits.getBit(value, 7));
-    }
-
-    public void p_modify_z(byte value) {
-        P.setZero(value == 0);
-    }
-
 }
