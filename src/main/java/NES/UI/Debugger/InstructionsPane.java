@@ -94,7 +94,10 @@ public class InstructionsPane extends JPanel {
                 return "#$"+Common.byteToHexString(operand1, false);
             }
             case RELATIVE -> {
-                return ""; //TODO: Complete
+                //operand1 is offset
+                // We add +2 because instruction is 2 bytes which affects the final offset
+                short relative_addr = (short) (cpu.registers.PC + operand1 + 2);
+                return "$" + Common.shortToHexString(relative_addr, false);
             }
             default -> throw new RuntimeException("Not implemented yet");
         }
@@ -114,5 +117,4 @@ public class InstructionsPane extends JPanel {
             default -> throw new RuntimeException("Not implemented yet");
         }
     }
-
 }

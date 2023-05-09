@@ -14,7 +14,7 @@ public class DebuggerWindow extends JFrame {
         this.nes = nes;
 
         setTitle("6502 Debugger");
-        //setSize(800, 600);
+        setSize(1000, 200);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JPanel main_pane = new JPanel();
@@ -32,7 +32,7 @@ public class DebuggerWindow extends JFrame {
         main_pane.add(instr_pane);
 
         add(main_pane);
-        pack();
+        //pack();
         setVisible(true);
         setLocationRelativeTo(null);
     }

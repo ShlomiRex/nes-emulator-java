@@ -3,11 +3,13 @@ package NES;
 
 import NES.CPU.CPU;
 import NES.Cartridge.ROMParser;
+import NES.PPU.PPU;
 
 public class NES {
 
     private ROMParser romParser;
     public CPU cpu;
+    private PPU ppu;
 
     public byte[] cpu_memory; // All 64KB addressable memory
 
@@ -21,6 +23,7 @@ public class NES {
         // Upper bank
         System.arraycopy(romParser.getPrg_rom(), 0, this.cpu_memory, 0xC000, 1024*16);
 
-        cpu = new CPU(cpu_memory);
+        ppu = new PPU();
+        cpu = new CPU(cpu_memory, ppu.registers);
     }
 }

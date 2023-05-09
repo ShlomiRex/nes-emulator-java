@@ -2,6 +2,7 @@ package NES.CPU;
 
 import NES.CPU.Registers.CPURegisters;
 import NES.Common;
+import NES.PPU.PPURegisters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,9 +16,13 @@ public class CPU {
 
     private final Decoder decoder;
 
-    public CPU(byte[] memory) {
+    private PPURegisters ppuRegisters;
+
+    public CPU(byte[] cpu_memory, PPURegisters ppuRegisters) {
+        this.memory = cpu_memory;
+        this.ppuRegisters = ppuRegisters;
+
         this.registers = new CPURegisters();
-        this.memory = memory;
         this.decoder = new Decoder();
 
         res_interrupt();
@@ -54,10 +59,20 @@ public class CPU {
     private byte read_memory(short addr) {
         //TODO: Add mapping here. For now I only support mapper 0.
 
-        // Note: 'addr' is short, which means in Java it can be negative. However we deal with unsigned numbers.
-        // This is the best way to convert any signed number to unsigned, which allows accessing arrays.
-        byte res = memory[addr & 0xFFFF];
-        logger.debug("Reading memory: [" +
+        byte res;
+
+        // Map certain addresses to PPU if needed
+        switch (addr) {
+            case 0x2002 -> {
+                res = ppuRegisters.getStatus();
+            }
+            default -> {
+                // Note: 'addr' is short, which means in Java it can be negative. However we deal with unsigned numbers.
+                // This is the best way to convert any signed number to unsigned, which allows accessing arrays.
+                res = memory[addr & 0xFFFF];
+            }
+        }
+        logger.debug("Read memory: [" +
                 Common.shortToHexString(addr, true) + "] = " +
                 Common.byteToHexString(res, true));
         return res;
