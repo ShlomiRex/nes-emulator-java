@@ -10,12 +10,16 @@ public class ButtonPane extends JPanel {
         btn_tick.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                next_tick.set(true);
-                while(next_tick.get()) {
-                    // Wait until CPU executes the next instruction
-                    // Because this is UI thread, we can do infinite while loop. Doesn't affect CPU
+                synchronized (next_tick) {
+                    next_tick.set(true);
+                    next_tick.notify();
+                    try {
+                        next_tick.wait();
+                        debugger_pane.repaint();
+                    } catch (InterruptedException ex) {
+                        throw new RuntimeException(ex);
+                    }
                 }
-                debugger_pane.repaint();
             }
         });
 

@@ -3,13 +3,12 @@ package NES.UI.Debugger;
 import NES.NES;
 
 import javax.swing.*;
-import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DebuggerWindow extends JFrame {
 
-    private NES nes;
+    private final NES nes;
 
     public DebuggerWindow(NES nes, AtomicBoolean next_tick_event) {
         this.nes = nes;
