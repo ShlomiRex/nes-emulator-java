@@ -99,6 +99,27 @@ public class Decoder {
         }
     }
 
+    public enum KnownAddresses {
+        PPU_STATUS((short) 0x2002);
+
+        private short addr;
+
+        KnownAddresses(short addr) {
+            this.addr = addr;
+        }
+
+        public static KnownAddresses getFromAddress(short addr) {
+            switch(addr) {
+                case 0x2002 -> {
+                    return PPU_STATUS;
+                }
+                default -> {
+                    return null;
+                }
+            }
+        }
+    }
+
     public InstructionInfo decode_opcode(byte opcode) {
         switch (opcode & 0xFF) {
             case 0x00:

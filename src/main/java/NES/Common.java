@@ -78,4 +78,8 @@ public class Common {
                 return (byte) (variable & ~(1 << bitIndex));
         }
     }
+
+    public static short convert_2_bytes_to_short(byte msb, byte lsb) {
+        return (short) ((msb << 8) | lsb);
+    }
 }

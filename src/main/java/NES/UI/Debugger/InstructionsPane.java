@@ -34,12 +34,18 @@ public class InstructionsPane extends JPanel {
         operand1.setEnabled(false);
         operand2.setEnabled(false);
 
+        opcode.setMinimumSize(opcode.getSize());
+        operand1.setMinimumSize(operand1.getSize());
+        operand2.setMinimumSize(operand2.getSize());
+
         add(opcode);
         add(operand1);
         add(operand2);
 
         decoded_instr = new JTextField("LDX $#FF");
         decoded_instr.setEditable(false);
+        decoded_instr.setMinimumSize(decoded_instr.getSize());
+
         add(decoded_instr);
 
         decoder = new Decoder();
@@ -67,12 +73,14 @@ public class InstructionsPane extends JPanel {
             this.operand1.setText(Common.byteToHexString(operand1, false));
             this.operand2.setText("--");
 
-            decoded_instr += " " + convert_operands_to_human_readable_text(info.addrmode, operand1);;
+            decoded_instr += " " + convert_1_operands_to_human_readable_text(info.addrmode, operand1);;
         } else if (info.bytes == 3) {
             byte operand1 = cpu_memory[cpu.registers.PC + 1 & 0xFFFF];
             byte operand2 = cpu_memory[cpu.registers.PC + 2 & 0xFFFF];
             this.operand1.setText(Common.byteToHexString(operand1, false));
             this.operand2.setText(Common.byteToHexString(operand2, false));
+
+            decoded_instr += " " + convert_2_operands_to_human_readable_text(info.addrmode, operand1, operand2);;
         } else {
             throw new RuntimeException("Unexpected amount of bytes in instruction, must be at most 3");
         }
@@ -80,7 +88,7 @@ public class InstructionsPane extends JPanel {
         this.decoded_instr.setText(decoded_instr);
     }
 
-    private String convert_operands_to_human_readable_text(Decoder.AddressingMode addrmode, byte operand1) {
+    private String convert_1_operands_to_human_readable_text(Decoder.AddressingMode addrmode, byte operand1) {
         switch (addrmode) {
             case IMMEDIATE -> {
                 return "#$"+Common.byteToHexString(operand1, false);
@@ -91,4 +99,20 @@ public class InstructionsPane extends JPanel {
             default -> throw new RuntimeException("Not implemented yet");
         }
     }
+
+    private String convert_2_operands_to_human_readable_text(Decoder.AddressingMode addrmode, byte operand1, byte operand2) {
+        switch (addrmode) {
+            case ABSOLUTE -> {
+                // Little edian = switch order of operands that represent the address
+                short addr = Common.convert_2_bytes_to_short(operand2, operand1);
+                Decoder.KnownAddresses knownAddresses = Decoder.KnownAddresses.getFromAddress(addr);
+                if (knownAddresses != null)
+                    return knownAddresses.toString();
+                else
+                    return "#$"+Common.byteToHexString(operand1, false);
+            }
+            default -> throw new RuntimeException("Not implemented yet");
+        }
+    }
+
 }
