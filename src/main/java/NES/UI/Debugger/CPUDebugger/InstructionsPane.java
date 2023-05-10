@@ -1,4 +1,4 @@
-package NES.UI.Debugger;
+package NES.UI.Debugger.CPUDebugger;
 
 import NES.CPU.CPU;
 import NES.CPU.Decoder;
@@ -10,7 +10,7 @@ import java.awt.*;
 
 public class InstructionsPane extends JPanel {
 
-    private CPU cpu;
+    private final CPU cpu;
     private final Decoder decoder;
     private final byte[] cpu_memory;
 
@@ -94,8 +94,9 @@ public class InstructionsPane extends JPanel {
                 return "#$"+Common.byteToHexString(operand1, false);
             }
             case RELATIVE -> {
-                //operand1 is offset
-                // We add +2 because instruction is 2 bytes which affects the final offset
+                // operand1 is offset
+                // We add +2 because the debugger starts after the instruction is completed, i.e.
+                // the PC is the next instruction. We want the old instruction
                 short relative_addr = (short) (cpu.registers.PC + operand1 + 2);
                 return "$" + Common.shortToHexString(relative_addr, false);
             }
@@ -106,15 +107,29 @@ public class InstructionsPane extends JPanel {
     private String convert_2_operands_to_human_readable_text(Decoder.AddressingMode addrmode, byte operand1, byte operand2) {
         switch (addrmode) {
             case ABSOLUTE -> {
-                // Little edian = switch order of operands that represent the address
+                // Little endian = switch order of operands that represent the address
                 short addr = Common.convert_2_bytes_to_short(operand2, operand1);
-                Decoder.KnownAddresses knownAddresses = Decoder.KnownAddresses.getFromAddress(addr);
-                if (knownAddresses != null)
-                    return knownAddresses.toString();
+                String knownTag = convert_addr_to_tag(addr);
+                if (knownTag != null)
+                    return knownTag;
                 else
                     return "#$"+Common.byteToHexString(operand1, false);
             }
             default -> throw new RuntimeException("Not implemented yet");
+        }
+    }
+
+    private String convert_addr_to_tag(short addr) {
+        switch (addr) {
+            case 0x2000 -> {
+                return "PPU_CTRL";
+            }
+            case 0x2002 -> {
+                return "PPU_STATUS";
+            }
+            default -> {
+                return null;
+            }
         }
     }
 }

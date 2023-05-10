@@ -16,9 +16,12 @@ public class CPU {
 
     private final Decoder decoder;
 
-    private PPURegisters ppuRegisters;
+    private final PPURegisters ppuRegisters;
 
     public CPU(byte[] cpu_memory, PPURegisters ppuRegisters) {
+        if (cpu_memory.length != 1024 * 64)
+            throw new RuntimeException("Unexpected CPU memory address space size");
+
         this.memory = cpu_memory;
         this.ppuRegisters = ppuRegisters;
 
@@ -64,7 +67,10 @@ public class CPU {
         // Map certain addresses to PPU if needed
         switch (addr) {
             case 0x2002 -> {
-                res = ppuRegisters.getStatus();
+                res = ppuRegisters.readStatus();
+            }
+            case 0x2000 -> {
+                res = ppuRegisters.getCtrl();
             }
             default -> {
                 // Note: 'addr' is short, which means in Java it can be negative. However we deal with unsigned numbers.

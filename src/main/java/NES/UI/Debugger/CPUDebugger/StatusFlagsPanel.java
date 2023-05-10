@@ -1,4 +1,4 @@
-package NES.UI.Debugger;
+package NES.UI.Debugger.CPUDebugger;
 
 import NES.CPU.Registers.StatusFlags;
 
