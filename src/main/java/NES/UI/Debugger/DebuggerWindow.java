@@ -2,6 +2,7 @@ package NES.UI.Debugger;
 
 import NES.NES;
 import NES.UI.Debugger.CPUDebugger.*;
+import NES.UI.Debugger.PPUDebugger.PaletteTablePane;
 import NES.UI.Debugger.PPUDebugger.PatternTablesPane;
 import NES.UI.Debugger.PPUDebugger.PatternTilePane;
 
@@ -30,6 +31,7 @@ public class DebuggerWindow extends JFrame {
         JPanel cycles_pane = new CyclesPane(nes.cpu);
         JPanel instr_pane = new InstructionsPane(nes.cpu, nes.cpu_memory);
         JPanel pattern_tables_pane = new PatternTablesPane(nes.ppu);
+        JPanel palette_table_pane = new PaletteTablePane();
 
         // CPU debugging
         main_cpu_debugging_pane.add(button_pane);
@@ -40,6 +42,7 @@ public class DebuggerWindow extends JFrame {
 
         // PPU debugging
         main_ppu_debugging_pane.add(pattern_tables_pane);
+        main_ppu_debugging_pane.add(palette_table_pane);
 
         // Main pane
         main_pane.add(main_cpu_debugging_pane);

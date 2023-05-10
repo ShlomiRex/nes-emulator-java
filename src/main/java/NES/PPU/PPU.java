@@ -9,7 +9,11 @@ public class PPU {
     // Memory
     private final byte[] pattern_tables;
 
+    // Renderer variables
+
+    private int cycle;
     private int scanline;
+    private boolean frame_complete;
 
     public PPU(byte[] pattern_tables) {
         this.registers = new PPURegisters();
@@ -23,6 +27,8 @@ public class PPU {
 
     public void reset() {
         registers.reset();
+        cycle = 0;
+        scanline = 0; // TODO: Check what to do here
     }
 
     public byte[] get_pattern_tile(byte tile_index, boolean is_left_table) {
@@ -72,4 +78,17 @@ public class PPU {
 
         return pixels;
     }
+
+    public void clock_tick() {
+        cycle ++;
+        if (cycle >= 341) {
+            cycle = 0;
+            scanline ++;
+            if (scanline >= 261) {
+                scanline = -1;
+                frame_complete = true;
+            }
+        }
+    }
+
 }
