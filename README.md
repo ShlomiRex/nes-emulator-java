@@ -4,6 +4,13 @@ This is my attempt to create basic NES emulator in Java.
 
 My goal is to not to look at other's code, but to understand on the high-level the NES architecture and create it in Rust.
 
+# Screenshots
+
+First pattern tile render
+
+Notice I already added CPU debugger (everything works except the stack, which for now is just for show)
+![](README-resources/Screenshot2023-05-10%20031001.png)
+
 # Resources
 
 The most used resorces:
