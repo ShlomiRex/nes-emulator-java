@@ -54,14 +54,12 @@ public class PatternTilePane extends JPanel {
      * @param container_width
      * @param container_height
      */
-    public void paintTile(Graphics g, int container_width, int container_height) {
+    private void paintTile(Graphics g, int container_width, int container_height) {
         byte[] tile = ppu.get_pattern_tile(tile_index, is_left_pattern_table);
-        //TODO: Paint the tile, should be: |-  (like | pattern and then - pattern)
-
         byte[][] pixels = ppu.convert_pattern_tile_to_pixel_pattern(tile);
 
         g.setColor(Color.BLACK);
-        g.fillRect(0, 0, panel_width, panel_height);
+        g.fillRect(0, 0, container_width, container_height);
 
         int pixel_width = container_width / 8;
         int pixel_height = container_height / 8;
