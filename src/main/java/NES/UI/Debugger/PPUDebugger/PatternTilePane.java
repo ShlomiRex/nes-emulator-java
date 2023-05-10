@@ -1,9 +1,13 @@
 package NES.UI.Debugger.PPUDebugger;
 
+import NES.Common;
 import NES.PPU.PPU;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 
 public class PatternTilePane extends JPanel {
     private final PPU ppu;
@@ -13,15 +17,30 @@ public class PatternTilePane extends JPanel {
     private final int panel_width, panel_height;
 
 
-    public PatternTilePane(PPU ppu, byte tile_index, boolean is_left_pattern_table) {
+    public PatternTilePane(PPU ppu, byte tile_index, boolean is_left_pattern_table, JLabel selected_tile_label) {
         this.ppu = ppu;
         this.tile_index = tile_index;
         this.is_left_pattern_table = is_left_pattern_table;
 
-        this.panel_width = 36;
-        this.panel_height = 36;
+        this.panel_width = 16;
+        this.panel_height = 16;
 
         setPreferredSize(new Dimension(panel_width, panel_height));
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                super.mouseEntered(e);
+                setBorder(BorderFactory.createLineBorder(Color.BLUE, 2));
+                selected_tile_label.setText("Tile: $"+ Common.byteToHexString(tile_index, false));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                super.mouseExited(e);
+                setBorder(BorderFactory.createEmptyBorder());
+                selected_tile_label.setText("Tile:");
+            }
+        });
     }
 
     @Override
@@ -39,7 +58,7 @@ public class PatternTilePane extends JPanel {
         int pixel_width = panel_width / 8;
         int pixel_height = panel_height / 8;
 
-        g.setColor(Color.WHITE);
+        g.setColor(Color.WHITE); //TODO: Use color index instead of checking (pixel != 0)
         for(int row = 0; row < 8; row ++) {
             for (int col = 0; col < 8; col ++) {
                 byte pixel = pixels[row][col];
