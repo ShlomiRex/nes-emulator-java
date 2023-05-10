@@ -31,12 +31,12 @@ public class PPU {
         // Each pattern tile is 16 bytes in size. We jump by 16 bytes.
         // The tile index can be 0x0-0xFF, but the actual bytes needed are 0xFF times 16, which fits in u16.
         if (is_left_table) {
-            short i = (short) (tile_index * 16);
+            short i = (short) ((tile_index & 0xFF) * 16);
 
             //TODO: This can cause regression problems. A lot of copying memory, each tile, for each frame?
             // For now I leave this as is
             byte[] tile = new byte[16];
-            System.arraycopy(pattern_tables, i, tile, 0, 16);
+            System.arraycopy(pattern_tables, i & 0xFFFF, tile, 0, 16);
             return tile;
         } else {
             throw new RuntimeException("Not implemented yet");

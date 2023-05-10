@@ -29,8 +29,7 @@ public class DebuggerWindow extends JFrame {
         JPanel button_pane = new ButtonPane(next_tick_event, main_pane);
         JPanel cycles_pane = new CyclesPane(nes.cpu);
         JPanel instr_pane = new InstructionsPane(nes.cpu, nes.cpu_memory);
-        //JPanel pattern_tables_pane = new PatternTablesPane(nes.ppu);
-        JPanel pattern_tile_pane = new PatternTilePane(nes.ppu, (byte)0x7B, true);
+        JPanel pattern_tables_pane = new PatternTablesPane(nes.ppu);
 
         // CPU debugging
         main_cpu_debugging_pane.add(button_pane);
@@ -40,8 +39,7 @@ public class DebuggerWindow extends JFrame {
         main_cpu_debugging_pane.add(instr_pane);
 
         // PPU debugging
-        //main_ppu_debugging_pane.add(pattern_tables_pane);
-        main_ppu_debugging_pane.add(pattern_tile_pane);
+        main_ppu_debugging_pane.add(pattern_tables_pane);
 
         // Main pane
         main_pane.add(main_cpu_debugging_pane);

@@ -15,11 +15,13 @@ public class PatternTablesPane extends JPanel {
         this.ppu = ppu;
 
         setBorder(new TitledBorder("Pattern Tables"));
+        setLayout(new GridLayout(16, 16));
 
-//        this.left_table = new PatternTable();
-//        this.right_table = new PatternTable();
-//
-//        add(left_table);
-//        add(right_table);
+        for(byte row = 0; row < 16; row ++) {
+            for (byte col = 0; col < 16; col++) {
+                byte tile_index = (byte)(col + row * 16);
+                add(new PatternTilePane(ppu, tile_index, true));
+            }
+        }
     }
 }
