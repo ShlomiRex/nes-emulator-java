@@ -125,8 +125,8 @@ public class ROMParser {
         int prg_rom_size_bytes = 1024 * 16 * this.header.prg_rom_size;
 
         byte[] prg_rom = fileInputStream.readNBytes(prg_rom_size_bytes);
-        if (prg_rom.length != 16*1024) {
-            throw new ParsingException("Expected PRG ROM of size 16KB, currently only supporting mapper 0");
+        if (prg_rom.length != 16*1024 && prg_rom.length != 32*1024) {
+            throw new ParsingException("Expected PRG ROM of size 16 or 32KB, currently only supporting mapper 0");
         }
         logger.info("PRG ROM size: " + prg_rom.length / 1024 + "KB");
 

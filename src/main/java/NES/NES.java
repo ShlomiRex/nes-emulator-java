@@ -23,11 +23,16 @@ public class NES {
 
         //TODO: Mapper 0 only
 
-        // Mirror the PRG banks (mapper 0 only)
-        // Lower bank
-        System.arraycopy(prg_rom, 0, this.cpu_memory, 0x8000, 1024*16);
-        // Upper bank
-        System.arraycopy(prg_rom, 0, this.cpu_memory, 0xC000, 1024*16);
+        if (prg_rom.length == 16*1024) {
+            // Mirror the PRG banks (mapper 0 only)
+            // Lower bank
+            System.arraycopy(prg_rom, 0, this.cpu_memory, 0x8000, 1024*16);
+            // Upper bank
+            System.arraycopy(prg_rom, 0, this.cpu_memory, 0xC000, 1024*16);
+        } else {
+            // 32KB
+            System.arraycopy(prg_rom, 0, this.cpu_memory, 0x8000, 1024*32);
+        }
 
         // PPU pattern tables
         byte[] pattern_tables = new byte[1024 * 8];

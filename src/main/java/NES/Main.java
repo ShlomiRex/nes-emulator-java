@@ -12,7 +12,11 @@ public class Main {
         // It synchronizes the UI to update itself after instruction has been executed.
         AtomicBoolean next_tick = new AtomicBoolean();
 
-        ROMParser romParser = new ROMParser("6502_programs/nestest/nestest.nes");
+        String program = "6502_programs/nestest/nestest.nes";
+        //String program = "6502_programs/greenscreen/greenscreen.nes";
+
+        ROMParser romParser = new ROMParser(program);
+
 
         NES nes = new NES(romParser);
         DebuggerWindow debuggerWindow = new DebuggerWindow(nes, next_tick);
