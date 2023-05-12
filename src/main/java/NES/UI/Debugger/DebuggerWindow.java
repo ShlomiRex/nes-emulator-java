@@ -4,16 +4,16 @@ import NES.NES;
 import NES.UI.Debugger.CPUDebugger.*;
 import NES.UI.Debugger.PPUDebugger.PaletteTablePane;
 import NES.UI.Debugger.PPUDebugger.PatternTablesPane;
-import NES.UI.Debugger.PPUDebugger.PatternTilePane;
 
 import javax.swing.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class DebuggerWindow extends JFrame {
 
     private final NES nes;
 
-    public DebuggerWindow(NES nes, AtomicBoolean next_tick_event) {
+    public DebuggerWindow(NES nes, DebuggerUIEvents ui_events) {
         this.nes = nes;
 
         setTitle("Java NES Emulator - Debugger");
@@ -27,7 +27,7 @@ public class DebuggerWindow extends JFrame {
 
         JPanel reg_pane = new RegistersPanel(nes.cpu.registers);
         JPanel stack_pane = new StackPanel();
-        JPanel button_pane = new ButtonPane(next_tick_event, main_pane);
+        JPanel button_pane = new ButtonPane(ui_events, main_pane);
         JPanel cycles_pane = new CyclesPane(nes.cpu);
         JPanel instr_pane = new InstructionsPane(nes.cpu, nes.cpu_memory);
         JPanel pattern_tables_pane = new PatternTablesPane(nes.ppu);

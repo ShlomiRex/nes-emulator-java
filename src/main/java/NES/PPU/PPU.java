@@ -1,9 +1,13 @@
 package NES.PPU;
 
+import NES.CPU.CPU;
 import NES.Common;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PPU {
 
+    private final Logger logger = LoggerFactory.getLogger(PPU.class);
     public final PPURegisters registers;
 
     // Memory
@@ -13,7 +17,6 @@ public class PPU {
 
     private int cycle;
     private int scanline;
-    private boolean frame_complete;
 
     public PPU(byte[] pattern_tables) {
         this.registers = new PPURegisters();
@@ -28,7 +31,7 @@ public class PPU {
     public void reset() {
         registers.reset();
         cycle = 0;
-        scanline = 0; // TODO: Check what to do here
+        scanline = 0;
     }
 
     public byte[] get_pattern_tile(byte tile_index, boolean is_left_table) {
@@ -80,15 +83,46 @@ public class PPU {
     }
 
     public void clock_tick() {
-        cycle ++;
-        if (cycle >= 341) {
+        if (scanline >= 0 && scanline <= 239) {
+            if (cycle == 0) {
+                // Do pre-render scanline setup
+            } else if (cycle >= 1 && cycle <= 256) {
+                // Visible scanline
+            } else if (cycle >= 257 && cycle <= 320) {
+                // Sprite evaluation
+            } else if (cycle >= 321 && cycle <= 336) {
+                // Sprite loading
+            } else if (cycle >= 337 && cycle <= 340) {
+                // Background loading
+            }
+        } else if (scanline == 240) {
+            if (cycle == 0) {
+                // End of visible scanlines
+            }
+        } else if (scanline >= 241 && scanline <= 260) {
+            if (scanline == 241 && cycle == 1) {
+                // Start of vblank
+                // Set vblank flag and generate NMI if enabled
+            }
+        }
+
+        // Increment cycle and scanline counters
+        cycle++;
+        if (cycle > 340) {
             cycle = 0;
-            scanline ++;
-            if (scanline >= 261) {
-                scanline = -1;
-                frame_complete = true;
+            scanline++;
+            if (scanline > 260) {
+                scanline = 0;
+                logger.debug("PPU: Frame complete, cycle: "+cycle+", scanline: "+scanline);
+                //frame++;
+                //oddFrame = !oddFrame;
             }
         }
     }
 
+    public void runFrame() {
+        for(int i = 0; i < 241; i++) {
+            clock_tick();
+        }
+    }
 }
