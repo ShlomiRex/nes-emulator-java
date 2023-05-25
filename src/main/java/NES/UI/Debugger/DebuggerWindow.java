@@ -21,9 +21,12 @@ public class DebuggerWindow extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JPanel main_pane = new JPanel();
-        main_pane.setLayout(new BoxLayout(main_pane, BoxLayout.PAGE_AXIS));
         JPanel main_cpu_debugging_pane = new JPanel();
         JPanel main_ppu_debugging_pane = new JPanel();
+
+        main_pane.setLayout(new BoxLayout(main_pane, BoxLayout.PAGE_AXIS));
+        main_cpu_debugging_pane.setBorder(BorderFactory.createTitledBorder("CPU"));
+        main_ppu_debugging_pane.setBorder(BorderFactory.createTitledBorder("PPU"));
 
         JPanel reg_pane = new RegistersPanel(nes.cpu.registers);
         JPanel stack_pane = new StackPanel();

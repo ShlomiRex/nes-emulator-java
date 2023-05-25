@@ -82,7 +82,14 @@ public class PPU {
         return pixels;
     }
 
+    /**
+     * Clock tick for PPU.
+     */
     public void clock_tick() {
+        logger.debug("PPU: Clock tick, cycle: "+cycle+", scanline: "+scanline);
+
+        // Implement PPU clock cycle
+
         if (scanline >= 0 && scanline <= 239) {
             if (cycle == 0) {
                 // Do pre-render scanline setup

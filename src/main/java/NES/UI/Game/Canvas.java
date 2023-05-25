@@ -1,4 +1,4 @@
-package NES.UI;
+package NES.UI.Game;
 
 import javax.swing.*;
 import java.awt.*;

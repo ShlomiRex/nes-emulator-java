@@ -36,7 +36,7 @@ public class CPU {
         logger.debug(registers.toString());
 
         // Fetch
-        byte opcode = read_memory(registers.PC); // Read at address of Program Counter (duh!)
+        byte opcode = read_memory(registers.getPC()); // Read at address of Program Counter (duh!)
 
         // Decode
         Decoder.InstructionInfo instr_info = decoder.decode_opcode(opcode);
@@ -52,7 +52,7 @@ public class CPU {
 
         // Increment PC
         if (instr != Decoder.Instructions.JMP && instr != Decoder.Instructions.JSR)
-            registers.PC += bytes;
+            registers.setPC((short) (registers.getPC() + bytes));
 
         this.cycles += cycles;
 
@@ -92,7 +92,7 @@ public class CPU {
         short new_pc = read_address_from_memory((short) 0xFFFC);
         logger.debug("Jumping to interrupt address: " + Common.shortToHexString(new_pc, true));
 
-        registers.PC = new_pc;
+        registers.setPC(new_pc);
         cycles = 8;
     }
 
@@ -113,47 +113,47 @@ public class CPU {
             case LDA:
                 fetched_memory = fetch_instruction_memory(addrmode);
                 if (instr == Decoder.Instructions.LDX)
-                    registers.X = fetched_memory;
+                    registers.setX(fetched_memory);
                 else if (instr == Decoder.Instructions.LDY)
-                    registers.Y = fetched_memory;
+                    registers.setY(fetched_memory);
                 else
-                    registers.A = fetched_memory;
-                registers.P.modify_n(fetched_memory);
-                registers.P.modify_z(fetched_memory);
+                    registers.setA(fetched_memory);
+                registers.getP().modify_n(fetched_memory);
+                registers.getP().modify_z(fetched_memory);
                 break;
             case PHA:
-                push_stack(registers.A);
+                push_stack(registers.getA());
                 break;
             case NOP:
                 // No operation
                 break;
             case PLA:
                 fetched_memory = fetch_instruction_memory(addrmode);
-                registers.A = fetched_memory;
+                registers.setA(fetched_memory);
 
-                registers.P.modify_n(fetched_memory);
-                registers.P.modify_z(fetched_memory);
+                registers.getP().modify_n(fetched_memory);
+                registers.getP().modify_z(fetched_memory);
                 break;
             case SEC:
-                registers.P.setCarry(true);
+                registers.getP().setCarry(true);
                 break;
             case CLC:
-                registers.P.setCarry(false);
+                registers.getP().setCarry(false);
                 break;
             case SEI:
-                registers.P.setInterruptDisable(true);
+                registers.getP().setInterruptDisable(true);
                 break;
             case CLI:
-                registers.P.setInterruptDisable(false);
+                registers.getP().setInterruptDisable(false);
                 break;
             case SED:
-                registers.P.setDecimal(true);
+                registers.getP().setDecimal(true);
                 break;
             case CLD:
-                registers.P.setDecimal(false);
+                registers.getP().setDecimal(false);
                 break;
             case CLV:
-                registers.P.setOverflow(false);
+                registers.getP().setOverflow(false);
                 break;
             case ADC:
                 // TODO: 08-May-23
@@ -164,21 +164,21 @@ public class CPU {
             case STA:
                 addr = fetch_instruction_address(addrmode);
                 if (instr == Decoder.Instructions.STX)
-                    write_memory(addr, registers.X);
+                    write_memory(addr, registers.getX());
                 else if (instr == Decoder.Instructions.STY)
-                    write_memory(addr, registers.Y);
+                    write_memory(addr, registers.getY());
                 else
-                    write_memory(addr, registers.A);
+                    write_memory(addr, registers.getA());
                 break;
             case INX:
-                registers.X += 1;
-                registers.P.modify_n(registers.X);
-                registers.P.modify_z(registers.X);
+                registers.setA((byte) (registers.getA() + 1));
+                registers.getP().modify_n(registers.getX());
+                registers.getP().modify_z(registers.getX());
                 break;
             case INY:
-                registers.Y += 1;
-                registers.P.modify_n(registers.Y);
-                registers.P.modify_z(registers.Y);
+                registers.setY((byte) (registers.getY() + 1));
+                registers.getP().modify_n(registers.getY());
+                registers.getP().modify_z(registers.getY());
                 break;
             case INC:
             case DEC:
@@ -189,12 +189,12 @@ public class CPU {
                     fetched_memory -= 1;
                 addr = fetch_instruction_address(addrmode);
                 write_memory(addr, fetched_memory);
-                registers.P.modify_n(fetched_memory);
-                registers.P.modify_z(fetched_memory);
+                registers.getP().modify_n(fetched_memory);
+                registers.getP().modify_z(fetched_memory);
                 break;
             case JMP:
                 addr = fetch_instruction_address(addrmode);
-                registers.PC = addr;
+                registers.setPC(addr);
                 break;
             case JSR:
                 // Jump to New Location Saving Return Address
@@ -213,51 +213,52 @@ public class CPU {
 
                 push_pc((short) 2);
                 addr = fetch_instruction_address(addrmode);
-                registers.PC = addr;
+                registers.setPC(addr);
                 break;
             case CMP:
-                exec_cmp(addrmode, registers.A);
+                exec_cmp(addrmode, registers.getA());
                 break;
             case CPX:
-                exec_cmp(addrmode, registers.X);
+                exec_cmp(addrmode, registers.getX());
                 break;
             case CPY:
-                exec_cmp(addrmode, registers.Y);
+                exec_cmp(addrmode, registers.getY());
                 break;
             case TAX:
-                registers.X = registers.A;
-                registers.P.modify_n(registers.X);
-                registers.P.modify_z(registers.X);
+                registers.setX(registers.getA());
+                registers.getP().modify_n(registers.getX());
+                registers.getP().modify_z(registers.getX());
                 break;
             case TAY:
-                registers.Y = registers.A;
-                registers.P.modify_n(registers.Y);
-                registers.P.modify_z(registers.Y);
+                registers.setY(registers.getA());
+                registers.getP().modify_n(registers.getY());
+                registers.getP().modify_z(registers.getY());
                 break;
             case TSX:
-                registers.X = registers.S;
-                registers.P.modify_n(registers.X);
-                registers.P.modify_z(registers.X);
+                registers.setX(registers.getS());
+                registers.getP().modify_n(registers.getX());
+                registers.getP().modify_z(registers.getX());
                 break;
             case TXA:
-                registers.A = registers.X;
-                registers.P.modify_n(registers.A);
-                registers.P.modify_z(registers.A);
+                registers.setA(registers.getX());
+                registers.getP().modify_n(registers.getA());
+                registers.getP().modify_z(registers.getA());
                 break;
             case TXS:
-                registers.S = registers.X;
+                registers.setS(registers.getX());
                 // We don't modify N or Z bits
                 break;
             case TYA:
-                registers.A = registers.Y;
-                registers.P.modify_n(registers.A);
-                registers.P.modify_z(registers.A);
+                registers.setA(registers.getY());
+                registers.getP().modify_n(registers.getA());
+                registers.getP().modify_z(registers.getA());
                 break;
             case AND:
                 fetched_memory = fetch_instruction_memory(addrmode);
-                registers.A = (byte) (registers.A & fetched_memory);
-                registers.P.modify_n(registers.A);
-                registers.P.modify_z(registers.A);
+
+                registers.setA((byte) (registers.getA() & fetched_memory));
+                registers.getP().modify_n(registers.getA());
+                registers.getP().modify_z(registers.getA());
                 break;
             case ASL:
             case LSR:
@@ -274,26 +275,26 @@ public class CPU {
 
                 // Now we need to know where to put the result. Register or memory?
                 if (addrmode == Decoder.AddressingMode.ACCUMULATOR) {
-                    registers.A = result;
+                    registers.setA(result);
                 } else {
                     addr = fetch_instruction_address(addrmode);
                     write_memory(addr, result);
                 }
 
-                registers.P.modify_n(result);
-                registers.P.modify_z(result);
-                registers.P.setCarry(new_carry);
+                registers.getP().modify_n(result);
+                registers.getP().modify_z(result);
+                registers.getP().setCarry(new_carry);
                 break;
             case BIT:
                 // Test Bits in Memory with Accumulator
                 fetched_memory = fetch_instruction_memory(addrmode);
-                result = (byte) (registers.A & fetched_memory);
+                result = (byte) (registers.getA() & fetched_memory);
                 boolean bit7 = Common.Bits.getBit(fetched_memory, 7);
                 boolean bit6 = Common.Bits.getBit(fetched_memory, 6);
 
-                registers.P.setNegative(bit7);
-                registers.P.setOverflow(bit6);
-                registers.P.modify_z(result);
+                registers.getP().setNegative(bit7);
+                registers.getP().setOverflow(bit6);
+                registers.getP().modify_z(result);
                 break;
             case BMI:
             case BPL:
@@ -304,16 +305,16 @@ public class CPU {
             case BCS:
             case BCC:
                 if (
-                        (instr == Decoder.Instructions.BMI && registers.P.getNegative()     == true)    ||
-                        (instr == Decoder.Instructions.BPL && registers.P.getNegative()     == false)   ||
-                        (instr == Decoder.Instructions.BNE && registers.P.getZero()         == false)   ||
-                        (instr == Decoder.Instructions.BVC && registers.P.getOverflow()     == false)   ||
-                        (instr == Decoder.Instructions.BVS && registers.P.getOverflow()     == true)    ||
-                        (instr == Decoder.Instructions.BEQ && registers.P.getZero()         == true)    ||
-                        (instr == Decoder.Instructions.BCS && registers.P.getCarry()        == true)    ||
-                        (instr == Decoder.Instructions.BCC && registers.P.getCarry()        == false)) {
-                    byte offset = read_memory((short) (registers.PC + 1));
-                    registers.PC = (short) (registers.PC + offset);
+                        (instr == Decoder.Instructions.BMI && registers.getP().getNegative()     == true)    ||
+                        (instr == Decoder.Instructions.BPL && registers.getP().getNegative()     == false)   ||
+                        (instr == Decoder.Instructions.BNE && registers.getP().getZero()         == false)   ||
+                        (instr == Decoder.Instructions.BVC && registers.getP().getOverflow()     == false)   ||
+                        (instr == Decoder.Instructions.BVS && registers.getP().getOverflow()     == true)    ||
+                        (instr == Decoder.Instructions.BEQ && registers.getP().getZero()         == true)    ||
+                        (instr == Decoder.Instructions.BCS && registers.getP().getCarry()        == true)    ||
+                        (instr == Decoder.Instructions.BCC && registers.getP().getCarry()        == false)) {
+                    byte offset = read_memory((short) (registers.getPC() + 1));
+                    registers.setPC((short) (registers.getPC() + offset));
                 }
                 break;
             default:
@@ -330,17 +331,17 @@ public class CPU {
         switch (addrmode) {
             case IMPLIED -> throw new RuntimeException("Instruction with implied addressing mode should never ask to fetch memory.");
             case IMMEDIATE -> {
-                byte res = read_memory((short) (registers.PC +1));
+                byte res = read_memory((short) (registers.getPC() +1));
                 logger.debug("Fetched immediate: "+Common.byteToHexString(res, true));
                 return res;
             }
             case ACCUMULATOR -> {
-                byte res = registers.A;
+                byte res = registers.getA();
                 logger.debug("Fetched accumulator: "+Common.byteToHexString(res, true));
                 return res;
             }
             case ABSOLUTE -> {
-                short addr = read_address_from_memory((short) (registers.PC + 1));
+                short addr = read_address_from_memory((short) (registers.getPC() + 1));
                 byte res = read_memory(addr);
                 logger.debug("Fetched absolute: "+Common.byteToHexString(res, true));
                 return res;
@@ -355,7 +356,7 @@ public class CPU {
      * @return
      */
     private short fetch_instruction_address(Decoder.AddressingMode addrmode) {
-        short pc_short = (short) (registers.PC + 1);
+        short pc_short = (short) (registers.getPC() + 1);
         switch(addrmode) {
             case IMMEDIATE -> {
                 byte res = read_memory(pc_short);
@@ -382,7 +383,7 @@ public class CPU {
     }
 
     private void push_stack(byte data) {
-        write_memory((short)(0x100 + registers.S), data);
+        write_memory((short)(0x100 + registers.getS()), data);
     }
 
     /**
@@ -390,10 +391,11 @@ public class CPU {
      * @param offset
      */
     private void push_pc(short offset) {
-        byte pc_msb = (byte) ((registers.PC += offset) >> 8);
-        byte pc_lsb = (byte) (registers.PC += offset);
+        byte pc_msb = (byte) ((registers.getPC() + offset) >> 8);
+        byte pc_lsb = (byte) (registers.getPC() + offset);
         push_stack(pc_msb); // store high
         push_stack(pc_lsb); // store low
+        registers.setPC((short) (registers.getPC() + offset + offset));
     }
 
     /**
@@ -425,8 +427,8 @@ public class CPU {
             new_c = true;
         }
 
-        registers.P.setNegative(new_n);
-        registers.P.setZero(new_z);
-        registers.P.setCarry(new_c);
+        registers.getP().setNegative(new_n);
+        registers.getP().setZero(new_z);
+        registers.getP().setCarry(new_c);
     }
 }

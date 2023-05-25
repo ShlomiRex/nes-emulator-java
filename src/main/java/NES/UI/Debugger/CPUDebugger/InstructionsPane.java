@@ -56,7 +56,7 @@ public class InstructionsPane extends JPanel {
         super.paintComponent(g);
 
         // Read opcode
-        byte opcode = cpu_memory[cpu.registers.PC & 0xFFFF];
+        byte opcode = cpu_memory[cpu.registers.getPC() & 0xFFFF];
         this.opcode.setText(Common.byteToHexString(opcode, false));
 
         // Decode opcode
@@ -69,14 +69,14 @@ public class InstructionsPane extends JPanel {
             this.operand2.setText("--");
         }
         else if (info.bytes == 2) {
-            byte operand1 = cpu_memory[cpu.registers.PC + 1 & 0xFFFF];
+            byte operand1 = cpu_memory[cpu.registers.getPC() + 1 & 0xFFFF];
             this.operand1.setText(Common.byteToHexString(operand1, false));
             this.operand2.setText("--");
 
             decoded_instr += " " + convert_1_operands_to_human_readable_text(info.addrmode, operand1);;
         } else if (info.bytes == 3) {
-            byte operand1 = cpu_memory[cpu.registers.PC + 1 & 0xFFFF];
-            byte operand2 = cpu_memory[cpu.registers.PC + 2 & 0xFFFF];
+            byte operand1 = cpu_memory[cpu.registers.getPC() + 1 & 0xFFFF];
+            byte operand2 = cpu_memory[cpu.registers.getPC() + 2 & 0xFFFF];
             this.operand1.setText(Common.byteToHexString(operand1, false));
             this.operand2.setText(Common.byteToHexString(operand2, false));
 
@@ -97,7 +97,7 @@ public class InstructionsPane extends JPanel {
                 // operand1 is offset
                 // We add +2 because the debugger starts after the instruction is completed, i.e.
                 // the PC is the next instruction. We want the old instruction
-                short relative_addr = (short) (cpu.registers.PC + operand1 + 2);
+                short relative_addr = (short) (cpu.registers.getPC() + operand1 + 2);
                 return "$" + Common.shortToHexString(relative_addr, false);
             }
             default -> throw new RuntimeException("Not implemented yet");

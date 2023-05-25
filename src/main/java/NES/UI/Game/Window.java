@@ -1,4 +1,6 @@
-package NES.UI;
+package NES.UI.Game;
+
+import NES.UI.Game.Canvas;
 
 import javax.swing.*;
 

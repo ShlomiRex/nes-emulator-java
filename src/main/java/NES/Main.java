@@ -34,30 +34,17 @@ public class Main {
             synchronized (ui_events) {
                 ui_events.wait(); // Wait for UI event to happen
                 if (ui_events.next_tick_request) {
-                    run_single_tick();
+                    logger.debug("Tick request");
+                    nes.cpu.clock_tick();
+                    ui_events.notify();
                 } else if (ui_events.run_request) {
-                    run_until_stop();
+                    logger.debug("Running request");
+                    while(!ui_events.stop_request) {
+                        nes.cpu.clock_tick();
+                    }
+                    logger.debug("Run finished");
                 }
             }
         }
     }
-
-    private void run_single_tick() {
-        // Run a single tick
-        logger.debug("Tick");
-        nes.ppu.runFrame();
-        nes.cpu.clock_tick();
-        ui_events.notify();
-    }
-
-    private void run_until_stop() {
-        // Run request
-        logger.debug("Running");
-        while(!ui_events.stop_request) {
-            nes.ppu.runFrame();
-            nes.cpu.clock_tick();
-        }
-        logger.debug("Run finished");
-    }
-
 }

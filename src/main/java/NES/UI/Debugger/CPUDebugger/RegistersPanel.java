@@ -2,18 +2,24 @@ package NES.UI.Debugger.CPUDebugger;
 
 import NES.CPU.Registers.CPURegisters;
 import NES.Common;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
-public class RegistersPanel extends JPanel {
+public class RegistersPanel extends JPanel implements PropertyChangeListener {
 
+    private final Logger logger = LoggerFactory.getLogger(RegistersPanel.class);
     private final CPURegisters registers;
     private final JTextField a,x,y,s,pc;
     private final JPanel statusFlagsPanel;
 
     public RegistersPanel(CPURegisters registers) {
         this.registers = registers;
+        this.registers.addChangeListener(this);
 
         // A
         add(new JLabel("A:"));
@@ -50,18 +56,35 @@ public class RegistersPanel extends JPanel {
         add(pc);
 
         // P
-        statusFlagsPanel = new StatusFlagsPanel(registers.P);
+        statusFlagsPanel = new StatusFlagsPanel(registers.getP());
         add(statusFlagsPanel);
+
+        // Start with initial values
+        a.setText(Common.byteToHexString(registers.getA(), false));
+        x.setText(Common.byteToHexString(registers.getX(), false));
+        y.setText(Common.byteToHexString(registers.getY(), false));
+        s.setText(Common.byteToHexString(registers.getS(), false));
+        pc.setText(Common.shortToHexString(registers.getPC(), false));
     }
 
     @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-
-        a.setText(Common.byteToHexString(registers.A, false));
-        x.setText(Common.byteToHexString(registers.X, false));
-        y.setText(Common.byteToHexString(registers.Y, false));
-        s.setText(Common.byteToHexString(registers.S, false));
-        pc.setText(Common.shortToHexString(registers.PC, false));
+    public void propertyChange(PropertyChangeEvent evt) {
+        logger.debug("Property change: " + evt.getPropertyName());
+        if (evt.getPropertyName().equals("A")) {
+            a.setText(Common.byteToHexString((byte) evt.getNewValue(), false));
+        } else if (evt.getPropertyName().equals("X")) {
+            x.setText(Common.byteToHexString((byte) evt.getNewValue(), false));
+        } else if (evt.getPropertyName().equals("Y")) {
+            y.setText(Common.byteToHexString((byte) evt.getNewValue(), false));
+        } else if (evt.getPropertyName().equals("S")) {
+            s.setText(Common.byteToHexString((byte) evt.getNewValue(), false));
+        } else if (evt.getPropertyName().equals("PC")) {
+            pc.setText(Common.shortToHexString((short) evt.getNewValue(), false));
+        } else {
+            throw new RuntimeException("Unknown property: " + evt.getPropertyName());
+        }
+//        else if (evt.getPropertyName().equals("P")) {
+//            statusFlagsPanel.repaint();
+//        }
     }
 }
