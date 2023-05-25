@@ -42,7 +42,7 @@ public class InstructionsPane extends JPanel {
         add(operand1);
         add(operand2);
 
-        decoded_instr = new JTextField("LDX $#FF");
+        decoded_instr = new JTextField("LDA PPU_STATUS", 10);
         decoded_instr.setEditable(false);
         decoded_instr.setMinimumSize(decoded_instr.getSize());
 

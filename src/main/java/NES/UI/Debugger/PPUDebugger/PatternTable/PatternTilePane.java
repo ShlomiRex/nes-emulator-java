@@ -1,4 +1,4 @@
-package NES.UI.Debugger.PPUDebugger;
+package NES.UI.Debugger.PPUDebugger.PatternTable;
 
 import NES.Common;
 import NES.PPU.PPU;

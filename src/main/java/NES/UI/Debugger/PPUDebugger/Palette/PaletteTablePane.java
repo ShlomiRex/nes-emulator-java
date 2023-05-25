@@ -1,4 +1,4 @@
-package NES.UI.Debugger.PPUDebugger;
+package NES.UI.Debugger.PPUDebugger.Palette;
 
 import NES.PPU.SystemPallete;
 

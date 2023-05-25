@@ -14,7 +14,7 @@ public class CyclesPane extends JPanel {
         this.cpu = cpu;
         this.cpu_cycles = new JLabel("0");
 
-        add(new JLabel("CPU Cycles: "));
+        add(new JLabel("Cycles: "));
         add(cpu_cycles);
     }
 

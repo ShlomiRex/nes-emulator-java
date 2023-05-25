@@ -1,6 +1,5 @@
 package NES.PPU;
 
-import NES.CPU.CPU;
 import NES.Common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,8 +14,8 @@ public class PPU {
 
     // Renderer variables
 
-    private int cycle;
-    private int scanline;
+    public int cycle;
+    public int scanline;
 
     public PPU(byte[] pattern_tables) {
         this.registers = new PPURegisters();
@@ -86,7 +85,7 @@ public class PPU {
      * Clock tick for PPU.
      */
     public void clock_tick() {
-        logger.debug("PPU: Clock tick, cycle: "+cycle+", scanline: "+scanline);
+        logger.debug("PPU: Clock tick, cycle: "+ cycle +", scanline: "+scanline);
 
         // Implement PPU clock cycle
 
@@ -120,7 +119,7 @@ public class PPU {
             scanline++;
             if (scanline > 260) {
                 scanline = 0;
-                logger.debug("PPU: Frame complete, cycle: "+cycle+", scanline: "+scanline);
+                logger.debug("PPU: Frame complete, cycle: "+ cycle +", scanline: "+scanline);
                 //frame++;
                 //oddFrame = !oddFrame;
             }
