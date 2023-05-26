@@ -1,44 +1,67 @@
 package NES.UI.Debugger.PPUDebugger;
 
+import NES.PPU.PPU;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.List;
 
 public class PPUButtonPane extends JPanel {
 
     private final Logger logger = LoggerFactory.getLogger(PPUButtonPane.class);
-    private boolean is_running;
-    private final JPanel debugger_pane;
+    private boolean is_running, is_running_custom_ticks;
 
-    public PPUButtonPane(PPUDebuggerUIEvents ui_events, JPanel debugger_pane) {
-        this.debugger_pane = debugger_pane;
-
+    public PPUButtonPane(PPU ppu, JPanel debugger_pane) {
         JButton btn_tick = new JButton("Tick");
         JButton btn_run = new JButton("Run");
         JButton btn_stop = new JButton("Stop");
         JSeparator separator = new JSeparator();
-        JButton btn_run_custom = new JButton("Run custom");
+        JPanel box_pane = new JPanel();
+        JPanel flow1_pane = new JPanel();
+        JButton btn_run_custom = new JButton("Run custom ticks");
         JTextField txt_run_custom = new JTextField("50", 4);
+        JPanel flow2_pane = new JPanel();
+        JButton btn_run_scanline_custom = new JButton("Run custom scanlines");
+        JTextField txt_run_scanline_custom = new JTextField("1", 4);
 
         btn_stop.setEnabled(false);
+        box_pane.setLayout(new BoxLayout(box_pane, BoxLayout.PAGE_AXIS));
+        btn_run_custom.setToolTipText("Run a custom number of ticks");
+        btn_run_scanline_custom.setToolTipText("Run a custom number of scanlines");
+
+        add(btn_tick);
+        add(btn_run);
+        add(btn_stop);
+        add(separator);
+        flow1_pane.add(btn_run_custom);
+        flow1_pane.add(txt_run_custom);
+        flow2_pane.add(btn_run_scanline_custom);
+        flow2_pane.add(txt_run_scanline_custom);
+        box_pane.add(flow1_pane);
+        box_pane.add(flow2_pane);
+        add(box_pane);
 
         btn_tick.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 logger.debug("Tick clicked");
-                synchronized (ui_events) {
-                    ui_events.next_tick_request = true;
-                    ui_events.notify();
-                    try {
-                        ui_events.wait();
-                        debugger_pane.repaint();
-                    } catch (InterruptedException ex) {
-                        throw new RuntimeException(ex);
-                    }
-                }
 
+                SwingWorker<Void, Void> worker = new SwingWorker<>() {
+                    @Override
+                    protected Void doInBackground() {
+                        ppu.clock_tick();
+                        return null;
+                    }
+
+                    @Override
+                    protected void done() {
+                        debugger_pane.repaint();
+                    }
+                };
+                worker.execute();
             }
         });
 
@@ -46,17 +69,28 @@ public class PPUButtonPane extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 logger.debug("Run clicked");
-                synchronized (ui_events) {
-                    ui_events.run_request = true;
-                    ui_events.stop_request = false;
-                    ui_events.notify();
-                }
-                is_running = true;
-                btn_tick.setEnabled(false);
-                btn_run.setEnabled(false);
-                btn_stop.setEnabled(true);
 
-                new RepainterThread().start();
+                SwingWorker<Void, Void> worker = new SwingWorker<>() {
+                    @Override
+                    protected Void doInBackground() {
+                        is_running = true;
+                        btn_tick.setEnabled(false);
+                        btn_run.setEnabled(false);
+                        btn_stop.setEnabled(true);
+
+                        while (is_running) {
+                            ppu.clock_tick();
+                            publish();
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    protected void process(List<Void> chunks) {
+                        debugger_pane.repaint();
+                    }
+                };
+                worker.execute();
             }
         });
 
@@ -64,10 +98,10 @@ public class PPUButtonPane extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 logger.debug("Stop clicked");
-                ui_events.stop_request = true;
-                ui_events.run_request = false;
 
                 is_running = false;
+                is_running_custom_ticks = false;
+
                 btn_tick.setEnabled(true);
                 btn_run.setEnabled(true);
                 btn_stop.setEnabled(false);
@@ -79,45 +113,54 @@ public class PPUButtonPane extends JPanel {
         btn_run_custom.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                logger.debug("Run custom clicked");
-                synchronized (ui_events) {
-                    ui_events.run_custom_request = true;
-                    ui_events.run_custom_cycles = Integer.parseInt(txt_run_custom.getText());
-                    ui_events.notify();
-                }
-                is_running = true;
-                new RepainterThread().start();
+                logger.debug("Run custom clicked with " + txt_run_custom.getText() + " ticks");
 
-                synchronized (ui_events) {
-                    try {
-                        ui_events.wait();
-                        is_running = false;
-                    } catch (InterruptedException ex) {
-                        throw new RuntimeException(ex);
+                SwingWorker<Void, Void> worker = new SwingWorker<>() {
+                    @Override
+                    protected Void doInBackground() {
+                        is_running_custom_ticks = true;
+                        btn_tick.setEnabled(false);
+                        btn_run.setEnabled(false);
+                        btn_stop.setEnabled(true);
+
+                        while (is_running_custom_ticks) {
+                            ppu.clock_tick();
+                            publish();
+                        }
+                        return null;
                     }
-                }
+
+                    @Override
+                    protected void process(List<Void> chunks) {
+                        debugger_pane.repaint();
+                    }
+                };
+                worker.execute();
             }
         });
 
-        add(btn_tick);
-        add(btn_run);
-        add(btn_stop);
-        add(separator);
-        add(btn_run_custom);
-        add(txt_run_custom);
+        btn_run_scanline_custom.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                SwingWorker<Void, Void> worker = new SwingWorker<>() {
+                    @Override
+                    protected Void doInBackground() {
+                        logger.debug("Run custom scanlines clicked with " + txt_run_scanline_custom.getText() + " scanlines");
+
+                        int scanlines = Integer.parseInt(txt_run_scanline_custom.getText());
+                        for(int scanline = 0; scanline < scanlines; scanline++) {
+                            for (int i = 0; i < 341; i++) {
+                                ppu.clock_tick();
+                            }
+                            debugger_pane.repaint();
+                        }
+                        return null;
+                    }
+                };
+                worker.execute();
+            }
+        });
     }
 
-    class RepainterThread extends Thread {
-        @Override
-        public void run() {
-            while(is_running) {
-                debugger_pane.repaint();
-                try {
-                    Thread.sleep(250);
-                } catch (InterruptedException ex) {
-                    throw new RuntimeException(ex);
-                }
-            }
-        }
-    }
+
 }
