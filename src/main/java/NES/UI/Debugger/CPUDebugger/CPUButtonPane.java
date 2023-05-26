@@ -14,6 +14,8 @@ public class CPUButtonPane extends JPanel {
     private boolean is_running;
     private final JPanel debugger_pane;
 
+    private Runnable repaint_ppu_pane_runnable;
+
     /**
      *
      * @param debugger_pane The panel to repaint to update UI once the tick is done
@@ -42,6 +44,7 @@ public class CPUButtonPane extends JPanel {
                     @Override
                     protected void done() {
                         debugger_pane.repaint();
+                        repaint_ppu_pane_runnable.run();
                     }
                 };
                 worker.execute();
@@ -72,6 +75,12 @@ public class CPUButtonPane extends JPanel {
                     protected void process(List<Void> chunks) {
                         debugger_pane.repaint();
                     }
+
+                    @Override
+                    protected void done() {
+                        debugger_pane.repaint();
+                        repaint_ppu_pane_runnable.run();
+                    }
                 };
                 worker.execute();
             }
@@ -94,5 +103,10 @@ public class CPUButtonPane extends JPanel {
         add(btn_tick);
         add(btn_run);
         add(btn_stop);
+    }
+
+    // Called when we need to update the PPU panel
+    public void setRepaintPpuPane(Runnable repaint_ppu_pane_runnable) {
+        this.repaint_ppu_pane_runnable = repaint_ppu_pane_runnable;
     }
 }

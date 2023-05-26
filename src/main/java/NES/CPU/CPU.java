@@ -17,6 +17,7 @@ public class CPU {
     private final Decoder decoder;
 
     private final PPURegisters ppuRegisters;
+    public long instructions = 0; // counter number of instructions executed
 
     public CPU(byte[] cpu_memory, PPURegisters ppuRegisters) {
         if (cpu_memory.length != 1024 * 64)
@@ -64,6 +65,8 @@ public class CPU {
             ppuRegisters.setNmiEnabled(false); // After reading the NMI flag ($2002) , it is cleared.
             nmi_interrupt();
         }
+
+        instructions ++;
     }
 
     private byte read_memory(short addr) {

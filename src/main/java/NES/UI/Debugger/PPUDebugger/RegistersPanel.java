@@ -1,10 +1,26 @@
 package NES.UI.Debugger.PPUDebugger;
 
+import NES.Common;
+import NES.PPU.PPURegisters;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class RegistersPanel extends JPanel {
-    public RegistersPanel() {
+
+    private final PPURegisters ppuRegisters;
+    private final JTextField txt_ppu_ctrl;
+    private final JTextField txt_ppu_mask;
+    private final JTextField txt_ppu_status;
+    private final JTextField txt_oam_addr;
+    private final JTextField txt_oam_data;
+    private final JTextField txt_ppu_scroll;
+    private final JTextField txt_ppu_addr;
+    private final JTextField txt_ppu_data;
+
+    public RegistersPanel(PPURegisters ppuRegisters) {
+        this.ppuRegisters = ppuRegisters;
+
         setBorder(BorderFactory.createTitledBorder("Registers"));
 
         setLayout(new GridLayout(2, 4));
@@ -27,14 +43,14 @@ public class RegistersPanel extends JPanel {
         lbl_ppu_addr.setToolTipText("PPU Address Register, Address: $2006");
         lbl_ppu_data.setToolTipText("PPU Data Register, Address: $2007");
 
-        JTextField txt_ppu_ctrl = new JTextField("00");
-        JTextField txt_ppu_mask = new JTextField("00");
-        JTextField txt_ppu_status = new JTextField("00");
-        JTextField txt_oam_addr = new JTextField("00");
-        JTextField txt_oam_data = new JTextField("00");
-        JTextField txt_ppu_scroll = new JTextField("00");
-        JTextField txt_ppu_addr = new JTextField("00");
-        JTextField txt_ppu_data = new JTextField("00");
+        txt_ppu_ctrl = new JTextField("00");
+        txt_ppu_mask = new JTextField("00");
+        txt_ppu_status = new JTextField("00");
+        txt_oam_addr = new JTextField("00");
+        txt_oam_data = new JTextField("00");
+        txt_ppu_scroll = new JTextField("00");
+        txt_ppu_addr = new JTextField("00");
+        txt_ppu_data = new JTextField("00");
 
         txt_ppu_ctrl.setEditable(false);
         txt_ppu_mask.setEditable(false);
@@ -68,5 +84,18 @@ public class RegistersPanel extends JPanel {
 
         add(lbl_ppu_data);
         add(txt_ppu_data);
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        txt_ppu_ctrl.setText(Common.byteToHexString(ppuRegisters.getCtrl(), false));
+        txt_ppu_mask.setText(Common.byteToHexString(ppuRegisters.getMask(), false));
+        txt_ppu_status.setText(Common.byteToHexString(ppuRegisters.getStatus(), false));
+//        txt_oam_addr.setText(Common.byteToHexString(ppuRegisters.getOamAddr(), false));
+//        txt_oam_data.setText(Common.byteToHexString(ppuRegisters.getOamData(), false));
+//        txt_ppu_scroll.setText(Common.byteToHexString(ppuRegisters.getScroll(), false));
+//        txt_ppu_addr.setText(Common.byteToHexString(ppuRegisters.getAddr(), false));
+//        txt_ppu_data.setText(Common.byteToHexString(ppuRegisters.getData(), false));
+
     }
 }
