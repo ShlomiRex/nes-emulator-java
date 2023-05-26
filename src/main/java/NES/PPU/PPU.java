@@ -85,6 +85,11 @@ public class PPU {
      * Clock tick for PPU.
      */
     public void clock_tick() {
+        if (frame == 60) {
+            frame = 0;
+            return;
+        }
+
         if (scanline == 262) {
             scanline = 0;
             frame ++;

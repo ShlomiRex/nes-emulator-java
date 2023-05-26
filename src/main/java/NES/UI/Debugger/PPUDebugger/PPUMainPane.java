@@ -20,6 +20,7 @@ public class PPUMainPane extends JPanel {
         JPanel scanline_pane = new ScanlinePane(ppu);
         JPanel frame_pane = new FramePane(ppu);
         JPanel vblank_pane = new VBlankPane(ppu);
+        JPanel registers_pane = new RegistersPanel();
         JPanel pattern_tables_pane = new PatternTablesPane(ppu);
         JPanel palette_table_pane = new PaletteTablePane();
 
@@ -40,6 +41,7 @@ public class PPUMainPane extends JPanel {
         top_flow_pane.add(button_pane);
         top_flow_pane.add(status_info_pane);
         top_flow_pane.add(vblank_pane);
+        top_flow_pane.add(registers_pane);
 
         bottom_flow_pane.add(pattern_tables_pane);
         bottom_flow_pane.add(palette_table_pane);
