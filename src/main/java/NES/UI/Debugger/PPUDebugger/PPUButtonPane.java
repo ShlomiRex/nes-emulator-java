@@ -12,7 +12,7 @@ import java.util.List;
 public class PPUButtonPane extends JPanel {
 
     private final Logger logger = LoggerFactory.getLogger(PPUButtonPane.class);
-    private boolean is_running, is_running_custom_ticks;
+    private boolean is_running;
 
     public PPUButtonPane(PPU ppu, JPanel debugger_pane) {
         JButton btn_tick = new JButton("Tick");
@@ -26,6 +26,7 @@ public class PPUButtonPane extends JPanel {
         JPanel flow2_pane = new JPanel();
         JButton btn_run_scanline_custom = new JButton("Run custom scanlines");
         JTextField txt_run_scanline_custom = new JTextField("1", 4);
+        JButton btn_run_until_vblank = new JButton("Run until VBlank");
 
         btn_stop.setEnabled(false);
         box_pane.setLayout(new BoxLayout(box_pane, BoxLayout.PAGE_AXIS));
@@ -42,6 +43,7 @@ public class PPUButtonPane extends JPanel {
         flow2_pane.add(txt_run_scanline_custom);
         box_pane.add(flow1_pane);
         box_pane.add(flow2_pane);
+        box_pane.add(btn_run_until_vblank);
         add(box_pane);
 
         btn_tick.addActionListener(new AbstractAction() {
@@ -100,7 +102,6 @@ public class PPUButtonPane extends JPanel {
                 logger.debug("Stop clicked");
 
                 is_running = false;
-                is_running_custom_ticks = false;
 
                 btn_tick.setEnabled(true);
                 btn_run.setEnabled(true);
@@ -118,12 +119,12 @@ public class PPUButtonPane extends JPanel {
                 SwingWorker<Void, Void> worker = new SwingWorker<>() {
                     @Override
                     protected Void doInBackground() {
-                        is_running_custom_ticks = true;
+                        is_running = true;
                         btn_tick.setEnabled(false);
                         btn_run.setEnabled(false);
                         btn_stop.setEnabled(true);
 
-                        while (is_running_custom_ticks) {
+                        while (is_running) {
                             ppu.clock_tick();
                             publish();
                         }
@@ -155,6 +156,40 @@ public class PPUButtonPane extends JPanel {
                             debugger_pane.repaint();
                         }
                         return null;
+                    }
+                };
+                worker.execute();
+            }
+        });
+
+        btn_run_until_vblank.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                logger.debug("Run until VBlank clicked");
+
+                SwingWorker<Void, Void> worker = new SwingWorker<>() {
+                    @Override
+                    protected Void doInBackground() {
+                        is_running = true;
+                        btn_tick.setEnabled(false);
+                        btn_run.setEnabled(false);
+                        btn_stop.setEnabled(true);
+
+                        while (is_running && !ppu.registers.isNmiEnabled()) {
+                            ppu.clock_tick();
+                            publish();
+                        }
+
+                        btn_tick.setEnabled(true);
+                        btn_run.setEnabled(true);
+                        btn_stop.setEnabled(false);
+
+                        return null;
+                    }
+
+                    @Override
+                    protected void process(List<Void> chunks) {
+                        debugger_pane.repaint();
                     }
                 };
                 worker.execute();
