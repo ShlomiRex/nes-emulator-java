@@ -36,3 +36,4 @@ Others:
 - Great CPU summary of almost everything: [here](https://www.nesdev.org/6502_cpu.txt)
 - Started reading PPU blogs, but this one is the best: [here](https://www.youtube.com/watch?v=-THeUXqR3zY)
 - Blog explains a lot about PPU, includes asm source code that runs basic blue background: [here](https://taywee.github.io/NerdyNights/nerdynights/asmfirstapp.html)
+- Detailed PPU timings (scanline, cycles): [here](https://www.nesdev.org/w/images/default/4/4f/Ppu.svg)

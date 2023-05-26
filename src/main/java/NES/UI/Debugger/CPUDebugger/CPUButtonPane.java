@@ -1,6 +1,5 @@
 package NES.UI.Debugger.CPUDebugger;
 
-import NES.UI.Debugger.DebuggerUIEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +17,7 @@ public class CPUButtonPane extends JPanel {
      * @param ui_events
      * @param debugger_pane The panel to repaint to update UI once the tick is done
      */
-    public CPUButtonPane(DebuggerUIEvents ui_events, JPanel debugger_pane) {
+    public CPUButtonPane(CPUDebuggerUIEvents ui_events, JPanel debugger_pane) {
         this.debugger_pane = debugger_pane;
 
         JButton btn_tick = new JButton("Tick");

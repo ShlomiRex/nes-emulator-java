@@ -1,6 +1,5 @@
 package NES.UI.Debugger.PPUDebugger;
 
-import NES.UI.Debugger.DebuggerUIEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,12 +12,15 @@ public class PPUButtonPane extends JPanel {
     private boolean is_running;
     private final JPanel debugger_pane;
 
-    public PPUButtonPane(DebuggerUIEvents ui_events, JPanel debugger_pane) {
+    public PPUButtonPane(PPUDebuggerUIEvents ui_events, JPanel debugger_pane) {
         this.debugger_pane = debugger_pane;
 
         JButton btn_tick = new JButton("Tick");
         JButton btn_run = new JButton("Run");
         JButton btn_stop = new JButton("Stop");
+        JSeparator separator = new JSeparator();
+        JButton btn_run_custom = new JButton("Run custom");
+        JTextField txt_run_custom = new JTextField("50", 4);
 
         btn_stop.setEnabled(false);
 
@@ -74,9 +76,35 @@ public class PPUButtonPane extends JPanel {
             }
         });
 
+        btn_run_custom.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                logger.debug("Run custom clicked");
+                synchronized (ui_events) {
+                    ui_events.run_custom_request = true;
+                    ui_events.run_custom_cycles = Integer.parseInt(txt_run_custom.getText());
+                    ui_events.notify();
+                }
+                is_running = true;
+                new RepainterThread().start();
+
+                synchronized (ui_events) {
+                    try {
+                        ui_events.wait();
+                        is_running = false;
+                    } catch (InterruptedException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+            }
+        });
+
         add(btn_tick);
         add(btn_run);
         add(btn_stop);
+        add(separator);
+        add(btn_run_custom);
+        add(txt_run_custom);
     }
 
     class RepainterThread extends Thread {

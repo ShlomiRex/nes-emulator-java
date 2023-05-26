@@ -31,4 +31,16 @@ public class PPURegisters {
     public byte getMask() {
         return mask;
     }
+
+    public boolean isNmiEnabled() {
+        return (ctrl & 0x80) != 0;
+    }
+
+    public void setNmiEnabled(boolean enabled) {
+        if (enabled) {
+            ctrl |= 0x80;
+        } else {
+            ctrl &= 0x7F;
+        }
+    }
 }

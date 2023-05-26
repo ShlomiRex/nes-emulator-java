@@ -1,7 +1,9 @@
 package NES.UI.Debugger;
 
 import NES.NES;
+import NES.UI.Debugger.CPUDebugger.CPUDebuggerUIEvents;
 import NES.UI.Debugger.CPUDebugger.CPUMainPane;
+import NES.UI.Debugger.PPUDebugger.PPUDebuggerUIEvents;
 import NES.UI.Debugger.PPUDebugger.PPUMainPane;
 
 import javax.swing.*;
@@ -10,7 +12,7 @@ public class DebuggerWindow extends JFrame {
 
     private final NES nes;
 
-    public DebuggerWindow(NES nes, DebuggerUIEvents cpu_ui_events, DebuggerUIEvents ppu_ui_events) {
+    public DebuggerWindow(NES nes, CPUDebuggerUIEvents cpu_ui_events, PPUDebuggerUIEvents ppu_ui_events) {
         this.nes = nes;
 
         setTitle("Java NES Emulator - Debugger");

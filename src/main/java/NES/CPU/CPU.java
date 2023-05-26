@@ -57,6 +57,12 @@ public class CPU {
         this.cycles += cycles;
 
         //TODO: Check OOPS cycle.
+
+        // Check NMI interrupt
+        if (ppuRegisters.isNmiEnabled()) {
+            logger.debug("NMI interrupt called");
+            nmi_interrupt();
+        }
     }
 
     private byte read_memory(short addr) {
@@ -430,5 +436,9 @@ public class CPU {
         registers.getP().setNegative(new_n);
         registers.getP().setZero(new_z);
         registers.getP().setCarry(new_c);
+    }
+
+    private void nmi_interrupt() {
+        // TODO: Complete
     }
 }

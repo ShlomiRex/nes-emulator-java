@@ -1,12 +1,11 @@
 package NES.UI.Debugger.CPUDebugger;
 
 import NES.CPU.CPU;
-import NES.UI.Debugger.DebuggerUIEvents;
 
 import javax.swing.*;
 
 public class CPUMainPane extends JPanel {
-    public CPUMainPane(CPU cpu, byte[] cpu_memory, DebuggerUIEvents ui_events) {
+    public CPUMainPane(CPU cpu, byte[] cpu_memory, CPUDebuggerUIEvents ui_events) {
         setBorder(BorderFactory.createTitledBorder("CPU"));
 
         JPanel reg_pane = new RegistersPanel(cpu.registers);

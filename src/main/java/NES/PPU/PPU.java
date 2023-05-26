@@ -12,10 +12,10 @@ public class PPU {
     // Memory
     private final byte[] pattern_tables;
 
-    // Renderer variables
-
+    // Renderer variables. I start counting from zero.
     public int cycle;
     public int scanline;
+    public int frame;
 
     public PPU(byte[] pattern_tables) {
         this.registers = new PPURegisters();
@@ -85,50 +85,32 @@ public class PPU {
      * Clock tick for PPU.
      */
     public void clock_tick() {
-        logger.debug("PPU: Clock tick, cycle: "+ cycle +", scanline: "+scanline);
+        //logger.debug("PPU: Clock tick, cycle: "+ cycle +", scanline: "+scanline+", frame: "+frame);
 
-        // Implement PPU clock cycle
-
-        if (scanline >= 0 && scanline <= 239) {
-            if (cycle == 0) {
-                // Do pre-render scanline setup
-            } else if (cycle >= 1 && cycle <= 256) {
-                // Visible scanline
-            } else if (cycle >= 257 && cycle <= 320) {
-                // Sprite evaluation
-            } else if (cycle >= 321 && cycle <= 336) {
-                // Sprite loading
-            } else if (cycle >= 337 && cycle <= 340) {
-                // Background loading
-            }
-        } else if (scanline == 240) {
-            if (cycle == 0) {
-                // End of visible scanlines
-            }
-        } else if (scanline >= 241 && scanline <= 260) {
-            if (scanline == 241 && cycle == 1) {
-                // Start of vblank
-                // Set vblank flag and generate NMI if enabled
-            }
+        if (scanline == 262) {
+            scanline = 0;
+            frame ++;
+            return;
         }
 
-        // Increment cycle and scanline counters
-        cycle++;
-        if (cycle > 340) {
+        if (cycle == 340) {
             cycle = 0;
-            scanline++;
-            if (scanline > 260) {
-                scanline = 0;
-                logger.debug("PPU: Frame complete, cycle: "+ cycle +", scanline: "+scanline);
-                //frame++;
-                //oddFrame = !oddFrame;
-            }
+            scanline ++;
+            return;
         }
-    }
 
-    public void runFrame() {
-        for(int i = 0; i < 241; i++) {
-            clock_tick();
+        if (scanline == 241 && cycle == 1) {
+            // VBlank start
+            logger.debug("PPU: VBlank");
+            registers.setNmiEnabled(true);
         }
+
+        if (scanline == 261 && cycle == 1) {
+            // VBlank end
+            logger.debug("PPU: VBlank end");
+            registers.setNmiEnabled(false);
+        }
+
+        cycle ++;
     }
 }
