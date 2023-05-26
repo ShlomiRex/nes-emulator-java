@@ -17,6 +17,8 @@ public class AssemnlyMainPane extends JPanel {
 
     private final SimpleAttributeSet attr_regular;
     private final SimpleAttributeSet attr_instr;
+    private final SimpleAttributeSet attr_instr_bytes;
+    private final SimpleAttributeSet attr_operands_prefix, attr_operands_suffix;
 
     public AssemnlyMainPane(CPURegisters cpuRegisters, byte[] cpu_memory) {
         this.cpu_memory = cpu_memory;
@@ -34,12 +36,22 @@ public class AssemnlyMainPane extends JPanel {
 
         try {
             attr_regular = new SimpleAttributeSet();
-            StyleConstants.setForeground(attr_regular, Color.BLACK);
-            StyleConstants.setBold(attr_regular, true);
-
+            attr_instr_bytes = new SimpleAttributeSet();
             attr_instr = new SimpleAttributeSet();
-            StyleConstants.setForeground(attr_instr, Color.BLUE);
+            attr_operands_prefix = new SimpleAttributeSet();
+            attr_operands_suffix = new SimpleAttributeSet();
+
+            StyleConstants.setForeground(attr_regular, Color.BLACK);
+            StyleConstants.setForeground(attr_instr_bytes, Color.GRAY);
+            StyleConstants.setForeground(attr_instr, new Color(0, 30, 116));
+            StyleConstants.setForeground(attr_operands_prefix, new Color(0, 30, 116));
+            StyleConstants.setForeground(attr_operands_suffix, new Color(8, 124, 0));
+
+            StyleConstants.setBold(attr_regular, true);
+            StyleConstants.setBold(attr_instr_bytes, true);
             StyleConstants.setBold(attr_instr, true);
+            StyleConstants.setBold(attr_operands_prefix, true);
+            StyleConstants.setBold(attr_operands_suffix, true);
 
             initializeAssemblyText();
         } catch (BadLocationException e) {
@@ -52,105 +64,43 @@ public class AssemnlyMainPane extends JPanel {
     }
 
     private void initializeAssemblyText() throws BadLocationException {
-        int pc = cpuRegisters.getPC() & 0xFFFF;
+        short pc = (short) (cpuRegisters.getPC() & 0xFFFF);
 
-        for (int assembly_line_num = 0; assembly_line_num < 30; assembly_line_num++) {
-            // Read opcode
-            byte opcode = cpu_memory[pc & 0xFFFF];
-            String str_opcode = Common.byteToHexString(opcode, false);
+        for (int assembly_line_num = 0; assembly_line_num < 34; assembly_line_num++) {
+            Decoder.AssemblyInfo info = decoder.decode_assembly_line(cpu_memory, pc);
 
-            // Decode opcode
-            Decoder.InstructionInfo info = decoder.decode_opcode(opcode);
-            String decoded_instr = info.instr.toString();
+            // Assembly line address
+            String str_addr = Common.shortToHexString(pc, true);
+            append(str_addr+"\t", attr_regular);
 
-            String str_operand1;
-            String str_operand2;
+            // Instructions bytes (1-3 bytes)
+            append(info.str_instr_bytes+"\t", attr_instr_bytes);
 
-            if (info.bytes == 1) {
-                str_operand1 = "  ";
-                str_operand2 = "  ";
-            }
-            else if (info.bytes == 2) {
-                byte operand1 = cpu_memory[pc + 1];
-                str_operand1 = Common.byteToHexString(operand1, false);
-                str_operand2 = "  ";
+            // Opcode
+            append(info.instr_info.instr.toString()+" ", attr_instr);
 
-                decoded_instr += " " + convert_1_operands_to_human_readable_text(info.addrmode, operand1);;
-            } else if (info.bytes == 3) {
-                byte operand1 = cpu_memory[pc + 1 & 0xFFFF];
-                byte operand2 = cpu_memory[pc + 2 & 0xFFFF];
-                str_operand1 = Common.byteToHexString(operand1, false);
-                str_operand2 = Common.byteToHexString(operand2, false);
-
-                decoded_instr += " " + convert_2_operands_to_human_readable_text(info.addrmode, operand1, operand2);;
-            } else {
-                throw new RuntimeException("Unexpected amount of bytes in instruction, must be at most 3");
+            // Operands
+            String operands = info.decoded_operand_or_symbol;
+            if (operands != null) {
+                if (operands.contains("#")) {
+                    // Not symbol - get the prefix and suffix
+                    String[] split = operands.split("\\$");
+                    append(split[0], attr_operands_prefix);
+                    append("$"+split[1], attr_operands_suffix);
+                } else {
+                    // Symbol
+                    append(operands, attr_operands_prefix);
+                }
             }
 
-            String str_addr = Common.shortToHexString((short) pc, true) + "\t";
-            append_without_style(str_addr);
-
-            String str_opcode_and_operands = str_opcode + " " + str_operand1 + " " + str_operand2 + " \t";
-            append_without_style(str_opcode_and_operands);
-
-            append_instr(decoded_instr + "\n");
-
-            pc += info.bytes;
+            append("\n", attr_regular);
+            pc += info.instr_info.bytes;
         }
     }
 
-    private void append_without_style(String str) throws BadLocationException {
+    private void append(String str, SimpleAttributeSet set) throws BadLocationException {
         Document doc = assembly_text_area.getStyledDocument();
-        doc.insertString(doc.getLength(), str, attr_regular);
+        doc.insertString(doc.getLength(), str, set);
     }
 
-    private void append_instr(String str_instr) throws BadLocationException {
-        Document doc = assembly_text_area.getStyledDocument();
-        doc.insertString(doc.getLength(), str_instr, attr_instr);
-    }
-
-    private String convert_1_operands_to_human_readable_text(Decoder.AddressingMode addrmode, byte operand1) {
-        switch (addrmode) {
-            case IMMEDIATE -> {
-                return "#$"+Common.byteToHexString(operand1, false);
-            }
-            case RELATIVE -> {
-                // operand1 is offset
-                // We add +2 because the debugger starts after the instruction is completed, i.e.
-                // the PC is the next instruction. We want the old instruction
-                short relative_addr = (short) (cpuRegisters.getPC() + operand1 + 2);
-                return "$" + Common.shortToHexString(relative_addr, false);
-            }
-            default -> throw new RuntimeException("Not implemented yet");
-        }
-    }
-
-    private String convert_2_operands_to_human_readable_text(Decoder.AddressingMode addrmode, byte operand1, byte operand2) {
-        switch (addrmode) {
-            case ABSOLUTE -> {
-                // Little endian = switch order of operands that represent the address
-                short addr = Common.convert_2_bytes_to_short(operand2, operand1);
-                String knownTag = convert_addr_to_tag(addr);
-                if (knownTag != null)
-                    return knownTag;
-                else
-                    return "#$"+Common.byteToHexString(operand1, false);
-            }
-            default -> throw new RuntimeException("Not implemented yet");
-        }
-    }
-
-    private String convert_addr_to_tag(short addr) {
-        switch (addr) {
-            case 0x2000 -> {
-                return "PPU_CTRL";
-            }
-            case 0x2002 -> {
-                return "PPU_STATUS";
-            }
-            default -> {
-                return null;
-            }
-        }
-    }
 }
