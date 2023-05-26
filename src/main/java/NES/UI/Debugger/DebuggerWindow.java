@@ -5,6 +5,7 @@ import NES.UI.Debugger.CPUDebugger.CPUMainPane;
 import NES.UI.Debugger.PPUDebugger.PPUMainPane;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class DebuggerWindow extends JFrame {
 
@@ -16,6 +17,8 @@ public class DebuggerWindow extends JFrame {
         setTitle("Java NES Emulator - Debugger");
         setSize(1600, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        Image img_icon = new ImageIcon("resources/NES_icon.png").getImage();
+        setIconImage(img_icon);
 
         JPanel main_pane = new JPanel();
 

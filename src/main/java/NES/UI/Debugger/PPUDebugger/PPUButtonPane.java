@@ -124,10 +124,16 @@ public class PPUButtonPane extends JPanel {
                         btn_run.setEnabled(false);
                         btn_stop.setEnabled(true);
 
-                        while (is_running) {
+                        int ticks = Integer.parseInt(txt_run_custom.getText());
+                        for (int i = 0; i < ticks; i++) {
+                            if (!is_running)
+                                break;
                             ppu.clock_tick();
                             publish();
                         }
+                        btn_tick.setEnabled(true);
+                        btn_run.setEnabled(true);
+                        btn_stop.setEnabled(false);
                         return null;
                     }
 
@@ -148,13 +154,23 @@ public class PPUButtonPane extends JPanel {
                     protected Void doInBackground() {
                         logger.debug("Run custom scanlines clicked with " + txt_run_scanline_custom.getText() + " scanlines");
 
+                        is_running = true;
+                        btn_tick.setEnabled(false);
+                        btn_run.setEnabled(false);
+                        btn_stop.setEnabled(true);
+
                         int scanlines = Integer.parseInt(txt_run_scanline_custom.getText());
                         for(int scanline = 0; scanline < scanlines; scanline++) {
                             for (int i = 0; i < 341; i++) {
+                                if (!is_running)
+                                    break;
                                 ppu.clock_tick();
                             }
                             debugger_pane.repaint();
                         }
+                        btn_tick.setEnabled(true);
+                        btn_run.setEnabled(true);
+                        btn_stop.setEnabled(false);
                         return null;
                     }
                 };
@@ -180,6 +196,7 @@ public class PPUButtonPane extends JPanel {
                             publish();
                         }
 
+                        is_running = false;
                         btn_tick.setEnabled(true);
                         btn_run.setEnabled(true);
                         btn_stop.setEnabled(false);
