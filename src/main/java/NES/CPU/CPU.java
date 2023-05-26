@@ -61,6 +61,7 @@ public class CPU {
         // Check NMI interrupt
         if (ppuRegisters.isNmiEnabled()) {
             logger.debug("NMI interrupt called");
+            ppuRegisters.setNmiEnabled(false); // After reading the NMI flag ($2002) , it is cleared.
             nmi_interrupt();
         }
     }

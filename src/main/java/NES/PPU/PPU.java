@@ -85,8 +85,6 @@ public class PPU {
      * Clock tick for PPU.
      */
     public void clock_tick() {
-        //logger.debug("PPU: Clock tick, cycle: "+ cycle +", scanline: "+scanline+", frame: "+frame);
-
         if (scanline == 262) {
             scanline = 0;
             frame ++;
@@ -101,13 +99,11 @@ public class PPU {
 
         if (scanline == 241 && cycle == 1) {
             // VBlank start
-            logger.debug("PPU: VBlank");
             registers.setNmiEnabled(true);
         }
 
         if (scanline == 261 && cycle == 1) {
             // VBlank end
-            logger.debug("PPU: VBlank end");
             registers.setNmiEnabled(false);
         }
 

@@ -19,16 +19,21 @@ public class PaletteTilePane extends JPanel {
         this.width = width;
         this.height = height;
 
+        String tooltip_text = ""+Common.byteToHexString((byte) tile_index, true)+
+                " Color: ("+color.getRed()+", "+color.getGreen()+", "+color.getBlue()+")";
+        if (tile_index == 0x0D)
+            tooltip_text += " Note: blacker than black";
+
         setPreferredSize(new Dimension(width, height));
 
+        String finalTooltip_text = tooltip_text;
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
                 super.mouseEntered(e);
                 setBorder(BorderFactory.createLineBorder(Color.BLUE, 2));
                 //selected_tile_label.setText("Tile: $" + Common.byteToHexString(tile_index, false));
-                setToolTipText(""+Common.byteToHexString((byte) tile_index, true)+
-                        " Color: ("+color.getRed()+", "+color.getGreen()+", "+color.getBlue()+")");
+                setToolTipText(finalTooltip_text);
             }
 
             @Override
@@ -60,7 +65,14 @@ public class PaletteTilePane extends JPanel {
             g.setColor(Color.WHITE);
         }
 
-        int str_width = g.getFontMetrics().stringWidth("00");
+        //int str_width = g.getFontMetrics().stringWidth("00");
         g.drawString(Common.byteToHexString((byte) tile_index, false), 0, height / 4);
+
+        // Show the 0x0D color as big red X
+        if (tile_index == 0x0D) {
+            g.setColor(Color.RED);
+            g.drawLine(0, 0, width, height);
+            g.drawLine(width, 0, 0, height);
+        }
     }
 }

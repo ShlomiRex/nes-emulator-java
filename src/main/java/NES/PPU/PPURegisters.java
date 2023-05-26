@@ -1,5 +1,7 @@
 package NES.PPU;
 
+import NES.Common;
+
 public class PPURegisters {
 
     private byte status;
@@ -33,14 +35,16 @@ public class PPURegisters {
     }
 
     public boolean isNmiEnabled() {
-        return (ctrl & 0x80) != 0;
+        //return (ctrl & 0x80) != 0;
+        return Common.Bits.getBit(status, 7);
     }
 
     public void setNmiEnabled(boolean enabled) {
-        if (enabled) {
-            ctrl |= 0x80;
-        } else {
-            ctrl &= 0x7F;
-        }
+        status = Common.Bits.setBit(status, 7, enabled);
+//        if (enabled) {
+//            ctrl |= 0x80;
+//        } else {
+//            ctrl &= 0x7F;
+//        }
     }
 }
