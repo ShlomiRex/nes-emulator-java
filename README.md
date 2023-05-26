@@ -15,7 +15,7 @@ Added pattern tables, added system palette, added run/stop buttons
 ![](README-resources/Screenshot2023-05-12%20203615.png)
 
 Added assembly viewer, PPU registers viewer, and PPU debugger
-![](README-resources/Screenshot2023-05-26 173426.png)
+![](README-resources/Screenshot2023-05-26%20173426.png)
 
 # Resources
 
