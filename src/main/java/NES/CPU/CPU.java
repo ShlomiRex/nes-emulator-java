@@ -109,7 +109,7 @@ public class CPU {
     private short read_address_from_memory(short addr) {
         byte lsb = read_memory(addr);
         byte msb = read_memory((short) (addr + 1));
-        return (short) ((msb << 8) | lsb);
+        return Common.makeShort(lsb, msb);
     }
 
     private void execute_instruction(Decoder.Instructions instr, Decoder.AddressingMode addrmode) {
@@ -443,6 +443,19 @@ public class CPU {
     }
 
     private void nmi_interrupt() {
-        // TODO: Complete
+        logger.debug("NMI interrupt called");
+        // Store current flags onto stack and when returning, restore them.
+        push_pc((short) 0);
+        byte p_flag = registers.getP().getAllFlags();
+        // Read about B flag: https://www.nesdev.org/wiki/Status_flags#The_B_flag
+        p_flag = Common.Bits.setBit(p_flag, 4, false);
+        push_stack(p_flag);
+
+        // Load interrupt vector and jump to address.
+        byte vector_lsb = read_memory((short) 0xFFFA);
+        byte vector_msb = read_memory((short) 0xFFFB);
+        short new_pc = Common.makeShort(vector_lsb, vector_msb);
+        logger.debug("Jumping to interrupt address: " + Common.shortToHexString(new_pc, true));
+        registers.setPC(new_pc);
     }
 }

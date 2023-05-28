@@ -10,7 +10,7 @@ import java.awt.*;
 
 public class AssemnlyMainPane extends JPanel {
 
-    private final JTextPane assembly_text_area;
+    public final AssemblyTextPane assembly_text_area;
     private final Decoder decoder;
     private final byte[] cpu_memory;
     private final CPURegisters cpuRegisters;
@@ -27,10 +27,7 @@ public class AssemnlyMainPane extends JPanel {
 
         setBorder(BorderFactory.createLoweredBevelBorder());
 
-        assembly_text_area = new JTextPane();
-        assembly_text_area.setEditable(false);
-        assembly_text_area.setAutoscrolls(true);
-        assembly_text_area.setFont(new Font("monospaced", Font.PLAIN, 12));
+        assembly_text_area = new AssemblyTextPane(cpuRegisters);
 
         JScrollPane scrollPane = new JScrollPane(assembly_text_area);
 
@@ -58,6 +55,8 @@ public class AssemnlyMainPane extends JPanel {
             throw new RuntimeException(e);
         }
 
+        // Highlight first instruction
+        assembly_text_area.ready_next_instruction();
 
         add(assembly_text_area);
         add(scrollPane);

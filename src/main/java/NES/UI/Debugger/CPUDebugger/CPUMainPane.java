@@ -1,18 +1,21 @@
 package NES.UI.Debugger.CPUDebugger;
 
 import NES.CPU.CPU;
+import NES.UI.Debugger.AssemblyDebugger.AssemblyTextPane;
+import NES.UI.Debugger.AssemblyDebugger.AssemnlyMainPane;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class CPUMainPane extends JPanel {
     private final CPUButtonPane button_pane;
-    public CPUMainPane(CPU cpu, byte[] cpu_memory) {
+
+    public CPUMainPane(CPU cpu, byte[] cpu_memory, AssemblyTextPane assembly_text_pane) {
         setBorder(BorderFactory.createTitledBorder("CPU"));
 
         JPanel reg_pane = new RegistersPanel(cpu.registers);
         JPanel stack_pane = new StackPanel();
-        button_pane = new CPUButtonPane(cpu, this);
+        button_pane = new CPUButtonPane(cpu, this, assembly_text_pane);
         JPanel cycles_pane = new CyclesPane(cpu);
         JPanel num_instr_pane = new NumInstructionsPane(cpu);
         JPanel instr_pane = new InstructionsPane(cpu, cpu_memory);

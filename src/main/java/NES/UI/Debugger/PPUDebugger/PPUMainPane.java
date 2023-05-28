@@ -15,7 +15,15 @@ public class PPUMainPane extends JPanel {
     public PPUMainPane(PPU ppu) {
         setBorder(BorderFactory.createTitledBorder("PPU"));
 
-        JPanel button_pane = new PPUButtonPane(ppu, this);
+        // Containers
+        JPanel box_pane = new JPanel();
+        JPanel top_flow_pane = new JPanel();
+        JPanel bottom_flow_pane = new JPanel();
+        box_pane.setLayout(new BoxLayout(box_pane, BoxLayout.PAGE_AXIS));
+        JPanel status_info_pane = new JPanel();
+
+        // Main panels
+        JPanel button_pane = new PPUButtonPane(ppu, top_flow_pane); // We don't need to update unrelated panels
         JPanel cycles_pane = new CyclesPane(ppu);
         JPanel scanline_pane = new ScanlinePane(ppu);
         JPanel frame_pane = new FramePane(ppu);
@@ -24,13 +32,7 @@ public class PPUMainPane extends JPanel {
         JPanel pattern_tables_pane = new PatternTablesPane(ppu);
         JPanel palette_table_pane = new PaletteTablePane();
 
-        // Containers
-        JPanel box_pane = new JPanel();
-        JPanel top_flow_pane = new JPanel();
-        JPanel bottom_flow_pane = new JPanel();
-        box_pane.setLayout(new BoxLayout(box_pane, BoxLayout.PAGE_AXIS));
 
-        JPanel status_info_pane = new JPanel();
         status_info_pane.setLayout(new GridLayout(3, 1));
         status_info_pane.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 

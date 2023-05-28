@@ -1,6 +1,7 @@
 package NES.UI.Debugger.CPUDebugger;
 
 import NES.CPU.CPU;
+import NES.UI.Debugger.AssemblyDebugger.AssemblyTextPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,10 +18,10 @@ public class CPUButtonPane extends JPanel {
     private Runnable repaint_ppu_pane_runnable;
 
     /**
-     *
-     * @param debugger_pane The panel to repaint to update UI once the tick is done
+     * @param debugger_pane      The panel to repaint to update UI once the tick is done
+     * @param assembly_main_pane
      */
-    public CPUButtonPane(CPU cpu, JPanel debugger_pane) {
+    public CPUButtonPane(CPU cpu, JPanel debugger_pane, AssemblyTextPane assembly_text_pane) {
         this.debugger_pane = debugger_pane;
 
         JButton btn_tick = new JButton("Tick");
@@ -45,6 +46,7 @@ public class CPUButtonPane extends JPanel {
                     protected void done() {
                         debugger_pane.repaint();
                         repaint_ppu_pane_runnable.run();
+                        assembly_text_pane.ready_next_instruction();
                     }
                 };
                 worker.execute();
@@ -74,6 +76,7 @@ public class CPUButtonPane extends JPanel {
                     @Override
                     protected void process(List<Void> chunks) {
                         debugger_pane.repaint();
+                        assembly_text_pane.ready_next_instruction();
                     }
 
                     @Override

@@ -12,6 +12,16 @@ public class Common {
         return HexFormat.of().parseHex(new_s.toString());
     }
 
+    /**
+     * Convert LSB and MSB to a short
+     * @param lsb
+     * @param msb
+     * @return
+     */
+    public static short makeShort(byte lsb, byte msb) {
+        return (short) ((msb << 8) | lsb);
+    }
+
     public enum BytesToHexStringFormat {
         NO_FORMAT,
         ARRAY,
