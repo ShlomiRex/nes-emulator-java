@@ -2,3 +2,4 @@
 target/
 *.deb
 *.fdb
+test_resources/**

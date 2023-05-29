@@ -479,7 +479,7 @@ public class Decoder {
         switch (addrmode) {
             case ABSOLUTE -> {
                 // Little endian = switch order of operands that represent the address
-                short addr = Common.convert_2_bytes_to_short(operand2, operand1);
+                short addr = Common.makeShort(operand2, operand1);
                 String knownSymbol = convert_addr_to_symbol(addr);
                 if (knownSymbol != null) {
                     return knownSymbol;
@@ -489,7 +489,7 @@ public class Decoder {
                 }
             }
             case ABSOLUTE_X -> {
-                short addr = Common.convert_2_bytes_to_short(operand2, operand1);
+                short addr = Common.makeShort(operand2, operand1);
                 String knownSymbol = convert_addr_to_symbol(addr);
                 if (knownSymbol != null) {
                     return knownSymbol;

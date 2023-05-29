@@ -6,6 +6,14 @@ public class StatusFlags {
 
     private byte p;
 
+    public StatusFlags(byte intValue) {
+        p = intValue;
+    }
+
+    public StatusFlags() {
+        reset();
+    }
+
     public void reset() {
         p = 0b0010_0000; // Set 'UNUSED' flag to 1
     }

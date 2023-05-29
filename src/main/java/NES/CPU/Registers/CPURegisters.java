@@ -94,7 +94,8 @@ public class CPURegisters {
     }
 
     public void setP(StatusFlags P) {
-        listener.propertyChange(new PropertyChangeEvent(this, "P", this.P, P));
+        if (listener != null)
+            listener.propertyChange(new PropertyChangeEvent(this, "P", this.P, P));
         this.P = P;
     }
 

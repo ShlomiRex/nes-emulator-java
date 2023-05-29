@@ -108,7 +108,7 @@ public class InstructionsPane extends JPanel {
         switch (addrmode) {
             case ABSOLUTE -> {
                 // Little endian = switch order of operands that represent the address
-                short addr = Common.convert_2_bytes_to_short(operand2, operand1);
+                short addr = Common.makeShort(operand2, operand1);
                 String knownTag = convert_addr_to_tag(addr);
                 if (knownTag != null)
                     return knownTag;

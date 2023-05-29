@@ -13,13 +13,13 @@ public class Common {
     }
 
     /**
-     * Convert LSB and MSB to a short
+     * Combine LSB and MSB to a create short (16-bit) value
      * @param lsb
      * @param msb
      * @return
      */
     public static short makeShort(byte lsb, byte msb) {
-        return (short) ((msb << 8) | lsb);
+        return (short) ((msb << 8) | lsb & 0xFF);
     }
 
     public enum BytesToHexStringFormat {
@@ -87,9 +87,5 @@ public class Common {
             else
                 return (byte) (variable & ~(1 << bitIndex));
         }
-    }
-
-    public static short convert_2_bytes_to_short(byte msb, byte lsb) {
-        return (short) ((msb << 8) | lsb);
     }
 }

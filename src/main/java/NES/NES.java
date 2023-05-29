@@ -40,5 +40,6 @@ public class NES {
 
         ppu = new PPU(pattern_tables);
         cpu = new CPU(cpu_memory, ppu.registers);
+        cpu.res_interrupt();
     }
 }

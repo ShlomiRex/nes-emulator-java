@@ -6,6 +6,9 @@ import NES.PPU.PPURegisters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class CPU {
 
     private final Logger logger = LoggerFactory.getLogger(CPU.class);
@@ -19,6 +22,9 @@ public class CPU {
     private final PPURegisters ppuRegisters;
     public long instructions = 0; // counter number of instructions executed
 
+    private boolean is_record_memory; // Only used in testing. If true, the CPU will record when memory is read and written.
+    private List<MemoryAccessRecord> recorded_memory; // Only used in testing. If record_memory is true, this will contain all the memory reads and writes.
+
     public CPU(byte[] cpu_memory, PPURegisters ppuRegisters) {
         if (cpu_memory.length != 1024 * 64)
             throw new RuntimeException("Unexpected CPU memory address space size");
@@ -28,8 +34,6 @@ public class CPU {
 
         this.registers = new CPURegisters();
         this.decoder = new Decoder();
-
-        res_interrupt();
     }
 
     public void clock_tick() {
@@ -60,7 +64,7 @@ public class CPU {
         //TODO: Check OOPS cycle.
 
         // Check NMI interrupt
-        if (ppuRegisters.isNmiEnabled()) {
+        if (ppuRegisters != null && ppuRegisters.isNmiEnabled()) {
             logger.debug("NMI interrupt called");
             ppuRegisters.setNmiEnabled(false); // After reading the NMI flag ($2002) , it is cleared.
             nmi_interrupt();
@@ -74,27 +78,31 @@ public class CPU {
 
         byte res;
 
-        // Map certain addresses to PPU if needed
-        switch (addr) {
-            case 0x2002 -> {
-                res = ppuRegisters.readStatus();
-            }
-            case 0x2000 -> {
-                res = ppuRegisters.getCtrl();
-            }
-            default -> {
-                // Note: 'addr' is short, which means in Java it can be negative. However we deal with unsigned numbers.
-                // This is the best way to convert any signed number to unsigned, which allows accessing arrays.
-                res = memory[addr & 0xFFFF];
-            }
-        }
+        // TODO: Do something about PPU memory. I think the PPU should modify the CPU address space
+//        // Map certain addresses to PPU if needed
+//        switch (addr) {
+//            case 0x2002 -> {
+//                res = ppuRegisters.readStatus();
+//            }
+//            case 0x2000 -> {
+//                res = ppuRegisters.getCtrl();
+//            }
+//            default -> {
+//                // Note: 'addr' is short, which means in Java it can be negative. However we deal with unsigned numbers.
+//                // This is the best way to convert any signed number to unsigned, which allows accessing arrays.
+//                res = memory[addr & 0xFFFF];
+//            }
+//        }\
+        res = memory[addr & 0xFFFF];
         logger.debug("Read memory: [" +
                 Common.shortToHexString(addr, true) + "] = " +
                 Common.byteToHexString(res, true));
+        if (is_record_memory)
+            recorded_memory.add(new MemoryAccessRecord(addr, res, true));
         return res;
     }
 
-    private void res_interrupt() {
+    public void res_interrupt() {
         logger.debug("Reset interrupt called");
 
         registers.reset();
@@ -374,7 +382,11 @@ public class CPU {
                 return res;
             }
             case ABSOLUTE -> {
-                return read_address_from_memory(pc_short);
+                byte low = read_memory(pc_short);
+                byte high = read_memory((short) (pc_short + 1));
+                short abs_addr = Common.makeShort(low, high);
+                logger.debug("Fetched absolute address: "+ Common.shortToHexString(abs_addr, false));
+                return abs_addr;
             }
             case ZEROPAGE -> {
                 return read_memory(pc_short);
@@ -389,7 +401,9 @@ public class CPU {
 
     private void write_memory(short addr, byte value) {
         logger.debug("Writing memory: ["+Common.shortToHexString(addr, true)+"] = "+value);
-        memory[addr] = value;
+        memory[addr & 0xFFFF] = value;
+        if (is_record_memory)
+            recorded_memory.add(new MemoryAccessRecord(addr, value, false));
     }
 
     private void push_stack(byte data) {
@@ -457,5 +471,26 @@ public class CPU {
         short new_pc = Common.makeShort(vector_lsb, vector_msb);
         logger.debug("Jumping to interrupt address: " + Common.shortToHexString(new_pc, true));
         registers.setPC(new_pc);
+    }
+
+    /**
+     * Only use in tests. Starts to record memory reads and writes.
+     * @param is_record
+     */
+    public void set_debugger_record_memory(boolean is_record) {
+        if (is_record && this.recorded_memory == null)
+            this.recorded_memory = new ArrayList<>();
+        this.is_record_memory = is_record;
+    }
+
+    public List<MemoryAccessRecord> get_debugger_memory_records() {
+        return this.recorded_memory;
+    }
+
+    public void clear_debugger_memory_records() {
+        this.recorded_memory.clear();
+    }
+
+    public record MemoryAccessRecord(short addr, byte value, boolean is_read) {
     }
 }
