@@ -22,7 +22,7 @@ Added assembly viewer, PPU registers viewer, and PPU debugger
 The most used resorces:
 
 - Online emulator for quick testing of the CPU: [here](https://skilldrick.github.io/easy6502/#first-program)
-- Best CPU instructions summary: [here](https://www.masswerk.at/6502/6502_instruction_set.html#CPX)
+- Best CPU instructions summary: [here](https://www.masswerk.at/6502/6502_instruction_set.html)
 
 Others:
 

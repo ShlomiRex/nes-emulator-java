@@ -100,7 +100,7 @@ public class CPU {
 //        }\
         res = memory[addr & 0xFFFF];
         logger.debug("Reading memory: [" +
-                addr + " (" + Common.shortToHexString(addr, true) + ")] = " + res +" ("+
+                (addr & 0xFFFF) + " (" + Common.shortToHexString(addr, true) + ")] = " + (res & 0xFF) +" ("+
                 Common.byteToHexString(res, true) + ")");
         if (is_record_memory)
             recorded_memory.add(new MemoryAccessRecord(addr, res, true));
@@ -367,6 +367,13 @@ public class CPU {
                 short addr = read_address_from_memory((short) (registers.getPC() + 1));
                 byte res = read_memory(addr);
                 logger.debug("Fetched absolute: "+Common.byteToHexString(res, true));
+                return res;
+            }
+            case ZEROPAGE -> {
+                byte oper = read_memory((short) (registers.getPC() + 1));
+                short addr = Common.makeShort(oper, (byte) 0x00);
+                byte res = read_memory(addr);
+                logger.debug("Fetched zeropage: "+Common.byteToHexString(res, true));
                 return res;
             }
             default -> throw new RuntimeException("Not implemented yet");
