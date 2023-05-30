@@ -50,7 +50,12 @@ public class CPU {
         int bytes = instr_info.bytes;
         int cycles = instr_info.cycles;
         Decoder.OopsCycle oops_cycle = instr_info.oopsCycle;
-        logger.debug(instr.toString()+"\t"+addrmode+"\tBytes: "+bytes+"\tCycles: "+cycles+"\tOops cycle: "+oops_cycle);
+        logger.debug(
+                instr.toString()+"("+Common.byteToHexString(opcode, true)+")\t"
+                +addrmode+"\tBytes: "
+                +bytes+"\tCycles: "
+                +cycles+"\tOops cycle: "
+                +oops_cycle);
 
         // Execute
         execute_instruction(instr, addrmode);
@@ -94,9 +99,9 @@ public class CPU {
 //            }
 //        }\
         res = memory[addr & 0xFFFF];
-        logger.debug("Read memory: [" +
-                Common.shortToHexString(addr, true) + "] = " +
-                Common.byteToHexString(res, true));
+        logger.debug("Reading memory: [" +
+                addr + " (" + Common.shortToHexString(addr, true) + ")] = " + res +" ("+
+                Common.byteToHexString(res, true) + ")");
         if (is_record_memory)
             recorded_memory.add(new MemoryAccessRecord(addr, res, true));
         return res;
@@ -389,7 +394,7 @@ public class CPU {
                 return abs_addr;
             }
             case ZEROPAGE -> {
-                return read_memory(pc_short);
+                return Common.makeShort(read_memory(pc_short), (byte) 0);
             }
             case INDIRECT -> {
                 short indirect_addr = read_address_from_memory(pc_short);
@@ -400,7 +405,8 @@ public class CPU {
     }
 
     private void write_memory(short addr, byte value) {
-        logger.debug("Writing memory: ["+Common.shortToHexString(addr, true)+"] = "+value);
+        logger.debug("Writing memory: ["+addr + " (" + Common.shortToHexString(addr, true)+")] = "
+                +value + " ("+Common.byteToHexString(value, true)+")");
         memory[addr & 0xFFFF] = value;
         if (is_record_memory)
             recorded_memory.add(new MemoryAccessRecord(addr, value, false));

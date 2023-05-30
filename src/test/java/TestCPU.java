@@ -2,9 +2,10 @@ import NES.CPU.CPU;
 import NES.CPU.Registers.StatusFlags;
 import NES.Common;
 import org.json.JSONArray;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,69 +15,66 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+
+import org.junit.jupiter.params.ParameterizedTest;
+
 
 import org.json.JSONObject;
 
 /**
- * Using the following git repository: https://github.com/TomHarte/ProcessorTests
+ * Using the following git repository: <a href="https://github.com/TomHarte/ProcessorTests">...</a>
  * We test on each opcode that the output of the CPU matches the output of the JSON test.
  */
 public class TestCPU {
-    private static Logger logger = LoggerFactory.getLogger(TestCPU.class);
-
-    private static boolean processor_tests_repo_exist = false;
+    private static final Logger logger = LoggerFactory.getLogger(TestCPU.class);
 
     private static CPU cpu;
     private static byte[] cpu_memory;
 
-
-    @BeforeClass
+    @BeforeAll
     public static void setUp() {
         Path path = Paths.get("test_resources/ProcessorTests");
-        processor_tests_repo_exist = Files.exists(path);
+        boolean processor_tests_repo_exist = Files.exists(path);
+        if (!processor_tests_repo_exist)
+            logger.error("ProcessorTests repo not found (https://github.com/TomHarte/ProcessorTests), skipping tests");
+        assumeTrue(processor_tests_repo_exist);
 
         cpu_memory = new byte[64 * 1024];
         cpu = new CPU(cpu_memory, null);
         cpu.set_debugger_record_memory(true);
     }
 
-    @Before
-    public void before() {
-        if (!processor_tests_repo_exist)
-            logger.error("ProcessorTests repo not found (https://github.com/TomHarte/ProcessorTests), skipping tests");
-        assumeTrue(processor_tests_repo_exist);
+    private static Stream<Arguments> testCases() {
+        return Stream.of(
+                Arguments.of((byte) 0x84)
+        );
     }
 
-//    @Test
-//    public void test_opcode_SEI() throws IOException {
-//        byte[] cpu_memory = new byte[64 * 1024];
-//        CPU cpu = new CPU(cpu_memory, null);
-//
-//        int opcode = 0x78;
-//
-//        JSONArray test = read_test(opcode);
-//
-//        for (int i = 0; i < test.length(); i++) {
-//            JSONObject test_obj = test.getJSONObject(i);
-//
-//            JSONObject initial = (JSONObject) test_obj.get("initial");
-//            init_cpu(cpu, cpu_memory, initial);
-//
-//            cpu.clock_tick(); // Single tick
-//
-//            JSONObject final_test = (JSONObject) test_obj.get("final");
-//            assert_final(cpu, cpu_memory, final_test);
-//        }
-//    }
+    @ParameterizedTest
+    @MethodSource("testCases")
+    //    @ValueSource(bytes = {(byte) 0x8D, (byte) 0x84})
+    public void cpu_tests_by_opcode(byte opcode) throws IOException {
+        JSONArray test = read_test(opcode);
 
-    @Test
-    public void test_opcode_STA_absolute() throws IOException {
-        int opcode = 0x8D;
-        run_test(opcode, cpu, cpu_memory);
+        for (int i = 0; i < test.length(); i++) {
+            JSONObject test_obj = test.getJSONObject(i);
+            String test_name = (String) test_obj.get("name");
+            logger.debug("Running test: " + i+"/"+test.length() + ", test name: " + test_name);
+
+            JSONObject initial = (JSONObject) test_obj.get("initial");
+            init_cpu(cpu, cpu_memory, initial);
+
+            cpu.clock_tick(); // Single tick
+
+            JSONObject final_test = (JSONObject) test_obj.get("final");
+            JSONArray cycles = (JSONArray) test_obj.get("cycles");
+            assert_final(cpu, cpu_memory, final_test, cycles);
+        }
     }
 
     private JSONArray read_test(int opcode) throws IOException {
@@ -87,6 +85,7 @@ public class TestCPU {
     }
 
     private void init_cpu(CPU cpu, byte[] cpu_memory, JSONObject init) {
+        // Clear memory access records for next test
         cpu.clear_debugger_memory_records();
 
         Integer pc = (Integer) init.get("pc");
@@ -97,6 +96,7 @@ public class TestCPU {
         Integer s = (Integer) init.get("s");
         JSONArray ram = (JSONArray) init.get("ram");
 
+        // Init CPU registers
         cpu.registers.setPC(pc.shortValue());
         cpu.registers.setA(a.byteValue());
         cpu.registers.setX(x.byteValue());
@@ -104,30 +104,18 @@ public class TestCPU {
         cpu.registers.setP(new StatusFlags((byte) p.intValue()));
         cpu.registers.setS(s.byteValue());
 
+        // Init the RAM
         for (int i = 0; i < ram.length(); i++) {
             JSONArray obj = (JSONArray) ram.get(i);
 
             Integer address = (Integer) obj.get(0);
             Integer value = (Integer) obj.get(1);
 
+            logger.debug("Setting memory: [" + address +
+                    " ("+Common.shortToHexString(address.shortValue(), true)+")] = " +
+                    value + " ("+Common.byteToHexString(value.byteValue(), true)+")");
+
             cpu_memory[address] = value.byteValue();
-        }
-    }
-
-    private void run_test(int opcode, CPU cpu, byte[] cpu_memory) throws IOException {
-        JSONArray test = read_test(opcode);
-
-        for (int i = 0; i < test.length(); i++) {
-            JSONObject test_obj = test.getJSONObject(i);
-
-            JSONObject initial = (JSONObject) test_obj.get("initial");
-            init_cpu(cpu, cpu_memory, initial);
-
-            cpu.clock_tick(); // Single tick
-
-            JSONObject final_test = (JSONObject) test_obj.get("final");
-            JSONArray cycles = (JSONArray) test_obj.get("cycles");
-            assert_final(cpu, cpu_memory, final_test, cycles);
         }
     }
 
@@ -141,12 +129,12 @@ public class TestCPU {
         JSONArray ram = (JSONArray) final_result.get("ram");
 
         // Test CPU flags
-        assertEquals(cpu.registers.getPC(), pc.shortValue());
-        assertEquals(cpu.registers.getA(), a.byteValue());
-        assertEquals(cpu.registers.getX(), x.byteValue());
-        assertEquals(cpu.registers.getY(), y.byteValue());
-        assertEquals(cpu.registers.getP().getAllFlags(), p.byteValue());
-        assertEquals(cpu.registers.getS(), s.byteValue());
+        assertEquals(pc.shortValue(), cpu.registers.getPC());
+        assertEquals(a.byteValue(), cpu.registers.getA());
+        assertEquals(x.byteValue(), cpu.registers.getX());
+        assertEquals(y.byteValue(), cpu.registers.getY());
+        assertEquals(p.byteValue(), cpu.registers.getP().getAllFlags());
+        assertEquals(s.byteValue(), cpu.registers.getS());
 
         // Test ram
         for (int i = 0; i < ram.length(); i++) {
@@ -155,13 +143,12 @@ public class TestCPU {
             Integer address = (Integer) obj.get(0);
             Integer value = (Integer) obj.get(1);
 
-            assertEquals(cpu_memory[address], value.byteValue());
+            assertEquals(value.byteValue(), cpu_memory[address]);
         }
 
         // Test cycles
         List<CPU.MemoryAccessRecord> records = cpu.get_debugger_memory_records();
-        assertEquals(records.size(), cycles.length());
-
+        assertEquals(cycles.length(), records.size());
         for (int i = 0; i < cycles.length(); i++) {
             JSONArray cycle_record = (JSONArray) cycles.get(i);
 
@@ -172,9 +159,9 @@ public class TestCPU {
             AtomicBoolean found_record = new AtomicBoolean(false);
             records.forEach(record -> {
                 if (record.addr() == address.shortValue()) {
-                    assertEquals(record.value(), value.byteValue());
+                    assertEquals(value.byteValue(), record.value());
                     boolean is_read = type.equals("read");
-                    assertEquals(record.is_read(), is_read);
+                    assertEquals(is_read, record.is_read());
 
                     found_record.set(true);
                 }
