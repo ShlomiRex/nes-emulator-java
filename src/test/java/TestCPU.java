@@ -2,36 +2,33 @@ import NES.CPU.CPU;
 import NES.CPU.Registers.StatusFlags;
 import NES.Common;
 import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.DisplayNameGeneration;
+import org.junit.jupiter.api.DisplayNameGenerator;
+import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
-
-import org.junit.jupiter.params.ParameterizedTest;
-
-
-import org.json.JSONObject;
 
 /**
  * Using the following git repository: <a href="https://github.com/TomHarte/ProcessorTests">...</a>
  * We test on each opcode that the output of the CPU matches the output of the JSON test.
  * The git repository must be cloned into the 'test_resources/' folder which is in the root folder of the project.
  */
+@DisplayNameGeneration(TestCPU.ReplaceCamelCase.class)
 public class TestCPU {
     private static final Logger logger = LoggerFactory.getLogger(TestCPU.class);
 
@@ -53,23 +50,24 @@ public class TestCPU {
 
     private static Stream<Arguments> testCases() {
         return Stream.of(
-//                Arguments.of((byte) 0x8D),
-//                Arguments.of((byte) 0x84),
-//                Arguments.of((byte) 0xA9),
+                Arguments.of((byte) 0x8D),
+                Arguments.of((byte) 0x84),
+                Arguments.of((byte) 0xA9),
                 Arguments.of((byte) 0xA5)
         );
     }
 
-    @ParameterizedTest
+
+    @ParameterizedTest(name = "Test Opcode: {0}")
     @MethodSource("testCases")
-    //@ValueSource(bytes = {(byte) 0xA9})
+    //@ValueSource(bytes = {(byte) 0x95})
     public void cpu_tests_by_opcode(byte opcode) throws IOException {
         JSONArray test = read_test(opcode);
         
         for (int i = 0; i < test.length(); i++) {
             JSONObject test_obj = test.getJSONObject(i);
             String test_name = (String) test_obj.get("name");
-            logger.debug("Running test: " + i+"/"+test.length() + ", test name: " + test_name);
+            logger.debug("Running test: " + (i+1) +"/"+test.length() + ", test name: " + test_name);
 
             JSONObject initial = (JSONObject) test_obj.get("initial");
             init_cpu(cpu, cpu_memory, initial);
@@ -152,27 +150,52 @@ public class TestCPU {
             assertEquals(value.byteValue(), cpu_memory[address]);
         }
 
-        // Test cycles
+        // Test cycles (Note: order of memory access records is important).
         List<CPU.MemoryAccessRecord> records = cpu.get_debugger_memory_records();
         assertEquals(cycles.length(), records.size());
         for (int i = 0; i < cycles.length(); i++) {
             JSONArray cycle_record = (JSONArray) cycles.get(i);
+            CPU.MemoryAccessRecord cpu_record = records.get(i);
 
-            Integer address = (Integer) cycle_record.get(0);
-            Integer value = (Integer) cycle_record.get(1);
-            String type = (String) cycle_record.get(2);
+            Integer cycle_address = (Integer) cycle_record.get(0);
+            Integer cycle_value = (Integer) cycle_record.get(1);
+            String cycle_type = (String) cycle_record.get(2);
 
-            AtomicBoolean found_record = new AtomicBoolean(false);
-            records.forEach(record -> {
-                if (record.addr() == address.shortValue()) {
-                    assertEquals(value.byteValue(), record.value());
-                    boolean is_read = type.equals("read");
-                    assertEquals(is_read, record.is_read());
+            assertEquals(cycle_address.shortValue(), cpu_record.addr());
+            assertEquals(cycle_value.byteValue(), cpu_record.value());
+            assertEquals(cycle_type.equals("read"), cpu_record.is_read());
+        }
+    }
 
-                    found_record.set(true);
+    static class ReplaceCamelCase extends DisplayNameGenerator.Standard {
+        @Override
+        public String generateDisplayNameForClass(Class<?> testClass) {
+            return replaceCamelCase(super.generateDisplayNameForClass(testClass));
+        }
+
+        @Override
+        public String generateDisplayNameForNestedClass(Class<?> nestedClass) {
+            return replaceCamelCase(super.generateDisplayNameForNestedClass(nestedClass));
+        }
+
+        @Override
+        public String generateDisplayNameForMethod(Class<?> testClass, Method testMethod) {
+            return this.replaceCamelCase(testMethod.getName()) +
+                    DisplayNameGenerator.parameterTypesAsString(testMethod);
+        }
+
+        String replaceCamelCase(String camelCase) {
+            StringBuilder result = new StringBuilder();
+            result.append(camelCase.charAt(0));
+            for (int i=1; i<camelCase.length(); i++) {
+                if (Character.isUpperCase(camelCase.charAt(i))) {
+                    result.append(' ');
+                    result.append(Character.toLowerCase(camelCase.charAt(i)));
+                } else {
+                    result.append(camelCase.charAt(i));
                 }
-            });
-            assertTrue(found_record.get());
+            }
+            return result.toString();
         }
     }
 }
