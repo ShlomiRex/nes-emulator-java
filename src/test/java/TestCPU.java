@@ -3,6 +3,7 @@ import NES.CPU.Registers.StatusFlags;
 import NES.Common;
 import org.json.JSONArray;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -29,6 +30,7 @@ import org.json.JSONObject;
 /**
  * Using the following git repository: <a href="https://github.com/TomHarte/ProcessorTests">...</a>
  * We test on each opcode that the output of the CPU matches the output of the JSON test.
+ * The git repository must be cloned into the 'test_resources/' folder which is in the root folder of the project.
  */
 public class TestCPU {
     private static final Logger logger = LoggerFactory.getLogger(TestCPU.class);
@@ -51,16 +53,19 @@ public class TestCPU {
 
     private static Stream<Arguments> testCases() {
         return Stream.of(
-                Arguments.of((byte) 0x84)
+//                Arguments.of((byte) 0x8D),
+//                Arguments.of((byte) 0x84),
+//                Arguments.of((byte) 0xA9),
+                Arguments.of((byte) 0xA5)
         );
     }
 
     @ParameterizedTest
     @MethodSource("testCases")
-    //    @ValueSource(bytes = {(byte) 0x8D, (byte) 0x84})
+    //@ValueSource(bytes = {(byte) 0xA9})
     public void cpu_tests_by_opcode(byte opcode) throws IOException {
         JSONArray test = read_test(opcode);
-
+        
         for (int i = 0; i < test.length(); i++) {
             JSONObject test_obj = test.getJSONObject(i);
             String test_name = (String) test_obj.get("name");
@@ -80,6 +85,7 @@ public class TestCPU {
     private JSONArray read_test(int opcode) throws IOException {
         String opcode_hex = Common.byteToHexString((byte) opcode, false);
         Path path = Paths.get("test_resources/ProcessorTests/nes6502", "v1", opcode_hex + ".json");
+        logger.debug("Reading test file: " + path);
         String jsonContent = new String(Files.readAllBytes(path));
         return new JSONArray(jsonContent);
     }

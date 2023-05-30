@@ -369,6 +369,12 @@ public class CPU {
                 logger.debug("Fetched absolute: "+Common.byteToHexString(res, true));
                 return res;
             }
+            case ZEROPAGE -> {
+                byte addr = read_memory((short) (registers.getPC() + 1));
+                byte res = read_memory(addr);
+                logger.debug("Fetched zeropage: "+Common.byteToHexString(res, true));
+                return res;
+            }
             default -> throw new RuntimeException("Not implemented yet");
         }
     }
