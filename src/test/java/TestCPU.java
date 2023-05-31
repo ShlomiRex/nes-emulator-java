@@ -59,7 +59,14 @@ public class TestCPU {
                 Arguments.of((byte) 0xBD),
                 Arguments.of((byte) 0xB9),
                 Arguments.of((byte) 0xA1),
-                Arguments.of((byte) 0xB1)
+                Arguments.of((byte) 0xB1),
+                Arguments.of((byte) 0xA2),
+                Arguments.of((byte) 0xA6),
+                Arguments.of((byte) 0xB6),
+                Arguments.of((byte) 0xAE),
+                Arguments.of((byte) 0xBE),
+
+                Arguments.of((byte) 0xBE)
         );
     }
 

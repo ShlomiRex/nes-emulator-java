@@ -381,13 +381,18 @@ public class CPU {
                 res = read_memory(addr);
                 logger.debug("Fetched zeropage: "+Common.byteToHexString(res, true));
                 return res;
+            case ZEROPAGE_Y:
             case ZEROPAGE_X:
                 oper = read_memory((short) (registers.getPC() + 1));
 
                 addr = Common.makeShort(oper, (byte) 0x00);
                 dummy_res = read_memory(addr); // Dummy read to pass how the real cpu works
 
-                effective_addr = Common.makeShort((byte) (oper + registers.getX()), (byte) 0x00);
+                if (addrmode == Decoder.AddressingMode.ZEROPAGE_X)
+                    register = registers.getX();
+                else
+                    register = registers.getY();
+                effective_addr = Common.makeShort((byte) (oper + register), (byte) 0x00);
 
                 res = read_memory(effective_addr);
                 logger.debug("Fetched zeropage_x: "+Common.byteToHexString(res, true));
