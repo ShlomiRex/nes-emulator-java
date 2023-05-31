@@ -378,8 +378,13 @@ public class CPU {
             }
             case ZEROPAGE_X -> {
                 byte oper = read_memory((short) (registers.getPC() + 1));
-                short addr = Common.makeShort((byte) (oper + registers.getX()), (byte) 0x00);
-                byte res = read_memory(addr);
+
+                short addr = Common.makeShort(oper, (byte) 0x00);
+                byte dummy_res = read_memory(addr); // Dummy read to pass how the real cpu works
+
+                short effective_addr = Common.makeShort((byte) (oper + registers.getX()), (byte) 0x00);
+
+                byte res = read_memory(effective_addr);
                 logger.debug("Fetched zeropage_x: "+Common.byteToHexString(res, true));
                 return res;
             }
