@@ -58,7 +58,8 @@ public class TestCPU {
                 Arguments.of((byte) 0xAD),
                 Arguments.of((byte) 0xBD),
                 Arguments.of((byte) 0xB9),
-                Arguments.of((byte) 0xA1)
+                Arguments.of((byte) 0xA1),
+                Arguments.of((byte) 0xB1)
         );
     }
 
@@ -155,7 +156,7 @@ public class TestCPU {
         }
 
         // Test cycles (Note: order of memory access records is important).
-        // This shows that my emulator is CPU accurate.
+        // This shows that my emulator is cycle accurate.
         List<CPU.MemoryAccessRecord> records = cpu.get_debugger_memory_records();
         assertEquals(cycles.length(), records.size());
         for (int i = 0; i < cycles.length(); i++) {
