@@ -1,4 +1,5 @@
 import NES.CPU.CPU;
+import NES.CPU.Decoder;
 import NES.CPU.Registers.StatusFlags;
 import NES.Common;
 import org.json.JSONArray;
@@ -6,9 +7,11 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +20,8 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -47,32 +52,75 @@ public class TestCPU {
         cpu.set_debugger_record_memory(true);
     }
 
-    private static Stream<Arguments> testCases() {
-        return Stream.of(
-                Arguments.of((byte) 0x8D),
-                Arguments.of((byte) 0x84),
-                Arguments.of((byte) 0xA9),
-                Arguments.of((byte) 0xA5),
-                Arguments.of((byte) 0xAD),
-                Arguments.of((byte) 0xB5),
-                Arguments.of((byte) 0xAD),
-                Arguments.of((byte) 0xBD),
-                Arguments.of((byte) 0xB9),
-                Arguments.of((byte) 0xA1),
-                Arguments.of((byte) 0xB1),
-                Arguments.of((byte) 0xA2),
-                Arguments.of((byte) 0xA6),
-                Arguments.of((byte) 0xB6),
-                Arguments.of((byte) 0xAE),
-                Arguments.of((byte) 0xBE),
+//    private static Stream<Arguments> testCases() {
+//        return Stream.of(
+//                Arguments.of((byte) 0x8D),
+//                Arguments.of((byte) 0x84),
+//                Arguments.of((byte) 0xA9),
+//                Arguments.of((byte) 0xA5),
+//                Arguments.of((byte) 0xAD),
+//                Arguments.of((byte) 0xB5),
+//                Arguments.of((byte) 0xAD),
+//                Arguments.of((byte) 0xBD),
+//                Arguments.of((byte) 0xB9),
+//                Arguments.of((byte) 0xA1),
+//                Arguments.of((byte) 0xB1),
+//                Arguments.of((byte) 0xA2),
+//                Arguments.of((byte) 0xA6),
+//                Arguments.of((byte) 0xB6),
+//                Arguments.of((byte) 0xAE),
+//                Arguments.of((byte) 0xBE),
+//
+//                Arguments.of((byte) 0xBE)
+//        );
+//    }
 
-                Arguments.of((byte) 0xBE)
-        );
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("test_cases_by_type_of_instruction")
+    public void test_by_type_of_instruction(String test_name, byte opcode) throws IOException {
+        logger.debug("Running test: " + test_name);
+        cpu_tests_by_opcode(opcode);
     }
 
+    @Test
+    public void custom_test() throws IOException {
+        test_by_type_of_instruction("STA 0x91", (byte) 0x91);
+        //test_by_type_of_instruction("STA 0x91", (byte) 0x91);
+    }
 
-    @ParameterizedTest(name = "Test Opcode: {0}")
-    @MethodSource("testCases")
+    private static Stream<Arguments> test_cases_by_type_of_instruction() {
+        HashMap<String, List<Byte>> instr_by_type = get_instructions_by_type();
+        List<Arguments> args = new ArrayList<>();
+
+        for (String instr_type : instr_by_type.keySet()) {
+            for (Byte opcode : instr_by_type.get(instr_type)) {
+                String test_name = "Test: " + instr_type + " opcode: " + Common.byteToHexString(opcode, true);
+                args.add(Arguments.of(test_name, opcode));
+            }
+        }
+
+        return args.stream();
+    }
+
+    public static HashMap<String, List<Byte>> get_instructions_by_type() {
+        HashMap<String, List<Byte>> instr_by_type = new HashMap<>();
+
+        for(int opcode = 0; opcode < 255; opcode++) {
+            Decoder.InstructionInfo instr_info = Decoder.instructions_table[opcode & 0xFF];
+            if (instr_info == null)
+                continue;
+            if (instr_by_type.get(instr_info.instr.toString()) == null) {
+                List<Byte> opcodes = new ArrayList<>();
+                opcodes.add((byte) opcode);
+                instr_by_type.put(instr_info.instr.toString(), opcodes);
+            } else {
+                instr_by_type.get(instr_info.instr.toString()).add((byte) opcode);
+            }
+        }
+
+        return instr_by_type;
+    }
+
     public void cpu_tests_by_opcode(byte opcode) throws IOException {
         JSONArray test = read_test(opcode);
         

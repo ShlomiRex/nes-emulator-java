@@ -112,9 +112,9 @@ public class Decoder {
         }
     }
 
-    private static InstructionInfo[] instructions_table = init_instructions_table();
+    public static final InstructionInfo[] instructions_table = init_instructions_table();
 
-    private static InstructionInfo[] init_instructions_table() {
+    public static InstructionInfo[] init_instructions_table() {
         if (instructions_table != null)
             return instructions_table;
 

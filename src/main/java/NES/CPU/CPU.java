@@ -504,21 +504,53 @@ public class CPU {
                 return read_address_from_memory(indirect_addr);
             }
             case INDIRECT_X -> {
-                byte indirect_addr = read_memory(operand1_addr);
-                byte x = registers.getX();
+                // Pre-Indexed Indirect, "(Zero-Page,X)"
 
-                // TODO: Complete
+                // fetch pointer address, increment PC
+                byte oper = read_memory((short) (registers.getPC() + 1));
 
-                // Read indirect address
-                byte indirect_memory = read_memory(indirect_addr);
+                // read from the address, add X to it
+                byte dummy_res = read_memory(Common.makeShort(oper, (byte) 0x00)); // Dummy read to pass how the real cpu works
+                short addr = (short) (oper + registers.getX() & 0xFF);
 
-                short indirect_x_addr = (short) (indirect_addr + (x & 0xFF));
-                return read_address_from_memory(indirect_x_addr);
+                // fetch effective address low
+                byte low = read_memory(addr);
+
+                // fetch effective address high
+                byte high = read_memory(((short)((addr + 1) % 256))); // If overflow, wrap around
+                return Common.makeShort(low, high);
             }
             case ZEROPAGE_X -> {
                 byte zp_addr = read_memory(operand1_addr);
                 byte x = registers.getX();
                 return (short) (zp_addr + (x & 0xFF));
+            }
+            case INDIRECT_Y -> {
+                // Post-Indexed Indirect, "(Zero-Page),Y"
+
+                // fetch pointer address, increment PC
+                byte oper = read_memory((short) (registers.getPC() + 1)); // Second read
+
+                // fetch effective address low
+                byte low = read_memory(Common.makeShort(oper, (byte) 0x00)); // Third read
+
+                // fetch effective address high, add Y to low byte of effective address
+                byte high = read_memory(Common.makeShort((byte) (oper + 1), (byte) 0x00));
+                boolean page_boundary_crossed = Common.isAdditionOverflow(low, registers.getY());
+                low = (byte)(low + registers.getY());
+
+                // read from effective address, fix high byte of effective address
+                short effective_addr = Common.makeShort(low, high);
+                read_memory(effective_addr); // dummy read
+
+                // read from effective address - if page boundary crossed. This is executed only if page crossed.
+                if (page_boundary_crossed) {
+                    effective_addr += 0x100;
+                    //read_memory(effective_addr); // dummy read
+                }
+
+                logger.debug("Fetched indirect_y address: "+Common.shortToHexString(effective_addr, true));
+                return effective_addr;
             }
         }
         throw new RuntimeException("Not implemented yet");
