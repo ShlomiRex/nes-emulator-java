@@ -256,6 +256,7 @@ public class CPU {
                 registers.getP().modify_z(registers.getX());
                 break;
             case TAY:
+                read_memory((short) (registers.getPC() + 1)); // dummy read
                 registers.setY(registers.getA());
                 registers.getP().modify_n(registers.getY());
                 registers.getP().modify_z(registers.getY());
