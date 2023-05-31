@@ -643,7 +643,7 @@ public class CPU {
 
         boolean new_n = false, new_z = false, new_c = false;
 
-        if (register < fetched_memory) {
+        if ((register & 0xFF) < (fetched_memory & 0xFF)) {
             new_n = last_bit;
         } else if (register == fetched_memory) {
             new_z = new_c = true;
@@ -654,7 +654,7 @@ public class CPU {
 
         registers.getP().setNegative(new_n);
         registers.getP().setZero(new_z);
-        registers.getP().setCarry(new_c);
+        registers.getP().setCarry(new_c); // TODO: Expected true
     }
 
     private void nmi_interrupt() {
