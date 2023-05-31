@@ -572,6 +572,33 @@ public class CPU {
                 logger.debug("Fetched indirect_y address: "+Common.shortToHex(effective_addr, true));
                 return effective_addr;
             }
+            case ABSOLUTE_Y -> {
+                byte abs_addr_low = read_memory((short) (registers.getPC() + 1));
+                byte abs_addr_high = read_memory((short) (registers.getPC() + 2));
+
+                if (addrmode == Decoder.AddressingMode.ABSOLUTE_X)
+                    register = registers.getX();
+                else
+                    register = registers.getY();
+
+                byte low_addr = (byte) (abs_addr_low + register);
+                effective_addr = Common.makeShort(low_addr, abs_addr_high);
+
+                // Check if page boundry crossed
+                page_boundary_crossed = Common.isAdditionOverflow(abs_addr_low, register);
+                if (page_boundary_crossed) {
+                    // Dummy read to pass how the real cpu works
+                    dummy_res = read_memory(effective_addr);
+
+                    // Fix the effective address
+                    effective_addr += 0x100;
+                }
+
+                if (!page_boundary_crossed)
+                    read_memory(effective_addr);
+
+                return effective_addr;
+            }
         }
         throw new RuntimeException("Not implemented yet");
     }

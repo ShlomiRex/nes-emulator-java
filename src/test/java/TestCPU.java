@@ -80,7 +80,7 @@ public class TestCPU {
 
     @Test
     public void custom_test() throws IOException {
-        test_by_type_of_instruction("STA 0x95", (byte) 0x95);
+        test_by_type_of_instruction(null, (byte) 0x99);
     }
 
     private static Stream<Arguments> test_cases_by_type_of_instruction() {
