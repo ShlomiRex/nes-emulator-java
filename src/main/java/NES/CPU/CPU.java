@@ -418,18 +418,26 @@ public class CPU {
 
                 return res;
             case INDIRECT_X:
+                // fetch pointer address, increment PC
                 oper = read_memory((short) (registers.getPC() + 1));
-                addr = Common.makeShort(oper, (byte) 0x00);
-                dummy_res = read_memory(addr); // Dummy read to pass how the real cpu works
 
-                effective_addr = Common.makeShort((byte) (oper + registers.getX()), (byte) 0x00);
+                // read from the address, add X to it
+                dummy_res = read_memory(Common.makeShort(oper, (byte) 0x00)); // Dummy read to pass how the real cpu works
+                addr = (short) (oper + registers.getX() & 0xFF);
 
-                byte low = read_memory(effective_addr);
-                byte high = read_memory((short) (effective_addr + 1));
+                // fetch effective address low
+                byte low = read_memory(addr);
+
+                // fetch effective address high
+                // TODO: Expected to read: 0
+                byte high = read_memory(((short)((addr + 1) % 256))); // If overflow, wrap around
+
+                //read from effective address
                 effective_addr = Common.makeShort(low, high);
-
                 res = read_memory(effective_addr);
+
                 logger.debug("Fetched indirect_x: "+Common.byteToHexString(res, true));
+
                 return res;
             default:
                 throw new RuntimeException("Not implemented yet");
