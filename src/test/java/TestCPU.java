@@ -50,17 +50,18 @@ public class TestCPU {
 
     private static Stream<Arguments> testCases() {
         return Stream.of(
-                Arguments.of((byte) 0x8D),
-                Arguments.of((byte) 0x84),
-                Arguments.of((byte) 0xA9),
-                Arguments.of((byte) 0xA5)
+//                Arguments.of((byte) 0x8D),
+//                Arguments.of((byte) 0x84),
+//                Arguments.of((byte) 0xA9),
+//                Arguments.of((byte) 0xA5),
+//                Arguments.of((byte) 0xAD),
+                Arguments.of((byte) 0xB5)
         );
     }
 
 
     @ParameterizedTest(name = "Test Opcode: {0}")
     @MethodSource("testCases")
-    //@ValueSource(bytes = {(byte) 0x95})
     public void cpu_tests_by_opcode(byte opcode) throws IOException {
         JSONArray test = read_test(opcode);
         

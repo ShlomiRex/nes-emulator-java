@@ -376,6 +376,13 @@ public class CPU {
                 logger.debug("Fetched zeropage: "+Common.byteToHexString(res, true));
                 return res;
             }
+            case ZEROPAGE_X -> {
+                byte oper = read_memory((short) (registers.getPC() + 1));
+                short addr = Common.makeShort((byte) (oper + registers.getX()), (byte) 0x00);
+                byte res = read_memory(addr);
+                logger.debug("Fetched zeropage_x: "+Common.byteToHexString(res, true));
+                return res;
+            }
             default -> throw new RuntimeException("Not implemented yet");
         }
     }
@@ -386,26 +393,43 @@ public class CPU {
      * @return
      */
     private short fetch_instruction_address(Decoder.AddressingMode addrmode) {
-        short pc_short = (short) (registers.getPC() + 1);
+        short operand1_addr = (short) (registers.getPC() + 1);
         switch(addrmode) {
             case IMMEDIATE -> {
-                byte res = read_memory(pc_short);
+                byte res = read_memory(operand1_addr);
                 logger.debug("Fetched immediate address: "+Common.shortToHexString(res, true));
                 return res;
             }
             case ABSOLUTE -> {
-                byte low = read_memory(pc_short);
-                byte high = read_memory((short) (pc_short + 1));
+                byte low = read_memory(operand1_addr);
+                byte high = read_memory((short) (operand1_addr + 1));
                 short abs_addr = Common.makeShort(low, high);
                 logger.debug("Fetched absolute address: "+ Common.shortToHexString(abs_addr, false));
                 return abs_addr;
             }
             case ZEROPAGE -> {
-                return Common.makeShort(read_memory(pc_short), (byte) 0);
+                return Common.makeShort(read_memory(operand1_addr), (byte) 0);
             }
             case INDIRECT -> {
-                short indirect_addr = read_address_from_memory(pc_short);
+                short indirect_addr = read_address_from_memory(operand1_addr);
                 return read_address_from_memory(indirect_addr);
+            }
+            case INDIRECT_X -> {
+                byte indirect_addr = read_memory(operand1_addr);
+                byte x = registers.getX();
+
+                // TODO: Complete
+
+                // Read indirect address
+                byte indirect_memory = read_memory(indirect_addr);
+
+                short indirect_x_addr = (short) (indirect_addr + (x & 0xFF));
+                return read_address_from_memory(indirect_x_addr);
+            }
+            case ZEROPAGE_X -> {
+                byte zp_addr = read_memory(operand1_addr);
+                byte x = registers.getX();
+                return (short) (zp_addr + (x & 0xFF));
             }
         }
         throw new RuntimeException("Not implemented yet");
@@ -505,5 +529,10 @@ public class CPU {
     }
 
     public record MemoryAccessRecord(short addr, byte value, boolean is_read) {
+        @Override
+        public String toString() {
+            String read_write = is_read ? "read" : "write";
+            return "["+(addr & 0xFFFF)+","+(value & 0xFF)+","+read_write+"]";
+        }
     }
 }
