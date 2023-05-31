@@ -23,6 +23,8 @@ The most used resorces:
 
 - Online emulator for quick testing of the CPU: [here](https://skilldrick.github.io/easy6502/#first-program)
 - Best CPU instructions summary: [here](https://www.masswerk.at/6502/6502_instruction_set.html)
+- To make my emulator CPU/cycle accurate: [here](https://www.nesdev.org/6502_cpu.txt), 
+which is from a question I posted on reddit: [here](https://www.reddit.com/r/EmuDev/comments/13vyfug/nes_test_lda_i_think_the_test_rom_is_wrong/)
 
 Others:
 

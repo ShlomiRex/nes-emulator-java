@@ -27,11 +27,11 @@ public class Common {
         ARRAY,
     }
 
-    public static String bytesToHexString(byte[] bytes, BytesToHexStringFormat format, boolean leading_0x) {
+    public static String bytesToHexString(byte[] bytes, BytesToHexStringFormat format, boolean prefix_0x) {
         if (format == BytesToHexStringFormat.NO_FORMAT) {
             StringBuilder sb = new StringBuilder();
             for (byte b : bytes) {
-                if (leading_0x)
+                if (prefix_0x)
                     sb.append(String.format("0x%02x", b));
                 else
                     sb.append(String.format("%02x", b));
@@ -41,7 +41,7 @@ public class Common {
             StringBuilder sb = new StringBuilder();
             sb.append("[");
             for (int i = 0; i < bytes.length; i++) {
-                if (leading_0x)
+                if (prefix_0x)
                     sb.append(String.format("0x%02X", bytes[i]));
                 else
                     sb.append(String.format("%02X", bytes[i]));
@@ -58,15 +58,15 @@ public class Common {
         return String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0');
     }
 
-    public static String byteToHexString(byte b, boolean leading_0x) {
-        if (leading_0x)
+    public static String byteToHexString(byte b, boolean prefix_0x) {
+        if (prefix_0x)
             return String.format("0x%02X", b & 0xFF);
         else
             return String.format("%02X", b & 0xFF);
     }
 
-    public static String shortToHexString(short s, boolean leading_0x) {
-        if (!leading_0x)
+    public static String shortToHexString(short s, boolean prefix_0x) {
+        if (!prefix_0x)
             return String.format("%04X", s & 0xFFFF);
         else
             return String.format("0x%04X", s & 0xFFFF);
@@ -87,5 +87,10 @@ public class Common {
             else
                 return (byte) (variable & ~(1 << bitIndex));
         }
+    }
+
+    public static boolean isOverflow(byte a, byte b) {
+        int sum = (a & 0xFF) + (b & 0xFF);
+        return sum > 0xFF;
     }
 }

@@ -28,7 +28,6 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
  * We test on each opcode that the output of the CPU matches the output of the JSON test.
  * The git repository must be cloned into the 'test_resources/' folder which is in the root folder of the project.
  */
-@DisplayNameGeneration(TestCPU.ReplaceCamelCase.class)
 public class TestCPU {
     private static final Logger logger = LoggerFactory.getLogger(TestCPU.class);
 
@@ -55,7 +54,9 @@ public class TestCPU {
 //                Arguments.of((byte) 0xA9),
 //                Arguments.of((byte) 0xA5),
 //                Arguments.of((byte) 0xAD),
-                Arguments.of((byte) 0xB5)
+//                Arguments.of((byte) 0xB5),
+//                Arguments.of((byte) 0xAD),
+                Arguments.of((byte) 0xBD)
         );
     }
 
@@ -152,6 +153,7 @@ public class TestCPU {
         }
 
         // Test cycles (Note: order of memory access records is important).
+        // This shows that my emulator is CPU accurate.
         List<CPU.MemoryAccessRecord> records = cpu.get_debugger_memory_records();
         assertEquals(cycles.length(), records.size());
         for (int i = 0; i < cycles.length(); i++) {
@@ -165,38 +167,6 @@ public class TestCPU {
             assertEquals(cycle_address.shortValue(), cpu_record.addr());
             assertEquals(cycle_value.byteValue(), cpu_record.value());
             assertEquals(cycle_type.equals("read"), cpu_record.is_read());
-        }
-    }
-
-    static class ReplaceCamelCase extends DisplayNameGenerator.Standard {
-        @Override
-        public String generateDisplayNameForClass(Class<?> testClass) {
-            return replaceCamelCase(super.generateDisplayNameForClass(testClass));
-        }
-
-        @Override
-        public String generateDisplayNameForNestedClass(Class<?> nestedClass) {
-            return replaceCamelCase(super.generateDisplayNameForNestedClass(nestedClass));
-        }
-
-        @Override
-        public String generateDisplayNameForMethod(Class<?> testClass, Method testMethod) {
-            return this.replaceCamelCase(testMethod.getName()) +
-                    DisplayNameGenerator.parameterTypesAsString(testMethod);
-        }
-
-        String replaceCamelCase(String camelCase) {
-            StringBuilder result = new StringBuilder();
-            result.append(camelCase.charAt(0));
-            for (int i=1; i<camelCase.length(); i++) {
-                if (Character.isUpperCase(camelCase.charAt(i))) {
-                    result.append(' ');
-                    result.append(Character.toLowerCase(camelCase.charAt(i)));
-                } else {
-                    result.append(camelCase.charAt(i));
-                }
-            }
-            return result.toString();
         }
     }
 }

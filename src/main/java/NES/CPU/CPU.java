@@ -388,6 +388,27 @@ public class CPU {
                 logger.debug("Fetched zeropage_x: "+Common.byteToHexString(res, true));
                 return res;
             }
+            case ABSOLUTE_X -> {
+                byte abs_addr_low = read_memory((short) (registers.getPC() + 1));
+                byte abs_addr_high = read_memory((short) (registers.getPC() + 2));
+
+                byte low_addr = (byte) (abs_addr_low + registers.getX());
+                short effective_addr = Common.makeShort(low_addr, abs_addr_high);
+
+                // Check if page boundry crossed
+                if (Common.isOverflow(abs_addr_low, registers.getX())) {
+                    // Dummy read to pass how the real cpu works
+                    byte dummy_res = read_memory(effective_addr);
+
+                    // Fix the effective address
+                    effective_addr += 0x100;
+                }
+
+                byte res = read_memory(effective_addr);
+                logger.debug("Fetched absolute_x: "+Common.byteToHexString(res, true));
+
+                return res;
+            }
             default -> throw new RuntimeException("Not implemented yet");
         }
     }
