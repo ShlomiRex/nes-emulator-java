@@ -167,6 +167,7 @@ public class CPU {
                 registers.getP().setInterruptDisable(true);
                 break;
             case CLI:
+                read_memory((short) (registers.getPC() + 1)); // dummy read
                 registers.getP().setInterruptDisable(false);
                 break;
             case SED:
