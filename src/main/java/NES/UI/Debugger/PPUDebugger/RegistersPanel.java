@@ -88,9 +88,9 @@ public class RegistersPanel extends JPanel {
 
     @Override
     protected void paintComponent(Graphics g) {
-        txt_ppu_ctrl.setText(Common.byteToHexString(ppuRegisters.getCtrl(), false));
-        txt_ppu_mask.setText(Common.byteToHexString(ppuRegisters.getMask(), false));
-        txt_ppu_status.setText(Common.byteToHexString(ppuRegisters.getStatus(), false));
+        txt_ppu_ctrl.setText(Common.byteToHex(ppuRegisters.getCtrl(), false));
+        txt_ppu_mask.setText(Common.byteToHex(ppuRegisters.getMask(), false));
+        txt_ppu_status.setText(Common.byteToHex(ppuRegisters.getStatus(), false));
 //        txt_oam_addr.setText(Common.byteToHexString(ppuRegisters.getOamAddr(), false));
 //        txt_oam_data.setText(Common.byteToHexString(ppuRegisters.getOamData(), false));
 //        txt_ppu_scroll.setText(Common.byteToHexString(ppuRegisters.getScroll(), false));

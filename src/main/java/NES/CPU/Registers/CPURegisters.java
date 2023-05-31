@@ -3,13 +3,7 @@ package NES.CPU.Registers;
 import NES.Common;
 import NES.UI.Debugger.CPUDebugger.RegistersPanel;
 
-import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
-import java.util.EventListener;
-import java.util.List;
-import java.util.Observable;
 
 public class CPURegisters {
 
@@ -27,12 +21,12 @@ public class CPURegisters {
 
     @Override
     public String toString() {
-        String a = "A: " + Common.byteToHexString(A, false);
-        String x = "X: " + Common.byteToHexString(X, false);
-        String y = "Y: " + Common.byteToHexString(Y, false);
-        String s = "S: " + Common.byteToHexString(S, false);
-        String pc = "PC: " + Common.shortToHexString(PC, false);
-        String p = "P: NV-BDIZC " + Common.byteToBinaryString(P.getAllFlags());
+        String a = "A: " + Common.byteToHex(A, false);
+        String x = "X: " + Common.byteToHex(X, false);
+        String y = "Y: " + Common.byteToHex(Y, false);
+        String s = "S: " + Common.byteToHex(S, false);
+        String pc = "PC: " + Common.shortToHex(PC, false);
+        String p = "P: NV-BDIZC " + Common.byteToBinary(P.getAllFlags());
 
         StringBuilder sb = new StringBuilder();
         sb.append(a).append("\t");

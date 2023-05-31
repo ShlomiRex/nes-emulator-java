@@ -57,7 +57,7 @@ public class InstructionsPane extends JPanel {
 
         // Read opcode
         byte opcode = cpu_memory[cpu.registers.getPC() & 0xFFFF];
-        this.opcode.setText(Common.byteToHexString(opcode, false));
+        this.opcode.setText(Common.byteToHex(opcode, false));
 
         // Decode opcode
         Decoder.InstructionInfo info = decoder.decode_opcode(opcode);
@@ -70,15 +70,15 @@ public class InstructionsPane extends JPanel {
         }
         else if (info.bytes == 2) {
             byte operand1 = cpu_memory[cpu.registers.getPC() + 1 & 0xFFFF];
-            this.operand1.setText(Common.byteToHexString(operand1, false));
+            this.operand1.setText(Common.byteToHex(operand1, false));
             this.operand2.setText("--");
 
             decoded_instr += " " + convert_1_operands_to_human_readable_text(info.addrmode, operand1);;
         } else if (info.bytes == 3) {
             byte operand1 = cpu_memory[cpu.registers.getPC() + 1 & 0xFFFF];
             byte operand2 = cpu_memory[cpu.registers.getPC() + 2 & 0xFFFF];
-            this.operand1.setText(Common.byteToHexString(operand1, false));
-            this.operand2.setText(Common.byteToHexString(operand2, false));
+            this.operand1.setText(Common.byteToHex(operand1, false));
+            this.operand2.setText(Common.byteToHex(operand2, false));
 
             decoded_instr += " " + convert_2_operands_to_human_readable_text(info.addrmode, operand1, operand2);;
         } else {
@@ -91,14 +91,14 @@ public class InstructionsPane extends JPanel {
     private String convert_1_operands_to_human_readable_text(Decoder.AddressingMode addrmode, byte operand1) {
         switch (addrmode) {
             case IMMEDIATE -> {
-                return "#$"+Common.byteToHexString(operand1, false);
+                return "#$"+Common.byteToHex(operand1, false);
             }
             case RELATIVE -> {
                 // operand1 is offset
                 // We add +2 because the debugger starts after the instruction is completed, i.e.
                 // the PC is the next instruction. We want the old instruction
                 short relative_addr = (short) (cpu.registers.getPC() + operand1 + 2);
-                return "$" + Common.shortToHexString(relative_addr, false);
+                return "$" + Common.shortToHex(relative_addr, false);
             }
             default -> throw new RuntimeException("Not implemented yet");
         }
@@ -113,7 +113,7 @@ public class InstructionsPane extends JPanel {
                 if (knownTag != null)
                     return knownTag;
                 else
-                    return "#$"+Common.byteToHexString(operand1, false);
+                    return "#$"+Common.byteToHex(operand1, false);
             }
             default -> throw new RuntimeException("Not implemented yet");
         }

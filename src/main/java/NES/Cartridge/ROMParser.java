@@ -132,11 +132,11 @@ public class ROMParser {
 
         byte[] first_16_bytes = Arrays.copyOfRange(prg_rom, 0, 16);
         logger.info("First 16 bytes of PRG ROM: " +
-                Common.bytesToHexString(first_16_bytes, Common.BytesToHexStringFormat.ARRAY, false));
+                Common.bytesToHex(first_16_bytes, Common.BytesToHexStringFormat.ARRAY, false));
 
         byte[] last_16_bytes = Arrays.copyOfRange(prg_rom, prg_rom.length - 16, prg_rom.length);
         logger.info("Last 16 bytes of PRG ROM: " +
-                Common.bytesToHexString(last_16_bytes, Common.BytesToHexStringFormat.ARRAY, false));
+                Common.bytesToHex(last_16_bytes, Common.BytesToHexStringFormat.ARRAY, false));
 
         return prg_rom;
     }

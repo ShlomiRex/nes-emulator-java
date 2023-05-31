@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
-import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -60,26 +59,26 @@ public class RegistersPanel extends JPanel implements PropertyChangeListener {
         add(statusFlagsPanel);
 
         // Start with initial values
-        a.setText(Common.byteToHexString(registers.getA(), false));
-        x.setText(Common.byteToHexString(registers.getX(), false));
-        y.setText(Common.byteToHexString(registers.getY(), false));
-        s.setText(Common.byteToHexString(registers.getS(), false));
-        pc.setText(Common.shortToHexString(registers.getPC(), false));
+        a.setText(Common.byteToHex(registers.getA(), false));
+        x.setText(Common.byteToHex(registers.getX(), false));
+        y.setText(Common.byteToHex(registers.getY(), false));
+        s.setText(Common.byteToHex(registers.getS(), false));
+        pc.setText(Common.shortToHex(registers.getPC(), false));
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         logger.debug("Property change: " + evt.getPropertyName());
         if (evt.getPropertyName().equals("A")) {
-            a.setText(Common.byteToHexString((byte) evt.getNewValue(), false));
+            a.setText(Common.byteToHex((byte) evt.getNewValue(), false));
         } else if (evt.getPropertyName().equals("X")) {
-            x.setText(Common.byteToHexString((byte) evt.getNewValue(), false));
+            x.setText(Common.byteToHex((byte) evt.getNewValue(), false));
         } else if (evt.getPropertyName().equals("Y")) {
-            y.setText(Common.byteToHexString((byte) evt.getNewValue(), false));
+            y.setText(Common.byteToHex((byte) evt.getNewValue(), false));
         } else if (evt.getPropertyName().equals("S")) {
-            s.setText(Common.byteToHexString((byte) evt.getNewValue(), false));
+            s.setText(Common.byteToHex((byte) evt.getNewValue(), false));
         } else if (evt.getPropertyName().equals("PC")) {
-            pc.setText(Common.shortToHexString((short) evt.getNewValue(), false));
+            pc.setText(Common.shortToHex((short) evt.getNewValue(), false));
         } else {
             throw new RuntimeException("Unknown property: " + evt.getPropertyName());
         }

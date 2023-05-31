@@ -27,7 +27,7 @@ public class Common {
         ARRAY,
     }
 
-    public static String bytesToHexString(byte[] bytes, BytesToHexStringFormat format, boolean prefix_0x) {
+    public static String bytesToHex(byte[] bytes, BytesToHexStringFormat format, boolean prefix_0x) {
         if (format == BytesToHexStringFormat.NO_FORMAT) {
             StringBuilder sb = new StringBuilder();
             for (byte b : bytes) {
@@ -54,18 +54,18 @@ public class Common {
         }
     }
 
-    public static String byteToBinaryString(byte b) {
+    public static String byteToBinary(byte b) {
         return String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0');
     }
 
-    public static String byteToHexString(byte b, boolean prefix_0x) {
+    public static String byteToHex(byte b, boolean prefix_0x) {
         if (prefix_0x)
             return String.format("0x%02X", b & 0xFF);
         else
             return String.format("%02X", b & 0xFF);
     }
 
-    public static String shortToHexString(short s, boolean prefix_0x) {
+    public static String shortToHex(short s, boolean prefix_0x) {
         if (!prefix_0x)
             return String.format("%04X", s & 0xFFFF);
         else

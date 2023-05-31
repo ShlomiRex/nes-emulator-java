@@ -282,7 +282,7 @@ public class Decoder {
     public AssemblyInfo decode_assembly_line(byte[] cpu_memory, short pc) {
         // Read opcode
         byte opcode = cpu_memory[pc & 0xFFFF];
-        String str_opcode = Common.byteToHexString(opcode, false);
+        String str_opcode = Common.byteToHex(opcode, false);
 
         // Decode opcode
         InstructionInfo info = decode_opcode(opcode);
@@ -297,15 +297,15 @@ public class Decoder {
         }
         else if (info.bytes == 2) {
             byte operand1 = cpu_memory[pc + 1 & 0xFFFF];
-            str_operand1 = Common.byteToHexString(operand1, false);
+            str_operand1 = Common.byteToHex(operand1, false);
             str_operand2 = "  ";
 
             decoded_operand_or_symbol = convert_1_operands_to_human_readable_text(info.addrmode, operand1, pc);;
         } else if (info.bytes == 3) {
             byte operand1 = cpu_memory[pc + 1 & 0xFFFF];
             byte operand2 = cpu_memory[pc + 2 & 0xFFFF];
-            str_operand1 = Common.byteToHexString(operand1, false);
-            str_operand2 = Common.byteToHexString(operand2, false);
+            str_operand1 = Common.byteToHex(operand1, false);
+            str_operand2 = Common.byteToHex(operand2, false);
 
             decoded_operand_or_symbol = convert_2_operands_to_human_readable_text(info.addrmode, operand1, operand2);;
         } else {
@@ -319,14 +319,14 @@ public class Decoder {
     private String convert_1_operands_to_human_readable_text(Decoder.AddressingMode addrmode, byte operand1, short pc) {
         switch (addrmode) {
             case IMMEDIATE -> {
-                return "#$" + Common.byteToHexString(operand1, false);
+                return "#$" + Common.byteToHex(operand1, false);
             }
             case RELATIVE -> {
                 // operand1 is offset
                 // We add +2 because the debugger starts after the instruction is completed, i.e.
                 // the PC is the next instruction. We want the old instruction
                 short relative_addr = (short) (pc + operand1 + 2);
-                return "$" + Common.shortToHexString(relative_addr, false);
+                return "$" + Common.shortToHex(relative_addr, false);
             }
             default -> throw new RuntimeException("Not implemented yet");
         }
@@ -342,7 +342,7 @@ public class Decoder {
                     return knownSymbol;
                 }
                 else {
-                    return "#$" + Common.byteToHexString(operand1, false);
+                    return "#$" + Common.byteToHex(operand1, false);
                 }
             }
             case ABSOLUTE_X -> {
@@ -351,7 +351,7 @@ public class Decoder {
                 if (knownSymbol != null) {
                     return knownSymbol;
                 } else {
-                    return "$" + Common.shortToHexString(addr, false) + ",X";
+                    return "$" + Common.shortToHex(addr, false) + ",X";
                 }
             }
             default -> throw new RuntimeException("Not implemented yet");

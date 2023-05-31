@@ -19,7 +19,7 @@ public class PaletteTilePane extends JPanel {
         this.width = width;
         this.height = height;
 
-        String tooltip_text = ""+Common.byteToHexString((byte) tile_index, true)+
+        String tooltip_text = ""+Common.byteToHex((byte) tile_index, true)+
                 " Color: ("+color.getRed()+", "+color.getGreen()+", "+color.getBlue()+")";
         if (tile_index == 0x0D)
             tooltip_text += " Note: blacker than black";
@@ -66,7 +66,7 @@ public class PaletteTilePane extends JPanel {
         }
 
         //int str_width = g.getFontMetrics().stringWidth("00");
-        g.drawString(Common.byteToHexString((byte) tile_index, false), 0, height / 4);
+        g.drawString(Common.byteToHex((byte) tile_index, false), 0, height / 4);
 
         // Show the 0x0D color as big red X
         if (tile_index == 0x0D) {

@@ -31,7 +31,7 @@ public class PatternTilePane extends JPanel {
             public void mouseEntered(MouseEvent e) {
                 super.mouseEntered(e);
                 setBorder(BorderFactory.createLineBorder(Color.BLUE, 2));
-                selected_tile_label.setText("Tile: $" + Common.byteToHexString(tile_index, false));
+                selected_tile_label.setText("Tile: $" + Common.byteToHex(tile_index, false));
 
 
             }

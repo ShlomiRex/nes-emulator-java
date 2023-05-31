@@ -5,18 +5,14 @@ import NES.Common;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DisplayNameGeneration;
-import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -93,7 +89,7 @@ public class TestCPU {
 
         for (String instr_type : instr_by_type.keySet()) {
             for (Byte opcode : instr_by_type.get(instr_type)) {
-                String test_name = "Test: " + instr_type + " opcode: " + Common.byteToHexString(opcode, true);
+                String test_name = "Test: " + instr_type + " opcode: " + Common.byteToHex(opcode, true);
                 args.add(Arguments.of(test_name, opcode));
             }
         }
@@ -140,7 +136,7 @@ public class TestCPU {
     }
 
     private JSONArray read_test(int opcode) throws IOException {
-        String opcode_hex = Common.byteToHexString((byte) opcode, false);
+        String opcode_hex = Common.byteToHex((byte) opcode, false);
         Path path = Paths.get("test_resources/ProcessorTests/nes6502", "v1", opcode_hex + ".json");
         logger.debug("Reading test file: " + path);
         String jsonContent = new String(Files.readAllBytes(path));
@@ -175,8 +171,8 @@ public class TestCPU {
             Integer value = (Integer) obj.get(1);
 
             logger.debug("Setting memory: [" + address +
-                    " ("+Common.shortToHexString(address.shortValue(), true)+")] = " +
-                    value + " ("+Common.byteToHexString(value.byteValue(), true)+")");
+                    " ("+Common.shortToHex(address.shortValue(), true)+")] = " +
+                    value + " ("+Common.byteToHex(value.byteValue(), true)+")");
 
             cpu_memory[address] = value.byteValue();
         }

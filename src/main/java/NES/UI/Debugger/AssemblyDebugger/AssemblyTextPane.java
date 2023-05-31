@@ -2,7 +2,6 @@ package NES.UI.Debugger.AssemblyDebugger;
 
 import NES.CPU.Registers.CPURegisters;
 import NES.Common;
-import org.slf4j.Logger;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
@@ -31,7 +30,7 @@ public class AssemblyTextPane extends JTextPane {
         highlighter.removeAllHighlights();
         try {
             short pc = cpuRegisters.getPC();
-            String search = Common.shortToHexString(pc, true);
+            String search = Common.shortToHex(pc, true);
 
             if (text == null)
                 text = getDocument().getText(0, getDocument().getLength());

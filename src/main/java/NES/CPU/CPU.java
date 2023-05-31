@@ -51,7 +51,7 @@ public class CPU {
         int cycles = instr_info.cycles;
         Decoder.OopsCycle oops_cycle = instr_info.oopsCycle;
         logger.debug(
-                instr.toString()+"("+Common.byteToHexString(opcode, true)+")\t"
+                instr.toString()+"("+Common.byteToHex(opcode, true)+")\t"
                 +addrmode+"\tBytes: "
                 +bytes+"\tCycles: "
                 +cycles+"\tOops cycle: "
@@ -100,8 +100,8 @@ public class CPU {
 //        }\
         res = memory[addr & 0xFFFF];
         logger.debug("Reading memory: [" +
-                (addr & 0xFFFF) + " (" + Common.shortToHexString(addr, true) + ")] = " + (res & 0xFF) +" ("+
-                Common.byteToHexString(res, true) + ")");
+                (addr & 0xFFFF) + " (" + Common.shortToHex(addr, true) + ")] = " + (res & 0xFF) +" ("+
+                Common.byteToHex(res, true) + ")");
         if (is_record_memory)
             recorded_memory.add(new MemoryAccessRecord(addr, res, true));
         return res;
@@ -113,7 +113,7 @@ public class CPU {
         registers.reset();
 
         short new_pc = read_address_from_memory((short) 0xFFFC);
-        logger.debug("Jumping to interrupt address: " + Common.shortToHexString(new_pc, true));
+        logger.debug("Jumping to interrupt address: " + Common.shortToHex(new_pc, true));
 
         registers.setPC(new_pc);
         cycles = 8;
@@ -365,22 +365,22 @@ public class CPU {
                 throw new RuntimeException("Instruction with implied addressing mode should never ask to fetch memory.");
             case IMMEDIATE:
                 res = read_memory((short) (registers.getPC() +1));
-                logger.debug("Fetched immediate: "+Common.byteToHexString(res, true));
+                logger.debug("Fetched immediate: "+Common.byteToHex(res, true));
                 return res;
             case ACCUMULATOR:
                 res = registers.getA();
-                logger.debug("Fetched accumulator: "+Common.byteToHexString(res, true));
+                logger.debug("Fetched accumulator: "+Common.byteToHex(res, true));
                 return res;
             case ABSOLUTE:
                 addr = read_address_from_memory((short) (registers.getPC() + 1));
                 res = read_memory(addr);
-                logger.debug("Fetched absolute: "+Common.byteToHexString(res, true));
+                logger.debug("Fetched absolute: "+Common.byteToHex(res, true));
                 return res;
             case ZEROPAGE:
                 oper = read_memory((short) (registers.getPC() + 1));
                 addr = Common.makeShort(oper, (byte) 0x00);
                 res = read_memory(addr);
-                logger.debug("Fetched zeropage: "+Common.byteToHexString(res, true));
+                logger.debug("Fetched zeropage: "+Common.byteToHex(res, true));
                 return res;
             case ZEROPAGE_Y:
             case ZEROPAGE_X:
@@ -396,7 +396,7 @@ public class CPU {
                 effective_addr = Common.makeShort((byte) (oper + register), (byte) 0x00);
 
                 res = read_memory(effective_addr);
-                logger.debug("Fetched zeropage_x: "+Common.byteToHexString(res, true));
+                logger.debug("Fetched zeropage_x: "+Common.byteToHex(res, true));
                 return res;
             case ABSOLUTE_X:
             case ABSOLUTE_Y:
@@ -421,7 +421,7 @@ public class CPU {
                 }
 
                 res = read_memory(effective_addr);
-                logger.debug("Fetched absolute_x: "+Common.byteToHexString(res, true));
+                logger.debug("Fetched absolute_x: "+Common.byteToHex(res, true));
 
                 return res;
             case INDIRECT_X:
@@ -444,7 +444,7 @@ public class CPU {
                 effective_addr = Common.makeShort(low, high);
                 res = read_memory(effective_addr);
 
-                logger.debug("Fetched indirect_x: "+Common.byteToHexString(res, true));
+                logger.debug("Fetched indirect_x: "+Common.byteToHex(res, true));
                 return res;
             case INDIRECT_Y:
                 // Post-Indexed Indirect, "(Zero-Page),Y"
@@ -470,7 +470,7 @@ public class CPU {
                     res = read_memory(effective_addr);
                 }
 
-                logger.debug("Fetched indirect_y: "+Common.byteToHexString(res, true));
+                logger.debug("Fetched indirect_y: "+Common.byteToHex(res, true));
                 return res;
             default:
                 throw new RuntimeException("Not implemented yet");
@@ -495,14 +495,14 @@ public class CPU {
         switch(addrmode) {
             case IMMEDIATE -> {
                 res = read_memory(operand1_addr);
-                logger.debug("Fetched immediate address: "+Common.shortToHexString(res, true));
+                logger.debug("Fetched immediate address: "+Common.shortToHex(res, true));
                 return res;
             }
             case ABSOLUTE -> {
                 byte low = read_memory(operand1_addr);
                 byte high = read_memory((short) (operand1_addr + 1));
                 short abs_addr = Common.makeShort(low, high);
-                logger.debug("Fetched absolute address: "+ Common.shortToHexString(abs_addr, false));
+                logger.debug("Fetched absolute address: "+ Common.shortToHex(abs_addr, false));
                 return abs_addr;
             }
             case ZEROPAGE -> {
@@ -542,7 +542,7 @@ public class CPU {
                 effective_addr = Common.makeShort((byte) (oper + register), (byte) 0x00);
 
                 //res = read_memory(effective_addr);
-                logger.debug("Fetched zeropage_x address: "+Common.shortToHexString(effective_addr, true));
+                logger.debug("Fetched zeropage_x address: "+Common.shortToHex(effective_addr, true));
                 return effective_addr;
             }
             case INDIRECT_Y -> {
@@ -569,7 +569,7 @@ public class CPU {
                     //read_memory(effective_addr); // dummy read
                 }
 
-                logger.debug("Fetched indirect_y address: "+Common.shortToHexString(effective_addr, true));
+                logger.debug("Fetched indirect_y address: "+Common.shortToHex(effective_addr, true));
                 return effective_addr;
             }
         }
@@ -577,8 +577,8 @@ public class CPU {
     }
 
     private void write_memory(short addr, byte value) {
-        logger.debug("Writing memory: ["+addr + " (" + Common.shortToHexString(addr, true)+")] = "
-                +value + " ("+Common.byteToHexString(value, true)+")");
+        logger.debug("Writing memory: ["+addr + " (" + Common.shortToHex(addr, true)+")] = "
+                +value + " ("+Common.byteToHex(value, true)+")");
         memory[addr & 0xFFFF] = value;
         if (is_record_memory)
             recorded_memory.add(new MemoryAccessRecord(addr, value, false));
@@ -647,7 +647,7 @@ public class CPU {
         byte vector_lsb = read_memory((short) 0xFFFA);
         byte vector_msb = read_memory((short) 0xFFFB);
         short new_pc = Common.makeShort(vector_lsb, vector_msb);
-        logger.debug("Jumping to interrupt address: " + Common.shortToHexString(new_pc, true));
+        logger.debug("Jumping to interrupt address: " + Common.shortToHex(new_pc, true));
         registers.setPC(new_pc);
     }
 

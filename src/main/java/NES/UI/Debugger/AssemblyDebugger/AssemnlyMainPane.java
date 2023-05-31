@@ -69,7 +69,7 @@ public class AssemnlyMainPane extends JPanel {
             Decoder.AssemblyInfo info = decoder.decode_assembly_line(cpu_memory, pc);
 
             // Assembly line address
-            String str_addr = Common.shortToHexString(pc, true);
+            String str_addr = Common.shortToHex(pc, true);
             append(str_addr+"\t", attr_regular);
 
             // Instructions bytes (1-3 bytes)
