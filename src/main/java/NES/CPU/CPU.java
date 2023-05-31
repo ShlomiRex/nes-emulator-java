@@ -249,6 +249,7 @@ public class CPU {
                 exec_cmp(addrmode, registers.getY());
                 break;
             case TAX:
+                read_memory((short) (registers.getPC() + 1)); // dummy read
                 registers.setX(registers.getA());
                 registers.getP().modify_n(registers.getX());
                 registers.getP().modify_z(registers.getX());

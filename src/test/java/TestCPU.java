@@ -80,7 +80,7 @@ public class TestCPU {
 
     @Test
     public void custom_test() throws IOException {
-        test_by_type_of_instruction(null, (byte) 0x99);
+        test_by_type_of_instruction("TAX", (byte) 0xAA);
     }
 
     private static Stream<Arguments> test_cases_by_type_of_instruction() {
