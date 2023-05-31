@@ -49,14 +49,15 @@ public class TestCPU {
 
     private static Stream<Arguments> testCases() {
         return Stream.of(
-//                Arguments.of((byte) 0x8D),
-//                Arguments.of((byte) 0x84),
-//                Arguments.of((byte) 0xA9),
-//                Arguments.of((byte) 0xA5),
-//                Arguments.of((byte) 0xAD),
-//                Arguments.of((byte) 0xB5),
-//                Arguments.of((byte) 0xAD),
-                Arguments.of((byte) 0xBD)
+                Arguments.of((byte) 0x8D),
+                Arguments.of((byte) 0x84),
+                Arguments.of((byte) 0xA9),
+                Arguments.of((byte) 0xA5),
+                Arguments.of((byte) 0xAD),
+                Arguments.of((byte) 0xB5),
+                Arguments.of((byte) 0xAD),
+                Arguments.of((byte) 0xBD),
+                Arguments.of((byte) 0xB9)
         );
     }
 

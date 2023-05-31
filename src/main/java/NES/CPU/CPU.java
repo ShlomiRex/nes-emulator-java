@@ -351,65 +351,74 @@ public class CPU {
      * @return
      */
     private byte fetch_instruction_memory(Decoder.AddressingMode addrmode) {
+        byte res;
+        byte oper;
+        short addr;
+        short effective_addr;
+        byte dummy_res;
+        byte register;
+
         switch (addrmode) {
-            case IMPLIED -> throw new RuntimeException("Instruction with implied addressing mode should never ask to fetch memory.");
-            case IMMEDIATE -> {
-                byte res = read_memory((short) (registers.getPC() +1));
+            case IMPLIED:
+                throw new RuntimeException("Instruction with implied addressing mode should never ask to fetch memory.");
+            case IMMEDIATE:
+                res = read_memory((short) (registers.getPC() +1));
                 logger.debug("Fetched immediate: "+Common.byteToHexString(res, true));
                 return res;
-            }
-            case ACCUMULATOR -> {
-                byte res = registers.getA();
+            case ACCUMULATOR:
+                res = registers.getA();
                 logger.debug("Fetched accumulator: "+Common.byteToHexString(res, true));
                 return res;
-            }
-            case ABSOLUTE -> {
-                short addr = read_address_from_memory((short) (registers.getPC() + 1));
-                byte res = read_memory(addr);
+            case ABSOLUTE:
+                addr = read_address_from_memory((short) (registers.getPC() + 1));
+                res = read_memory(addr);
                 logger.debug("Fetched absolute: "+Common.byteToHexString(res, true));
                 return res;
-            }
-            case ZEROPAGE -> {
-                byte oper = read_memory((short) (registers.getPC() + 1));
-                short addr = Common.makeShort(oper, (byte) 0x00);
-                byte res = read_memory(addr);
+            case ZEROPAGE:
+                oper = read_memory((short) (registers.getPC() + 1));
+                addr = Common.makeShort(oper, (byte) 0x00);
+                res = read_memory(addr);
                 logger.debug("Fetched zeropage: "+Common.byteToHexString(res, true));
                 return res;
-            }
-            case ZEROPAGE_X -> {
-                byte oper = read_memory((short) (registers.getPC() + 1));
+            case ZEROPAGE_X:
+                oper = read_memory((short) (registers.getPC() + 1));
 
-                short addr = Common.makeShort(oper, (byte) 0x00);
-                byte dummy_res = read_memory(addr); // Dummy read to pass how the real cpu works
+                addr = Common.makeShort(oper, (byte) 0x00);
+                dummy_res = read_memory(addr); // Dummy read to pass how the real cpu works
 
-                short effective_addr = Common.makeShort((byte) (oper + registers.getX()), (byte) 0x00);
+                effective_addr = Common.makeShort((byte) (oper + registers.getX()), (byte) 0x00);
 
-                byte res = read_memory(effective_addr);
+                res = read_memory(effective_addr);
                 logger.debug("Fetched zeropage_x: "+Common.byteToHexString(res, true));
                 return res;
-            }
-            case ABSOLUTE_X -> {
+            case ABSOLUTE_X:
+            case ABSOLUTE_Y:
                 byte abs_addr_low = read_memory((short) (registers.getPC() + 1));
                 byte abs_addr_high = read_memory((short) (registers.getPC() + 2));
 
-                byte low_addr = (byte) (abs_addr_low + registers.getX());
-                short effective_addr = Common.makeShort(low_addr, abs_addr_high);
+                if (addrmode == Decoder.AddressingMode.ABSOLUTE_X)
+                    register = registers.getX();
+                else
+                    register = registers.getY();
+
+                byte low_addr = (byte) (abs_addr_low + register);
+                effective_addr = Common.makeShort(low_addr, abs_addr_high);
 
                 // Check if page boundry crossed
-                if (Common.isOverflow(abs_addr_low, registers.getX())) {
+                if (Common.isOverflow(abs_addr_low, register)) {
                     // Dummy read to pass how the real cpu works
-                    byte dummy_res = read_memory(effective_addr);
+                    dummy_res = read_memory(effective_addr);
 
                     // Fix the effective address
                     effective_addr += 0x100;
                 }
 
-                byte res = read_memory(effective_addr);
+                res = read_memory(effective_addr);
                 logger.debug("Fetched absolute_x: "+Common.byteToHexString(res, true));
 
                 return res;
-            }
-            default -> throw new RuntimeException("Not implemented yet");
+            default:
+                throw new RuntimeException("Not implemented yet");
         }
     }
 
