@@ -417,6 +417,20 @@ public class CPU {
                 logger.debug("Fetched absolute_x: "+Common.byteToHexString(res, true));
 
                 return res;
+            case INDIRECT_X:
+                oper = read_memory((short) (registers.getPC() + 1));
+                addr = Common.makeShort(oper, (byte) 0x00);
+                dummy_res = read_memory(addr); // Dummy read to pass how the real cpu works
+
+                effective_addr = Common.makeShort((byte) (oper + registers.getX()), (byte) 0x00);
+
+                byte low = read_memory(effective_addr);
+                byte high = read_memory((short) (effective_addr + 1));
+                effective_addr = Common.makeShort(low, high);
+
+                res = read_memory(effective_addr);
+                logger.debug("Fetched indirect_x: "+Common.byteToHexString(res, true));
+                return res;
             default:
                 throw new RuntimeException("Not implemented yet");
         }
