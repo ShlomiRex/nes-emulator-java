@@ -484,9 +484,17 @@ public class CPU {
      */
     private short fetch_instruction_address(Decoder.AddressingMode addrmode) {
         short operand1_addr = (short) (registers.getPC() + 1);
+        byte res;
+        byte oper;
+        short addr;
+        short effective_addr;
+        byte dummy_res;
+        byte register;
+        boolean page_boundary_crossed;
+
         switch(addrmode) {
             case IMMEDIATE -> {
-                byte res = read_memory(operand1_addr);
+                res = read_memory(operand1_addr);
                 logger.debug("Fetched immediate address: "+Common.shortToHexString(res, true));
                 return res;
             }
@@ -508,11 +516,11 @@ public class CPU {
                 // Pre-Indexed Indirect, "(Zero-Page,X)"
 
                 // fetch pointer address, increment PC
-                byte oper = read_memory((short) (registers.getPC() + 1));
+                oper = read_memory((short) (registers.getPC() + 1));
 
                 // read from the address, add X to it
-                byte dummy_res = read_memory(Common.makeShort(oper, (byte) 0x00)); // Dummy read to pass how the real cpu works
-                short addr = (short) (oper + registers.getX() & 0xFF);
+                dummy_res = read_memory(Common.makeShort(oper, (byte) 0x00)); // Dummy read to pass how the real cpu works
+                addr = (short) (oper + registers.getX() & 0xFF);
 
                 // fetch effective address low
                 byte low = read_memory(addr);
@@ -522,26 +530,37 @@ public class CPU {
                 return Common.makeShort(low, high);
             }
             case ZEROPAGE_X -> {
-                byte zp_addr = read_memory(operand1_addr);
-                byte x = registers.getX();
-                return (short) (zp_addr + (x & 0xFF));
+                oper = read_memory((short) (registers.getPC() + 1));
+
+                addr = Common.makeShort(oper, (byte) 0x00);
+                dummy_res = read_memory(addr); // Dummy read to pass how the real cpu works
+
+                if (addrmode == Decoder.AddressingMode.ZEROPAGE_X)
+                    register = registers.getX();
+                else
+                    register = registers.getY();
+                effective_addr = Common.makeShort((byte) (oper + register), (byte) 0x00);
+
+                //res = read_memory(effective_addr);
+                logger.debug("Fetched zeropage_x address: "+Common.shortToHexString(effective_addr, true));
+                return effective_addr;
             }
             case INDIRECT_Y -> {
                 // Post-Indexed Indirect, "(Zero-Page),Y"
 
                 // fetch pointer address, increment PC
-                byte oper = read_memory((short) (registers.getPC() + 1)); // Second read
+                oper = read_memory((short) (registers.getPC() + 1)); // Second read
 
                 // fetch effective address low
                 byte low = read_memory(Common.makeShort(oper, (byte) 0x00)); // Third read
 
                 // fetch effective address high, add Y to low byte of effective address
                 byte high = read_memory(Common.makeShort((byte) (oper + 1), (byte) 0x00));
-                boolean page_boundary_crossed = Common.isAdditionOverflow(low, registers.getY());
+                page_boundary_crossed = Common.isAdditionOverflow(low, registers.getY());
                 low = (byte)(low + registers.getY());
 
                 // read from effective address, fix high byte of effective address
-                short effective_addr = Common.makeShort(low, high);
+                effective_addr = Common.makeShort(low, high);
                 read_memory(effective_addr); // dummy read
 
                 // read from effective address - if page boundary crossed. This is executed only if page crossed.

@@ -84,7 +84,7 @@ public class TestCPU {
 
     @Test
     public void custom_test() throws IOException {
-        test_by_type_of_instruction("CLI 0x58", (byte) 0x58);
+        test_by_type_of_instruction("STA 0x95", (byte) 0x95);
     }
 
     private static Stream<Arguments> test_cases_by_type_of_instruction() {
