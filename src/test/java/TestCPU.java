@@ -80,7 +80,8 @@ public class TestCPU {
 
     @Test
     public void custom_test() throws IOException {
-        test_by_type_of_instruction("CPX", (byte) 0xE0);
+        test_by_type_of_instruction("CLV", (byte) 0xB8);
+        //test_by_type_of_instruction("TAY", (byte) 0xA8);
     }
 
     private static Stream<Arguments> test_cases_by_type_of_instruction() {

@@ -177,6 +177,7 @@ public class CPU {
                 registers.getP().setDecimal(false);
                 break;
             case CLV:
+                read_memory((short) (registers.getPC() + 1)); // dummy read
                 registers.getP().setOverflow(false);
                 break;
             case ADC:
