@@ -108,4 +108,8 @@ public class CPURegisters {
     public void addChangeListener(RegistersPanel listener) {
         this.listener = listener;
     }
+
+    public void incrementPC() {
+        PC++;
+    }
 }

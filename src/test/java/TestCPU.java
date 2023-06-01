@@ -60,7 +60,16 @@ public class TestCPU {
         //test_by_type_of_instruction("BCC", (byte) 0x90);
         //test_by_type_of_instruction("JSR", (byte) 0x20);
         //test_by_type_of_instruction("LSR", (byte) 0x46);
-        test_by_type_of_instruction("ADC", (byte) 0x79);
+        //test_by_type_of_instruction("ADC", (byte) 0x79);
+
+        test_by_type_of_instruction("LDA", (byte) 0xA9);
+        test_by_type_of_instruction("LDA", (byte) 0xA5);
+//        test_by_type_of_instruction("LDA", (byte) 0xB5);
+//        test_by_type_of_instruction("LDA", (byte) 0xAD);
+//        test_by_type_of_instruction("LDA", (byte) 0xBD);
+//        test_by_type_of_instruction("LDA", (byte) 0xB9);
+//        test_by_type_of_instruction("LDA", (byte) 0xA1);
+//        test_by_type_of_instruction("LDA", (byte) 0xB1);
     }
 
     private static Stream<Arguments> test_cases_by_type_of_instruction() {

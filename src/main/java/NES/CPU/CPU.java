@@ -42,10 +42,11 @@ public class CPU {
 
         // Fetch
         byte opcode = read_memory(registers.getPC()); // Read at address of Program Counter (duh!)
+        registers.incrementPC(); // Increment PC
 
         // Decode
         Decoder.InstructionInfo instr_info = decoder.decode_opcode(opcode);
-        Decoder.Instructions instr = instr_info.instr;
+        Instructions instr = instr_info.instr;
         AddressingMode addrmode = instr_info.addrmode;
         int bytes = instr_info.bytes;
         int cycles = instr_info.cycles;
@@ -59,12 +60,6 @@ public class CPU {
 
         // Execute
         execute_instruction(instr, addrmode);
-
-        // Increment PC
-        if (instr != Decoder.Instructions.JMP && instr != Decoder.Instructions.JSR)
-            registers.setPC((short) (registers.getPC() + bytes));
-
-        this.cycles += cycles;
 
         //TODO: Check OOPS cycle.
 
@@ -104,6 +99,7 @@ public class CPU {
                 Common.byteToHex(res, true) + ")");
         if (is_record_memory)
             recorded_memory.add(new MemoryAccessRecord(addr, res, true));
+        cycles ++;
         return res;
     }
 
@@ -125,546 +121,165 @@ public class CPU {
         return Common.makeShort(lsb, msb);
     }
 
-    private void execute_instruction(Decoder.Instructions instr, AddressingMode addrmode) {
-        byte fetched_memory;
-        short addr;
-        byte result;
+    private void execute_instruction(Instructions instr, AddressingMode addrmode) {
+        // This help me to make the CPU cycle accurate:
+        // http://www.atarihq.com/danb/files/64doc.txt
 
+        boolean is_instructions_accessing_the_stack = false;
         switch(instr) {
-            case LDX:
-            case LDY:
-            case LDA:
-                fetched_memory = fetch_instruction_memory(addrmode).getA();
-                if (instr == Decoder.Instructions.LDX)
-                    registers.setX(fetched_memory);
-                else if (instr == Decoder.Instructions.LDY)
-                    registers.setY(fetched_memory);
-                else
-                    registers.setA(fetched_memory);
-                registers.getP().modify_n(fetched_memory);
-                registers.getP().modify_z(fetched_memory);
-                break;
+            // Instructions accessing the stack
+            case BRK:
+                throw new RuntimeException("BRK instruction not implemented");
+            case RTI:
+                throw new RuntimeException("RTI instruction not implemented");
+            case RTS:
+                throw new RuntimeException("RTS instruction not implemented");
             case PHA:
-                push_stack(registers.getA());
-                break;
-            case NOP:
-                // No operation
-                break;
+            case PHP:
+                throw new RuntimeException("PHA/PHP instruction not implemented");
             case PLA:
-                fetched_memory = fetch_instruction_memory(addrmode).getA();
-                registers.setA(fetched_memory);
-
-                registers.getP().modify_n(fetched_memory);
-                registers.getP().modify_z(fetched_memory);
-                break;
-            case SEC:
-                registers.getP().setCarry(true);
-                break;
-            case CLC:
-                registers.getP().setCarry(false);
-                break;
-            case SEI:
-                registers.getP().setInterruptDisable(true);
-                break;
-            case CLI:
-                read_memory((short) (registers.getPC() + 1)); // dummy read
-                registers.getP().setInterruptDisable(false);
-                break;
-            case SED:
-                registers.getP().setDecimal(true);
-                break;
-            case CLD:
-                registers.getP().setDecimal(false);
-                break;
-            case CLV:
-                read_memory((short) (registers.getPC() + 1)); // dummy read
-                registers.getP().setOverflow(false);
-                break;
-            case ADC:
-                // Implement ADC
-                fetched_memory = fetch_instruction_memory(addrmode).getA();
-                result = (byte) (registers.getA() + fetched_memory + (registers.getP().getCarry() ? 1 : 0));
-
-                byte m_plus_a = (byte) (fetched_memory + registers.getA());
-                boolean is_carry = Common.isAdditionCarry(fetched_memory, registers.getA());
-                boolean is_carry2 = Common.isAdditionCarry(m_plus_a, (byte) (registers.getP().getCarry() ? 1 : 0));
-                boolean negative_flag_set = ((registers.getA() ^ result) & (fetched_memory ^ result) & 0x80) != 0;
-
-                registers.getP().modify_n(result);
-                registers.getP().modify_z(result);
-                registers.getP().setCarry(is_carry || is_carry2);
-                registers.getP().setOverflow(negative_flag_set);
-                registers.setA(result);
-                break;
-            case STX:
-            case STY:
-            case STA:
-                addr = fetch_instruction_address(addrmode);
-                if (instr == Decoder.Instructions.STX)
-                    write_memory(addr, registers.getX());
-                else if (instr == Decoder.Instructions.STY)
-                    write_memory(addr, registers.getY());
-                else
-                    write_memory(addr, registers.getA());
-                break;
-            case INX:
-            case INY:
-                byte register;
-                if (instr == Decoder.Instructions.INX)
-                    register = (byte) (registers.getX() + 1);
-                else
-                    register = (byte) (registers.getY() + 1);
-
-                registers.setY(register);
-                registers.getP().modify_n(register);
-                registers.getP().modify_z(register);
-                break;
-            case INC:
-            case DEC:
-                fetched_memory = fetch_instruction_memory(addrmode).getA();
-                if (instr == Decoder.Instructions.INC)
-                    fetched_memory += 1;
-                else
-                    fetched_memory -= 1;
-                addr = fetch_instruction_address(addrmode);
-                write_memory(addr, fetched_memory);
-                registers.getP().modify_n(fetched_memory);
-                registers.getP().modify_z(fetched_memory);
-                break;
-            case JMP:
-                addr = fetch_instruction_address(addrmode);
-                registers.setPC(addr);
-                break;
+            case PLP:
+                throw new RuntimeException("PLA/PLP instruction not implemented");
             case JSR:
-                // Jump to New Location Saving Return Address
-
-                // push (PC+2),
-                // (PC+1) -> PCL
-                // (PC+2) -> PCH
-
-                // What order of bytes to push?
-                // After a lot of googling: https://stackoverflow.com/a/63886154
-                // Basically push the PC like so: "...You need to push the high byte first, and then the low byte."
-
-                // Push PC onto stack (return address)
-                // NOTE: I push the 3rd byte of the instruction (PC + 2). Why not PC+3 (next instruction)?
-                // Idk, but its important to emulate this exactly, because some games use this feature.
-
-                push_pc((short) 2);
-                addr = fetch_instruction_address(addrmode);
-                registers.setPC(addr);
-                break;
-            case CMP:
-                exec_cmp(addrmode, registers.getA());
-                break;
-            case CPX:
-                exec_cmp(addrmode, registers.getX());
-                break;
-            case CPY:
-                exec_cmp(addrmode, registers.getY());
-                break;
-            case TAX:
-                read_memory((short) (registers.getPC() + 1)); // dummy read
-                registers.setX(registers.getA());
-                registers.getP().modify_n(registers.getX());
-                registers.getP().modify_z(registers.getX());
-                break;
-            case TAY:
-                read_memory((short) (registers.getPC() + 1)); // dummy read
-                registers.setY(registers.getA());
-                registers.getP().modify_n(registers.getY());
-                registers.getP().modify_z(registers.getY());
-                break;
-            case TSX:
-                registers.setX(registers.getS());
-                registers.getP().modify_n(registers.getX());
-                registers.getP().modify_z(registers.getX());
-                break;
-            case TXA:
-                registers.setA(registers.getX());
-                registers.getP().modify_n(registers.getA());
-                registers.getP().modify_z(registers.getA());
-                break;
-            case TXS:
-                registers.setS(registers.getX());
-                // We don't modify N or Z bits
-                break;
-            case TYA:
-                registers.setA(registers.getY());
-                registers.getP().modify_n(registers.getA());
-                registers.getP().modify_z(registers.getA());
-                break;
-            case AND:
-                fetched_memory = fetch_instruction_memory(addrmode).getA();
-
-                registers.setA((byte) (registers.getA() & fetched_memory));
-                registers.getP().modify_n(registers.getA());
-                registers.getP().modify_z(registers.getA());
-                break;
-            case ASL:
-            case LSR:
-                fetched_memory = fetch_instruction_memory(addrmode).getA();
-                result = fetched_memory;
-                if (instr == Decoder.Instructions.ASL) {
-                    result <<= 1;
-                } else {
-                    result >>= 1;
-                }
-                // Determine if shift overflowed (if yes, then set carry)
-                // If last bit is 1, and we left shift, then that bit is the carry.
-                boolean new_carry = Common.Bits.getBit(fetched_memory, 7);
-
-                // Now we need to know where to put the result. Register or memory?
-                if (addrmode == AddressingMode.ACCUMULATOR) {
-                    registers.setA(result);
-                } else {
-                    addr = fetch_instruction_address(addrmode);
-                    write_memory(addr, result);
-                }
-
-                registers.getP().modify_n(result);
-                registers.getP().modify_z(result);
-                registers.getP().setCarry(new_carry);
-                break;
-            case BIT:
-                // Test Bits in Memory with Accumulator
-                fetched_memory = fetch_instruction_memory(addrmode).getA();
-                result = (byte) (registers.getA() & fetched_memory);
-                boolean bit7 = Common.Bits.getBit(fetched_memory, 7);
-                boolean bit6 = Common.Bits.getBit(fetched_memory, 6);
-
-                registers.getP().setNegative(bit7);
-                registers.getP().setOverflow(bit6);
-                registers.getP().modify_z(result);
-                break;
-            case BMI:
-            case BPL:
-            case BNE:
-            case BVC:
-            case BVS:
-            case BEQ:
-            case BCS:
-            case BCC:
-                // Relative Addressing (Conditional Branching)
-                // Relative addressing (BCC, BCS, BNE, BEQ, BPL, BMI, BVC, BVS)
-
-                short pc = registers.getPC();
-                // fetch operand, increment PC
-                byte offset = read_memory((short) (pc + 1));
-
-                // Fetch opcode of next instruction, If branch is taken, add operand to PCL. Otherwise increment PC.
-                short next_instr_addr = (short) (pc + 2);
-                read_memory(next_instr_addr); // dummy read
-
-                // If branch taken
-                if (
-                        (instr == Decoder.Instructions.BMI && registers.getP().getNegative()     == true)    ||
-                        (instr == Decoder.Instructions.BPL && registers.getP().getNegative()     == false)   ||
-                        (instr == Decoder.Instructions.BNE && registers.getP().getZero()         == false)   ||
-                        (instr == Decoder.Instructions.BVC && registers.getP().getOverflow()     == false)   ||
-                        (instr == Decoder.Instructions.BVS && registers.getP().getOverflow()     == true)    ||
-                        (instr == Decoder.Instructions.BEQ && registers.getP().getZero()         == true)    ||
-                        (instr == Decoder.Instructions.BCS && registers.getP().getCarry()        == true)    ||
-                        (instr == Decoder.Instructions.BCC && registers.getP().getCarry()        == false)) {
-                    // add operand to PCL
-                    byte pc_low = (byte) (pc & 0xFF);
-                    pc_low += offset;
-
-                    // Fetch opcode of next instruction. Fix PCH. If it did not change, increment PC.
-                    read_memory(next_instr_addr); // dummy read
-                    registers.setPC((short) (pc + offset));
-                }
-                break;
-            case ROL:
-                byte old_value;
-                Common.Pair<Byte, Short> fetched = null;
-                if (addrmode == AddressingMode.ACCUMULATOR) {
-                    // Accumulator
-                    old_value = registers.getA();
-                } else {
-                    // Memory
-                    // fetch low byte of address, increment PC
-                    // fetch high byte of address, add index register X to low address byte, increment PC
-                    // read from effective address, fix the high byte of effective address
-                    fetched = fetch_instruction_memory(addrmode);
-                    old_value = fetched.getA();
-                }
-
-                boolean old_carry = registers.getP().getCarry();
-                new_carry = Common.Bits.getBit(old_value, 7);
-
-                byte new_value = (byte) (old_value << 1);
-                if (old_carry) {
-                    new_value |= 1;
-                }
-
-                // Now we need to know where to put the result. Register or memory?
-                if (addrmode == AddressingMode.ACCUMULATOR) {
-                    registers.setA(new_value);
-                    read_memory((short) (registers.getPC() + 1)); // dummy read
-                } else {
-                    addr = fetched.getB();
-                    write_memory(addr, old_value); // dummy write
-                    write_memory(addr, new_value);
-                }
-                registers.getP().modify_n(new_value);
-                registers.getP().modify_z(new_value);
-                registers.getP().setCarry(new_carry);
-                break;
+                throw new RuntimeException("JSR instruction not implemented");
             default:
-                throw new RuntimeException("Not implemented yet");
+                is_instructions_accessing_the_stack = true;
+                break;
         }
-    }
 
-    /**
-     * Fetch memory required by the instruction. All load instructions use this.
-     * @param addrmode
-     * @return Pair of fetched memory and effective address
-     */
-    private Common.Pair<Byte, Short> fetch_instruction_memory(AddressingMode addrmode) {
-        byte res;
-        byte oper;
-        short addr;
-        short effective_addr;
-        byte register;
-        boolean page_boundary_crossed;
+        if (!is_instructions_accessing_the_stack)
+            return;
 
         switch (addrmode) {
-            case IMPLIED:
-                throw new RuntimeException("Instruction with implied addressing mode should never ask to fetch memory.");
-            case IMMEDIATE:
-                res = read_memory((short) (registers.getPC() +1));
-                return new Common.Pair<>(res, (short) (registers.getPC() + 1));
+            // Accumulator or implied addressing
             case ACCUMULATOR:
-                res = registers.getA();
-                return new Common.Pair<>(res, null);
+            case IMPLIED:
+                accumulator_or_implied_addressing(instr);
+                break;
+            case IMMEDIATE:
+                immediate_addressing(instr);
+                break;
             case ABSOLUTE:
-                addr = read_address_from_memory((short) (registers.getPC() + 1));
-                res = read_memory(addr);
-                return new Common.Pair<>(res, addr);
+                absolute_addressing(instr);
+                break;
+            // Zero page addressing
             case ZEROPAGE:
-                oper = read_memory((short) (registers.getPC() + 1));
-                effective_addr = Common.makeShort(oper, (byte) 0x00);
-                res = read_memory(effective_addr);
-                return new Common.Pair<>(res, effective_addr);
-            case ZEROPAGE_Y:
+                zeropage_addressing(instr);
+                break;
+            // Zero page indexed addressing
             case ZEROPAGE_X:
-                oper = read_memory((short) (registers.getPC() + 1));
-
-                addr = Common.makeShort(oper, (byte) 0x00);
-                read_memory(addr); // Dummy read to pass how the real cpu works
-
-                if (addrmode == AddressingMode.ZEROPAGE_X)
-                    register = registers.getX();
-                else
-                    register = registers.getY();
-                effective_addr = Common.makeShort((byte) (oper + register), (byte) 0x00);
-
-                res = read_memory(effective_addr);
-                logger.debug("Fetched zeropage_x: "+Common.byteToHex(res, true));
-                return new Common.Pair<>(res, effective_addr);
+            case ZEROPAGE_Y:
+                zeropage_indexed_addressing(instr);
+                break;
+            // Absolute indexed addressing
             case ABSOLUTE_X:
             case ABSOLUTE_Y:
-                // fetch low byte of address, increment PC
-                byte abs_addr_low = read_memory((short) (registers.getPC() + 1));
-                // fetch high byte of address, add index register X to low address byte,
-                byte abs_addr_high = read_memory((short) (registers.getPC() + 2));
-                if (addrmode == AddressingMode.ABSOLUTE_X)
-                    register = registers.getX();
-                else
-                    register = registers.getY();
-                byte low_addr = (byte) (abs_addr_low + register);
-                effective_addr = Common.makeShort(low_addr, abs_addr_high);
-
-                //read from effective address, fix the high byte of effective address
-                read_memory(effective_addr); // dummy read
-
-                // Check if page boundry crossed
-                if (Common.isAdditionCarry(abs_addr_low, register)) {
-                    // Fix the effective address
-                    effective_addr += 0x100;
-                }
-                // re-read from effective address
-                res = read_memory(effective_addr);
-                logger.debug("Fetched absolute_x: "+Common.byteToHex(res, true));
-
-                return new Common.Pair<>(res, effective_addr);
+                break;
+            // Relative addressing (BCC, BCS, BNE, BEQ, BPL, BMI, BVC, BVS)
+            case RELATIVE:
+                break;
+            // Indexed indirect addressing
             case INDIRECT_X:
-                // Pre-Indexed Indirect, "(Zero-Page,X)"
-
-                // fetch pointer address, increment PC
-                oper = read_memory((short) (registers.getPC() + 1));
-
-                // read from the address, add X to it
-                read_memory(Common.makeShort(oper, (byte) 0x00)); // Dummy read to pass how the real cpu works
-                addr = (short) (oper + registers.getX() & 0xFF);
-
-                // fetch effective address low
-                byte low = read_memory(addr);
-
-                // fetch effective address high
-                byte high = read_memory(((short)((addr + 1) % 256))); // If overflow, wrap around
-
-                //read from effective address
-                effective_addr = Common.makeShort(low, high);
-                res = read_memory(effective_addr);
-
-                logger.debug("Fetched indirect_x: "+Common.byteToHex(res, true));
-                return new Common.Pair<>(res, effective_addr);
             case INDIRECT_Y:
-                // Post-Indexed Indirect, "(Zero-Page),Y"
+                break;
+            // Indirect indexed addressing
+            // TODO: ??
 
-                // fetch pointer address, increment PC
-                oper = read_memory((short) (registers.getPC() + 1)); // Second read
+            // Absolute indirect addressing (JMP)
+            // TODO: ??
+        }
 
-                // fetch effective address low
-                low = read_memory(Common.makeShort(oper, (byte) 0x00)); // Third read
+    }
 
-                // fetch effective address high, add Y to low byte of effective address
-                high = read_memory(Common.makeShort((byte) (oper + 1), (byte) 0x00));
-                page_boundary_crossed = Common.isAdditionCarry(low, registers.getY());
-                low = (byte)(low + registers.getY());
+    private void accumulator_or_implied_addressing(Instructions instr) {
+    }
 
-                // read from effective address, fix high byte of effective address
-                effective_addr = Common.makeShort(low, high);
-                res = read_memory(effective_addr);
+    private void immediate_addressing(Instructions instr) {
+        // fetch value, increment PC
+        byte value = read_memory(registers.getPC());
+        registers.incrementPC();
 
-                // read from effective address - if page boundary crossed. This is executed only if page crossed.
-                if (page_boundary_crossed) {
-                    effective_addr += 0x100;
-                    res = read_memory(effective_addr);
-                }
-                return new Common.Pair<>(res, effective_addr);
+        switch(instr) {
+            case LDA:
+                registers.setA(value);
+                registers.getP().modify_n(value);
+                registers.getP().modify_z(value);
+                break;
             default:
                 throw new RuntimeException("Not implemented yet");
         }
     }
 
-    /**
-     * Extract the address from instruction. All store instructions use this.
-     * @param addrmode
-     * @return
-     */
-    private short fetch_instruction_address(AddressingMode addrmode) {
-        short operand1_addr = (short) (registers.getPC() + 1);
-        byte res;
-        byte oper;
-        short addr;
-        short effective_addr;
-        byte dummy_res;
-        byte register;
-        boolean page_boundary_crossed;
+    private void zeropage_indexed_addressing(Instructions instr) {
+    }
 
-        switch(addrmode) {
-            case IMMEDIATE:
-                res = read_memory(operand1_addr);
-                logger.debug("Fetched immediate address: " + Common.shortToHex(res, true));
-                return res;
-            case ABSOLUTE:
-                byte low = read_memory(operand1_addr);
-                byte high = read_memory((short) (operand1_addr + 1));
-                short abs_addr = Common.makeShort(low, high);
-                logger.debug("Fetched absolute address: " + Common.shortToHex(abs_addr, false));
-                return abs_addr;
-            case ZEROPAGE:
-                return Common.makeShort(read_memory(operand1_addr), (byte) 0);
-            case INDIRECT:
-                short indirect_addr = read_address_from_memory(operand1_addr);
-                return read_address_from_memory(indirect_addr);
-            case INDIRECT_X:
-                // Pre-Indexed Indirect, "(Zero-Page,X)"
+    private void zeropage_addressing(Instructions instr) {
+        // fetch address, increment PC
+        byte addr_low = read_memory(registers.getPC());
+        registers.incrementPC();
 
-                // fetch pointer address, increment PC
-                oper = read_memory((short) (registers.getPC() + 1));
+        // read from effective address
+        short effective_addr = Common.makeShort(addr_low, (byte) 0x00);
+        byte value = read_memory(effective_addr);
 
-                // read from the address, add X to it
-                dummy_res = read_memory(Common.makeShort(oper, (byte) 0x00)); // Dummy read to pass how the real cpu works
-                addr = (short) (oper + registers.getX() & 0xFF);
-
-                // fetch effective address low
-                low = read_memory(addr);
-
-                // fetch effective address high
-                high = read_memory(((short) ((addr + 1) % 256))); // If overflow, wrap around
-                return Common.makeShort(low, high);
-            case ZEROPAGE_Y:
-            case ZEROPAGE_X:
-                oper = read_memory((short) (registers.getPC() + 1));
-
-                addr = Common.makeShort(oper, (byte) 0x00);
-                dummy_res = read_memory(addr); // Dummy read to pass how the real cpu works
-
-                if (addrmode == AddressingMode.ZEROPAGE_X)
-                    register = registers.getX();
-                else
-                    register = registers.getY();
-                effective_addr = Common.makeShort((byte) (oper + register), (byte) 0x00);
-
-                //res = read_memory(effective_addr);
-                logger.debug("Fetched zeropage_x address: " + Common.shortToHex(effective_addr, true));
-                return effective_addr;
-            case INDIRECT_Y:
-                // Post-Indexed Indirect, "(Zero-Page),Y"
-
-                // fetch pointer address, increment PC
-                oper = read_memory((short) (registers.getPC() + 1)); // Second read
-
-                // fetch effective address low
-                low = read_memory(Common.makeShort(oper, (byte) 0x00)); // Third read
-
-                // fetch effective address high, add Y to low byte of effective address
-                high = read_memory(Common.makeShort((byte) (oper + 1), (byte) 0x00));
-                page_boundary_crossed = Common.isAdditionCarry(low, registers.getY());
-                low = (byte) (low + registers.getY());
-
-                // read from effective address, fix high byte of effective address
-                effective_addr = Common.makeShort(low, high);
-                read_memory(effective_addr); // dummy read
-
-                // read from effective address - if page boundary crossed. This is executed only if page crossed.
-                if (page_boundary_crossed) {
-                    effective_addr += 0x100;
-                    //read_memory(effective_addr); // dummy read
-                }
-
-                logger.debug("Fetched indirect_y address: " + Common.shortToHex(effective_addr, true));
-                return effective_addr;
-            case ABSOLUTE_X:
-            case ABSOLUTE_Y:
-                byte abs_addr_low = read_memory((short) (registers.getPC() + 1));
-                byte abs_addr_high = read_memory((short) (registers.getPC() + 2));
-
-                if (addrmode == AddressingMode.ABSOLUTE_X)
-                    register = registers.getX();
-                else
-                    register = registers.getY();
-
-                byte low_addr = (byte) (abs_addr_low + register);
-                effective_addr = Common.makeShort(low_addr, abs_addr_high);
-
-                // Check if page boundry crossed
-                page_boundary_crossed = Common.isAdditionCarry(abs_addr_low, register);
-                if (page_boundary_crossed) {
-                    // Dummy read to pass how the real cpu works
-                    dummy_res = read_memory(effective_addr);
-
-                    // Fix the effective address
-                    effective_addr += 0x100;
-                }
-
-                if (!page_boundary_crossed)
-                    read_memory(effective_addr);
-
-                return effective_addr;
+        switch(instr) {
+            case LDA:
+                registers.setA(value);
+                registers.getP().modify_n(value);
+                registers.getP().modify_z(value);
+                break;
             default:
                 throw new RuntimeException("Not implemented yet");
         }
+    }
+
+    private void absolute_addressing(Instructions instruction) {
+       switch(instruction) {
+           // JMP
+           case JMP:
+               throw new RuntimeException("Not implemented yet");
+           // Read instructions: LDA, LDX, LDY, EOR, AND, ORA, ADC, SBC, CMP, BIT, LAX, NOP
+           case LDA:
+           case LDX:
+           case LDY:
+           case EOR:
+           case AND:
+           case ORA:
+           case ADC:
+           case SBC:
+           case CMP:
+           case BIT:
+           case NOP:
+               //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
+               // LAX
+               throw new RuntimeException("Not implemented yet");
+            // Read-Modify-Write instructions (ASL, LSR, ROL, ROR, INC, DEC, SLO, SRE, RLA, RRA, ISB, DCP)
+           case ASL:
+           case LSR:
+           case ROL:
+           case ROR:
+           case INC:
+           case DEC:
+               //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
+               // SLO, SRE, RLA, RRA, ISB, DCP
+               throw new RuntimeException("Not implemented yet");
+           // Write instructions (STA, STX, STY, SAX)
+           case STA:
+           case STX:
+           case STY:
+               //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
+               // SAX
+               throw new RuntimeException("Not implemented yet");
+           default:
+               throw new RuntimeException("Did not expect this instruction here");
+       }
     }
 
     private void write_memory(short addr, byte value) {
         logger.debug("Writing memory: ["+addr + " (" + Common.shortToHex(addr, true)+")] = "
                 +value + " ("+Common.byteToHex(value, true)+")");
         memory[addr & 0xFFFF] = value;
+        cycles ++;
         if (is_record_memory)
             recorded_memory.add(new MemoryAccessRecord(addr, value, false));
     }
@@ -699,24 +314,24 @@ public class CPU {
 
 		*The N flag will be bit 7 of A, X, or Y - Memory
 		*/
-        byte fetched_memory = fetch_instruction_memory(addrmode).getA();
-        byte sub = (byte) (register - fetched_memory);
-        boolean last_bit = Common.Bits.getBit(sub, 7);
-
-        boolean new_n = false, new_z = false, new_c = false;
-
-        if ((register & 0xFF) < (fetched_memory & 0xFF)) {
-            new_n = last_bit;
-        } else if (register == fetched_memory) {
-            new_z = new_c = true;
-        } else {
-            new_n = last_bit;
-            new_c = true;
-        }
-
-        registers.getP().setNegative(new_n);
-        registers.getP().setZero(new_z);
-        registers.getP().setCarry(new_c); // TODO: Expected true
+//        byte fetched_memory = fetch_instruction_memory(addrmode).getA();
+//        byte sub = (byte) (register - fetched_memory);
+//        boolean last_bit = Common.Bits.getBit(sub, 7);
+//
+//        boolean new_n = false, new_z = false, new_c = false;
+//
+//        if ((register & 0xFF) < (fetched_memory & 0xFF)) {
+//            new_n = last_bit;
+//        } else if (register == fetched_memory) {
+//            new_z = new_c = true;
+//        } else {
+//            new_n = last_bit;
+//            new_c = true;
+//        }
+//
+//        registers.getP().setNegative(new_n);
+//        registers.getP().setZero(new_z);
+//        registers.getP().setCarry(new_c); // TODO: Expected true
     }
 
     private void nmi_interrupt() {
