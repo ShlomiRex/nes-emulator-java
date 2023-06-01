@@ -383,6 +383,9 @@ public class CPU {
                     old_value = registers.getA();
                 } else {
                     // Memory
+                    // fetch low byte of address, increment PC
+                    // fetch high byte of address, add index register X to low address byte, increment PC
+                    // read from effective address, fix the high byte of effective address
                     fetched = fetch_instruction_memory(addrmode);
                     old_value = fetched.getA();
                 }
@@ -462,25 +465,26 @@ public class CPU {
                 return new Common.Pair<>(res, effective_addr);
             case ABSOLUTE_X:
             case ABSOLUTE_Y:
+                // fetch low byte of address, increment PC
                 byte abs_addr_low = read_memory((short) (registers.getPC() + 1));
+                // fetch high byte of address, add index register X to low address byte,
                 byte abs_addr_high = read_memory((short) (registers.getPC() + 2));
-
                 if (addrmode == Decoder.AddressingMode.ABSOLUTE_X)
                     register = registers.getX();
                 else
                     register = registers.getY();
-
                 byte low_addr = (byte) (abs_addr_low + register);
                 effective_addr = Common.makeShort(low_addr, abs_addr_high);
 
+                //read from effective address, fix the high byte of effective address
+                read_memory(effective_addr); // dummy read
+
                 // Check if page boundry crossed
                 if (Common.isAdditionCarry(abs_addr_low, register)) {
-                    read_memory(effective_addr); // Dummy read to pass how the real cpu works
-
                     // Fix the effective address
                     effective_addr += 0x100;
                 }
-
+                // re-read from effective address
                 res = read_memory(effective_addr);
                 logger.debug("Fetched absolute_x: "+Common.byteToHex(res, true));
 

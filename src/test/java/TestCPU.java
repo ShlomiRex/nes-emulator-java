@@ -60,7 +60,7 @@ public class TestCPU {
         //test_by_type_of_instruction("BCC", (byte) 0x90);
         //test_by_type_of_instruction("JSR", (byte) 0x20);
         //test_by_type_of_instruction("LSR", (byte) 0x46);
-        test_by_type_of_instruction("ROL", (byte) 0x26);
+        test_by_type_of_instruction("ROL", (byte) 0x3E);
     }
 
     private static Stream<Arguments> test_cases_by_type_of_instruction() {
