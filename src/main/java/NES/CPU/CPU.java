@@ -185,8 +185,6 @@ public class CPU {
                 fetched_memory = fetch_instruction_memory(addrmode);
                 result = (byte) (registers.getA() + fetched_memory + (registers.getP().getCarry() ? 1 : 0));
 
-                int res = registers.getA() + fetched_memory + (registers.getP().getCarry() ? 1 : 0);
-
                 byte m_plus_a = (byte) (fetched_memory + registers.getA());
                 boolean is_carry = Common.isAdditionCarry(fetched_memory, registers.getA());
                 boolean is_carry2 = Common.isAdditionCarry(m_plus_a, (byte) (registers.getP().getCarry() ? 1 : 0));
@@ -210,14 +208,16 @@ public class CPU {
                     write_memory(addr, registers.getA());
                 break;
             case INX:
-                registers.setA((byte) (registers.getA() + 1));
-                registers.getP().modify_n(registers.getX());
-                registers.getP().modify_z(registers.getX());
-                break;
             case INY:
-                registers.setY((byte) (registers.getY() + 1));
-                registers.getP().modify_n(registers.getY());
-                registers.getP().modify_z(registers.getY());
+                byte register;
+                if (instr == Decoder.Instructions.INX)
+                    register = (byte) (registers.getX() + 1);
+                else
+                    register = (byte) (registers.getY() + 1);
+
+                registers.setY(register);
+                registers.getP().modify_n(register);
+                registers.getP().modify_z(register);
                 break;
             case INC:
             case DEC:
@@ -345,6 +345,18 @@ public class CPU {
             case BEQ:
             case BCS:
             case BCC:
+                // Relative Addressing (Conditional Branching)
+                // Relative addressing (BCC, BCS, BNE, BEQ, BPL, BMI, BVC, BVS)
+
+                short pc = registers.getPC();
+                // fetch operand, increment PC
+                byte offset = read_memory((short) (pc + 1));
+
+                // Fetch opcode of next instruction, If branch is taken, add operand to PCL. Otherwise increment PC.
+                short next_instr_addr = (short) (pc + 2);
+                read_memory(next_instr_addr); // dummy read
+
+                // If branch taken
                 if (
                         (instr == Decoder.Instructions.BMI && registers.getP().getNegative()     == true)    ||
                         (instr == Decoder.Instructions.BPL && registers.getP().getNegative()     == false)   ||
@@ -354,9 +366,49 @@ public class CPU {
                         (instr == Decoder.Instructions.BEQ && registers.getP().getZero()         == true)    ||
                         (instr == Decoder.Instructions.BCS && registers.getP().getCarry()        == true)    ||
                         (instr == Decoder.Instructions.BCC && registers.getP().getCarry()        == false)) {
-                    byte offset = read_memory((short) (registers.getPC() + 1));
-                    registers.setPC((short) (registers.getPC() + offset));
+                    // add operand to PCL
+                    byte pc_low = (byte) (pc & 0xFF);
+                    pc_low += offset;
+
+                    // Fetch opcode of next instruction. Fix PCH. If it did not change, increment PC.
+                    read_memory(next_instr_addr); // dummy read
+                    registers.setPC((short) (pc + offset));
+
                 }
+                break;
+            case ROL:
+                // Implement ROL instruction
+
+                byte value;
+                if (addrmode == Decoder.AddressingMode.ACCUMULATOR) {
+                    // Accumulator
+                    value = registers.getA();
+                } else {
+                    // Memory
+                    value = fetch_instruction_memory(addrmode);
+                }
+
+                boolean old_carry = registers.getP().getCarry();
+                new_carry = Common.Bits.getBit(value, 7);
+
+                value <<= 1;
+                if (old_carry) {
+                    value |= 1;
+                }
+
+                // Now we need to know where to put the result. Register or memory?
+                if (addrmode == Decoder.AddressingMode.ACCUMULATOR) {
+                    registers.setA(value);
+                } else {
+                    addr = fetch_instruction_address(addrmode);
+                    write_memory(addr, value);
+                }
+
+                registers.getP().modify_n(value);
+                registers.getP().modify_z(value);
+                registers.getP().setCarry(new_carry);
+
+                read_memory((short) (registers.getPC() + 1)); // dummy read
                 break;
             default:
                 throw new RuntimeException("Not implemented yet");

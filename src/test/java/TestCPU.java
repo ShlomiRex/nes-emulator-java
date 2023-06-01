@@ -48,29 +48,6 @@ public class TestCPU {
         cpu.set_debugger_record_memory(true);
     }
 
-//    private static Stream<Arguments> testCases() {
-//        return Stream.of(
-//                Arguments.of((byte) 0x8D),
-//                Arguments.of((byte) 0x84),
-//                Arguments.of((byte) 0xA9),
-//                Arguments.of((byte) 0xA5),
-//                Arguments.of((byte) 0xAD),
-//                Arguments.of((byte) 0xB5),
-//                Arguments.of((byte) 0xAD),
-//                Arguments.of((byte) 0xBD),
-//                Arguments.of((byte) 0xB9),
-//                Arguments.of((byte) 0xA1),
-//                Arguments.of((byte) 0xB1),
-//                Arguments.of((byte) 0xA2),
-//                Arguments.of((byte) 0xA6),
-//                Arguments.of((byte) 0xB6),
-//                Arguments.of((byte) 0xAE),
-//                Arguments.of((byte) 0xBE),
-//
-//                Arguments.of((byte) 0xBE)
-//        );
-//    }
-
     @ParameterizedTest(name = "{0}")
     @MethodSource("test_cases_by_type_of_instruction")
     public void test_by_type_of_instruction(String test_name, byte opcode) throws IOException {
@@ -80,7 +57,11 @@ public class TestCPU {
 
     @Test
     public void custom_test() throws IOException {
-        test_by_type_of_instruction("ADC", (byte) 0x61);
+        //test_by_type_of_instruction("BCC", (byte) 0x90);
+        //test_by_type_of_instruction("JSR", (byte) 0x20);
+        //test_by_type_of_instruction("LSR", (byte) 0x46);
+        test_by_type_of_instruction("ROL", (byte) 0x2A);
+        //test_by_type_of_instruction("ROL", (byte) 0x26);
     }
 
     private static Stream<Arguments> test_cases_by_type_of_instruction() {
