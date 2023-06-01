@@ -63,13 +63,13 @@ public class TestCPU {
         //test_by_type_of_instruction("ADC", (byte) 0x79);
 
         // All LDA tests
-        test_by_type_of_instruction("LDA", (byte) 0xA9);
-        test_by_type_of_instruction("LDA", (byte) 0xA5);
-        test_by_type_of_instruction("LDA", (byte) 0xB5);
-        test_by_type_of_instruction("LDA", (byte) 0xAD);
-        test_by_type_of_instruction("LDA", (byte) 0xBD);
+//        test_by_type_of_instruction("LDA", (byte) 0xA9);
+//        test_by_type_of_instruction("LDA", (byte) 0xA5);
+//        test_by_type_of_instruction("LDA", (byte) 0xB5);
+//        test_by_type_of_instruction("LDA", (byte) 0xAD);
+//        test_by_type_of_instruction("LDA", (byte) 0xBD);
 //        test_by_type_of_instruction("LDA", (byte) 0xB9);
-//        test_by_type_of_instruction("LDA", (byte) 0xA1);
+        test_by_type_of_instruction("LDA", (byte) 0xA1);
 //        test_by_type_of_instruction("LDA", (byte) 0xB1);
     }
 

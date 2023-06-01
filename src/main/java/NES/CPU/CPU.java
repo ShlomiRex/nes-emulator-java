@@ -127,7 +127,7 @@ public class CPU {
         // This help me to make the CPU cycle accurate:
         // http://www.atarihq.com/danb/files/64doc.txt
 
-        boolean is_instructions_accessing_the_stack = false;
+        boolean is_instructions_accessing_the_stack;
         switch(instr) {
             // Instructions accessing the stack
             case BRK:
@@ -160,19 +160,19 @@ public class CPU {
                 accumulator_or_implied_addressing(instr);
                 break;
             case IMMEDIATE:
-                immediate_addressing(instr);
+                immediate_addressing();
                 break;
             case ABSOLUTE:
                 absolute_addressing(instr);
                 break;
             // Zero page addressing
             case ZEROPAGE:
-                zeropage_addressing(instr);
+                zeropage_addressing();
                 break;
             // Zero page indexed addressing
             case ZEROPAGE_X:
             case ZEROPAGE_Y:
-                zeropage_indexed_addressing(instr, addrmode);
+                zeropage_indexed_addressing(addrmode);
                 break;
             // Absolute indexed addressing
             case ABSOLUTE_X:
@@ -181,23 +181,133 @@ public class CPU {
                 break;
             // Relative addressing (BCC, BCS, BNE, BEQ, BPL, BMI, BVC, BVS)
             case RELATIVE:
-                break;
+                throw new RuntimeException("Relative addressing not implemented");
             // Indexed indirect addressing
             case INDIRECT_X:
+                indexed_indirect_addressing(instr);
+                break;
             case INDIRECT_Y:
+                indirect_indexed_addressing(instr, addrmode);
                 break;
             // Indirect indexed addressing
             // TODO: ??
 
             // Absolute indirect addressing (JMP)
             // TODO: ??
+            default:
+                throw new RuntimeException("Addressing mode not implemented: " + addrmode);
         }
 
         // Execute
         switch (instr) {
-            case LDA -> lda();
+            case LDA -> exec_lda();
+            default -> throw new RuntimeException("Instruction not implemented: " + instr);
         }
 
+    }
+
+    /**
+     * X-indexed indirect addressing
+     * @param instr
+     */
+    private void indexed_indirect_addressing(Instructions instr) {
+
+        switch(instr) {
+            // Read instructions (LDA, ORA, EOR, AND, ADC, CMP, SBC, LAX)
+            case LDA:
+            case ORA:
+            case EOR:
+            case AND:
+            case ADC:
+            case CMP:
+            case SBC:
+                //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
+                // LAX
+
+                // fetch pointer address, increment PC
+                byte pointer_addr = read_memory(registers.getPC());
+                registers.incrementPC();
+
+                // read from the address, add X to it
+                short addr = (short) (pointer_addr & 0xFF);
+                byte effective_addr = read_memory((short) (pointer_addr & 0xFF));
+                addr += registers.getX();
+
+                // fetch effective address low
+                byte effective_addr_low = read_memory((short) (addr & 0xFF));
+
+                // fetch effective address high
+                byte effective_addr_high = read_memory((short) ((addr + 1) & 0xFF));
+
+                // read from effective address
+                fetched_data = read_memory(Common.makeShort(effective_addr_low, effective_addr_high));
+                break;
+            default:
+                throw new RuntimeException("Instruction not implemented: " + instr);
+        }
+    }
+
+    private void indirect_indexed_addressing(Instructions instr, AddressingMode addrmode) {
+        byte register;
+        if (addrmode == AddressingMode.INDIRECT_X)
+            register = registers.getX();
+        else
+            register = registers.getY();
+
+        switch(instr) {
+            // Read instructions (LDA, EOR, AND, ORA, ADC, SBC, CMP)
+            case LDA:
+            case EOR:
+            case AND:
+            case ORA:
+            case ADC:
+            case SBC:
+            case CMP:
+                // fetch pointer address, increment PC
+                byte pointer_addr = read_memory(registers.getPC());
+                registers.incrementPC();
+
+                // fetch effective address low
+                byte effective_addr_low = read_memory((short) (pointer_addr & 0xFF));
+
+                // fetch effective address high, add Y to low byte of effective address
+                // TODO: Need to read at address 149 (0x95)
+                byte effective_addr_high = read_memory((short) ((pointer_addr +1) & 0xFF));
+                byte new_effective_addr_low = (byte) (effective_addr_low + register);
+
+                // read from effective address, fix high byte of effective address
+                short effective_addr = Common.makeShort(new_effective_addr_low, effective_addr_high);
+                fetched_data = read_memory(effective_addr);
+
+                // Check page crossing
+                if (Common.isAdditionCarry(effective_addr_low, register)) {
+                    effective_addr += 0x100;
+
+                    // read from effective address
+                    fetched_data = read_memory(effective_addr);
+
+                    // This cycle will be executed only if the effective address was invalid during cycle #5, i.e. page boundary was crossed.
+                    cycles ++;
+                }
+
+
+                break;
+            // Read-Modify-Write instructions (SLO, SRE, RLA, RRA, ISB, DCP)
+//            case SLO:
+//            case SRE:
+//            case RLA:
+//            case RRA:
+//            case ISB:
+//            case DCP:
+                //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
+                // SLO, SRE, RLA, RRA, ISB, DCP
+//                throw new RuntimeException("Instruction not implemented: " + instr);
+            // Write instructions (STA, SHA)
+            case STA:
+                //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
+                // SHA
+                throw new RuntimeException("Instruction not implemented: " + instr);
+        }
     }
 
     private void absolute_indexed_addressing(Instructions instr, AddressingMode addrmode) {
@@ -240,10 +350,11 @@ public class CPU {
                 if (Common.isAdditionCarry(low_byte, register)) {
                     effective_addr += 0x100;
 
-                    // This cycle will be executed only if the effective address was invalid during cycle #4, i.e. page boundary was crossed.
-
                     // re-read from effective address
                     fetched_data = read_memory(effective_addr);
+
+                    // This cycle will be executed only if the effective address was invalid during cycle #4, i.e. page boundary was crossed.
+                    cycles ++;
                 }
                 break;
             // Read-Modify-Write instructions (ASL, LSR, ROL, ROR, INC, DEC, SLO, SRE, RLA, RRA, ISB, DCP)
@@ -267,9 +378,10 @@ public class CPU {
     }
 
     private void accumulator_or_implied_addressing(Instructions instr) {
+        throw new RuntimeException("Not implemented");
     }
 
-    private void immediate_addressing(Instructions instr) {
+    private void immediate_addressing() {
         // fetch value, increment PC
         byte value = read_memory(registers.getPC());
         registers.incrementPC();
@@ -277,7 +389,7 @@ public class CPU {
         fetched_data = value;
     }
 
-    private void zeropage_indexed_addressing(Instructions instr, AddressingMode addrmode) {
+    private void zeropage_indexed_addressing(AddressingMode addrmode) {
         // fetch address, increment PC
         byte addr_low = read_memory(registers.getPC());
         registers.incrementPC();
@@ -296,7 +408,7 @@ public class CPU {
         fetched_data = read_memory(effective_addr);
     }
 
-    private void zeropage_addressing(Instructions instr) {
+    private void zeropage_addressing() {
         // fetch address, increment PC
         byte addr_low = read_memory(registers.getPC());
         registers.incrementPC();
@@ -462,7 +574,7 @@ public class CPU {
         }
     }
 
-    private void lda() {
+    private void exec_lda() {
         registers.setA(fetched_data);
         registers.getP().setNegative(Common.Bits.getBit(fetched_data, 7));
         registers.getP().setZero(fetched_data == 0);
