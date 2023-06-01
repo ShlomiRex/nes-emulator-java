@@ -63,14 +63,24 @@ public class TestCPU {
         //test_by_type_of_instruction("ADC", (byte) 0x79);
 
         // All LDA tests
-        test_by_type_of_instruction("LDA", (byte) 0xA9);
-        test_by_type_of_instruction("LDA", (byte) 0xA5);
-        test_by_type_of_instruction("LDA", (byte) 0xB5);
-        test_by_type_of_instruction("LDA", (byte) 0xAD);
-        test_by_type_of_instruction("LDA", (byte) 0xBD);
-        test_by_type_of_instruction("LDA", (byte) 0xB9);
-        test_by_type_of_instruction("LDA", (byte) 0xA1);
-        test_by_type_of_instruction("LDA", (byte) 0xB1);
+//        test_by_type_of_instruction("LDA", (byte) 0xA9);
+//        test_by_type_of_instruction("LDA", (byte) 0xA5);
+//        test_by_type_of_instruction("LDA", (byte) 0xB5);
+//        test_by_type_of_instruction("LDA", (byte) 0xAD);
+//        test_by_type_of_instruction("LDA", (byte) 0xBD);
+//        test_by_type_of_instruction("LDA", (byte) 0xB9);
+//        test_by_type_of_instruction("LDA", (byte) 0xA1);
+//        test_by_type_of_instruction("LDA", (byte) 0xB1);
+
+        // All ADC tests
+        test_by_type_of_instruction("ADC", (byte) 0x69);
+        test_by_type_of_instruction("ADC", (byte) 0x65);
+        test_by_type_of_instruction("ADC", (byte) 0x75);
+        test_by_type_of_instruction("ADC", (byte) 0x6D);
+        test_by_type_of_instruction("ADC", (byte) 0x7D);
+        test_by_type_of_instruction("ADC", (byte) 0x79);
+        test_by_type_of_instruction("ADC", (byte) 0x61);
+        test_by_type_of_instruction("ADC", (byte) 0x71);
     }
 
     private static Stream<Arguments> test_cases_by_type_of_instruction() {

@@ -201,6 +201,7 @@ public class CPU {
         // Execute
         switch (instr) {
             case LDA -> exec_lda();
+            case ADC -> exec_adc();
             default -> throw new RuntimeException("Instruction not implemented: " + instr);
         }
 
@@ -578,5 +579,20 @@ public class CPU {
         registers.setA(fetched_data);
         registers.getP().setNegative(Common.Bits.getBit(fetched_data, 7));
         registers.getP().setZero(fetched_data == 0);
+    }
+
+    private void exec_adc() {
+        byte result = (byte) (registers.getA() + fetched_data + (registers.getP().getCarry() ? 1 : 0));
+
+        byte m_plus_a = (byte) (fetched_data + registers.getA());
+        boolean is_carry = Common.isAdditionCarry(fetched_data, registers.getA());
+        boolean is_carry2 = Common.isAdditionCarry(m_plus_a, (byte) (registers.getP().getCarry() ? 1 : 0));
+        boolean negative_flag_set = ((registers.getA() ^ result) & (fetched_data ^ result) & 0x80) != 0;
+
+        registers.getP().modify_n(result);
+        registers.getP().modify_z(result);
+        registers.getP().setCarry(is_carry || is_carry2);
+        registers.getP().setOverflow(negative_flag_set);
+        registers.setA(result);
     }
 }
