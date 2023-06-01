@@ -97,9 +97,9 @@ public class CPU {
 //            }
 //        }\
         res = memory[addr & 0xFFFF];
-        logger.debug("Reading memory: [" +
-                (addr & 0xFFFF) + " (" + Common.shortToHex(addr, true) + ")] = " + (res & 0xFF) +" ("+
-                Common.byteToHex(res, true) + ")");
+//        logger.debug("Reading memory: [" +
+//                (addr & 0xFFFF) + " (" + Common.shortToHex(addr, true) + ")] = " + (res & 0xFF) +" ("+
+//                Common.byteToHex(res, true) + ")");
         if (is_record_memory)
             recorded_memory.add(new MemoryAccessRecord(addr, res, true));
         cycles ++;
@@ -215,7 +215,6 @@ public class CPU {
      * @param instr
      */
     private void indexed_indirect_addressing(Instructions instr) {
-
         switch(instr) {
             // Read instructions (LDA, ORA, EOR, AND, ADC, CMP, SBC, LAX)
             case LDA:
@@ -245,6 +244,39 @@ public class CPU {
 
                 // read from effective address
                 fetched_data = read_memory(Common.makeShort(effective_addr_low, effective_addr_high));
+                break;
+            // Read-Modify-Write instructions (SLO, SRE, RLA, RRA, ISB, DCP)
+//            case SLO:
+//            case SRE:
+//            case RLA:
+//            case RRA:
+//            case ISB:
+//            case DCP:
+                //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
+                // SLO, SRE, RLA, RRA, ISB, DCP
+//                throw new RuntimeException("Read-Modify-Write instructions not implemented: " + instr);
+            // Write instructions (STA, SAX)
+            case STA:
+                //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
+                // SAX
+
+                // fetch pointer address, increment PC
+                pointer_addr = read_memory(registers.getPC());
+                registers.incrementPC();
+
+                // read from the address, add X to it
+                addr = (short) (pointer_addr & 0xFF);
+                effective_addr = read_memory((short) (pointer_addr & 0xFF));
+                addr += registers.getX();
+
+                // fetch effective address low
+                effective_addr_low = read_memory((short) (addr & 0xFF));
+
+                // fetch effective address high
+                effective_addr_high = read_memory((short) ((addr + 1) & 0xFF));
+
+                // write to effective address
+                fetched_addr = Common.makeShort(effective_addr_low, effective_addr_high);
                 break;
             default:
                 throw new RuntimeException("Instruction not implemented: " + instr);
@@ -310,7 +342,27 @@ public class CPU {
             case STA:
                 //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
                 // SHA
-                throw new RuntimeException("Instruction not implemented: " + instr);
+
+                // fetch pointer address, increment PC
+                pointer_addr = read_memory(registers.getPC());
+                registers.incrementPC();
+
+                // fetch effective address low
+                effective_addr_low = read_memory((short) (pointer_addr & 0xFF));
+
+                // fetch effective address high, add Y to low byte of effective address
+                effective_addr_high = read_memory((short) ((pointer_addr +1) & 0xFF));
+                new_effective_addr_low = (byte) (effective_addr_low + register);
+
+                // read from effective address, fix high byte of effective address
+                effective_addr = Common.makeShort(new_effective_addr_low, effective_addr_high);
+                read_memory(effective_addr);
+
+                if (Common.isAdditionCarry(effective_addr_low, register))
+                    effective_addr += 0x100;
+
+                fetched_addr = effective_addr;
+                break;
         }
     }
 
@@ -377,7 +429,29 @@ public class CPU {
             case STY:
                 //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
                 // SHA, SHX, SHY
-                throw new RuntimeException("Write instructions not implemented");
+
+                // fetch low byte of address, increment PC
+                low_byte = read_memory(registers.getPC());
+                registers.incrementPC();
+
+                // fetch high byte of address, add index register to low address byte, increment PC
+                high_byte = read_memory(registers.getPC());
+                new_low_byte = (byte) (low_byte + register);
+                registers.incrementPC();
+
+                // read from effective address, fix the high byte of effective address
+                effective_addr = Common.makeShort(new_low_byte, high_byte);
+                fetched_data = read_memory(effective_addr);
+
+                if (Common.isAdditionCarry(low_byte, register)) {
+                    effective_addr += 0x100;
+                }
+
+                // write to effective address
+                // Note: we store address, and after the addressing mode is finished, we execute in different place
+                fetched_addr = effective_addr;
+
+                break;
         }
     }
 
@@ -514,10 +588,12 @@ public class CPU {
     }
 
     private void absolute_addressing(Instructions instruction) {
+        byte addr_low, addr_high;
+
        switch(instruction) {
            // JMP
            case JMP:
-               throw new RuntimeException("Not implemented yet");
+                throw new RuntimeException("Not implemented yet");
            // Read instructions: LDA, LDX, LDY, EOR, AND, ORA, ADC, SBC, CMP, BIT, LAX, NOP
            case LDA:
            case LDX:
@@ -533,18 +609,18 @@ public class CPU {
                 //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
                 // LAX
 
-               //fetch low byte of address, increment PC
-               byte addr_low = read_memory(registers.getPC());
-               registers.incrementPC();
+                //fetch low byte of address, increment PC
+                addr_low = read_memory(registers.getPC());
+                registers.incrementPC();
 
-               // fetch high byte of address, increment PC
-               byte addr_high = read_memory(registers.getPC());
-               registers.incrementPC();
+                // fetch high byte of address, increment PC
+                addr_high = read_memory(registers.getPC());
+                registers.incrementPC();
 
-               // read from effective address
-               short effective_addr = Common.makeShort(addr_low, addr_high);
-               fetched_data = read_memory(effective_addr);
-               break;
+                // read from effective address
+                short effective_addr = Common.makeShort(addr_low, addr_high);
+                fetched_data = read_memory(effective_addr);
+                break;
             // Read-Modify-Write instructions (ASL, LSR, ROL, ROR, INC, DEC, SLO, SRE, RLA, RRA, ISB, DCP)
            case ASL:
            case LSR:
@@ -552,24 +628,36 @@ public class CPU {
            case ROR:
            case INC:
            case DEC:
-               //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
-               // SLO, SRE, RLA, RRA, ISB, DCP
-               throw new RuntimeException("Not implemented yet");
+                //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
+                // SLO, SRE, RLA, RRA, ISB, DCP
+                throw new RuntimeException("Not implemented yet");
            // Write instructions (STA, STX, STY, SAX)
            case STA:
            case STX:
            case STY:
-               //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
-               // SAX
-               throw new RuntimeException("Not implemented yet");
+                //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
+                // SAX
+
+                // fetch low byte of address, increment PC
+                addr_low = read_memory(registers.getPC());
+                registers.incrementPC();
+
+                // fetch high byte of address, increment PC
+                addr_high = read_memory(registers.getPC());
+                registers.incrementPC();
+
+                // write register to effective address
+                // Note: we store address, and after the addressing mode is finished, we execute in different place
+                fetched_addr = Common.makeShort(addr_low, addr_high);
+                break;
            default:
-               throw new RuntimeException("Did not expect this instruction here");
+                throw new RuntimeException("Did not expect this instruction here");
        }
     }
 
     private void write_memory(short addr, byte value) {
-        logger.debug("Writing memory: ["+addr + " (" + Common.shortToHex(addr, true)+")] = "
-                +value + " ("+Common.byteToHex(value, true)+")");
+//        logger.debug("Writing memory: ["+addr + " (" + Common.shortToHex(addr, true)+")] = "
+//                +value + " ("+Common.byteToHex(value, true)+")");
         memory[addr & 0xFFFF] = value;
         cycles ++;
         if (is_record_memory)

@@ -58,37 +58,37 @@ public class TestCPU {
     @Test
     public void custom_test() throws IOException {
         // All LDA tests
-//        test_by_type_of_instruction("LDA", (byte) 0xA9);
-//        test_by_type_of_instruction("LDA", (byte) 0xA5);
-//        test_by_type_of_instruction("LDA", (byte) 0xB5);
-//        test_by_type_of_instruction("LDA", (byte) 0xAD);
-//        test_by_type_of_instruction("LDA", (byte) 0xBD);
-//        test_by_type_of_instruction("LDA", (byte) 0xB9);
-//        test_by_type_of_instruction("LDA", (byte) 0xA1);
-//        test_by_type_of_instruction("LDA", (byte) 0xB1);
+        test_by_type_of_instruction("LDA", (byte) 0xA9);
+        test_by_type_of_instruction("LDA", (byte) 0xA5);
+        test_by_type_of_instruction("LDA", (byte) 0xB5);
+        test_by_type_of_instruction("LDA", (byte) 0xAD);
+        test_by_type_of_instruction("LDA", (byte) 0xBD);
+        test_by_type_of_instruction("LDA", (byte) 0xB9);
+        test_by_type_of_instruction("LDA", (byte) 0xA1);
+        test_by_type_of_instruction("LDA", (byte) 0xB1);
 
         // All ADC tests
-//        test_by_type_of_instruction("ADC", (byte) 0x69);
-//        test_by_type_of_instruction("ADC", (byte) 0x65);
-//        test_by_type_of_instruction("ADC", (byte) 0x75);
-//        test_by_type_of_instruction("ADC", (byte) 0x6D);
-//        test_by_type_of_instruction("ADC", (byte) 0x7D);
-//        test_by_type_of_instruction("ADC", (byte) 0x79);
-//        test_by_type_of_instruction("ADC", (byte) 0x61);
-//        test_by_type_of_instruction("ADC", (byte) 0x71);
+        test_by_type_of_instruction("ADC", (byte) 0x69);
+        test_by_type_of_instruction("ADC", (byte) 0x65);
+        test_by_type_of_instruction("ADC", (byte) 0x75);
+        test_by_type_of_instruction("ADC", (byte) 0x6D);
+        test_by_type_of_instruction("ADC", (byte) 0x7D);
+        test_by_type_of_instruction("ADC", (byte) 0x79);
+        test_by_type_of_instruction("ADC", (byte) 0x61);
+        test_by_type_of_instruction("ADC", (byte) 0x71);
 
         // All CLI tests
-//        test_by_type_of_instruction("CLI", (byte) 0x58);
+        test_by_type_of_instruction("CLI", (byte) 0x58);
 
         // All STA tests
-//        test_by_type_of_instruction("STA", (byte) 0x85);
-        // TODO: Add tests above this line are working.
+        test_by_type_of_instruction("STA", (byte) 0x85);
         test_by_type_of_instruction("STA", (byte) 0x95);
-//        test_by_type_of_instruction("STA", (byte) 0x8D);
-//        test_by_type_of_instruction("STA", (byte) 0x9D);
-//        test_by_type_of_instruction("STA", (byte) 0x99);
-//        test_by_type_of_instruction("STA", (byte) 0x81);
-//        test_by_type_of_instruction("STA", (byte) 0x91);
+        test_by_type_of_instruction("STA", (byte) 0x8D);
+        test_by_type_of_instruction("STA", (byte) 0x9D);
+        test_by_type_of_instruction("STA", (byte) 0x99);
+        test_by_type_of_instruction("STA", (byte) 0x81);
+        test_by_type_of_instruction("STA", (byte) 0x91);
+        // TODO: Add tests above this line are working.
 
         // All TAX tests
 //        test_by_type_of_instruction("TAX", (byte) 0xAA);
@@ -161,7 +161,7 @@ public class TestCPU {
     private JSONArray read_test(int opcode) throws IOException {
         String opcode_hex = Common.byteToHex((byte) opcode, false);
         Path path = Paths.get("test_resources/ProcessorTests/nes6502", "v1", opcode_hex + ".json");
-        logger.debug("Reading test file: " + path);
+        //logger.debug("Reading test file: " + path);
         String jsonContent = new String(Files.readAllBytes(path));
         return new JSONArray(jsonContent);
     }
@@ -193,9 +193,9 @@ public class TestCPU {
             Integer address = (Integer) obj.get(0);
             Integer value = (Integer) obj.get(1);
 
-            logger.debug("Setting memory: [" + address +
-                    " ("+Common.shortToHex(address.shortValue(), true)+")] = " +
-                    value + " ("+Common.byteToHex(value.byteValue(), true)+")");
+//            logger.debug("Setting memory: [" + address +
+//                    " ("+Common.shortToHex(address.shortValue(), true)+")] = " +
+//                    value + " ("+Common.byteToHex(value.byteValue(), true)+")");
 
             cpu_memory[address] = value.byteValue();
         }
