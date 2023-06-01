@@ -202,6 +202,7 @@ public class CPU {
         switch (instr) {
             case LDA -> exec_lda();
             case ADC -> exec_adc();
+            case CLI -> registers.getP().setInterruptDisable(false);
             default -> throw new RuntimeException("Instruction not implemented: " + instr);
         }
 
@@ -379,7 +380,8 @@ public class CPU {
     }
 
     private void accumulator_or_implied_addressing(Instructions instr) {
-        throw new RuntimeException("Not implemented");
+        // read next instruction byte (and throw it away)
+        read_memory(registers.getPC());
     }
 
     private void immediate_addressing() {

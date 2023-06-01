@@ -57,11 +57,6 @@ public class TestCPU {
 
     @Test
     public void custom_test() throws IOException {
-        //test_by_type_of_instruction("BCC", (byte) 0x90);
-        //test_by_type_of_instruction("JSR", (byte) 0x20);
-        //test_by_type_of_instruction("LSR", (byte) 0x46);
-        //test_by_type_of_instruction("ADC", (byte) 0x79);
-
         // All LDA tests
 //        test_by_type_of_instruction("LDA", (byte) 0xA9);
 //        test_by_type_of_instruction("LDA", (byte) 0xA5);
@@ -73,14 +68,42 @@ public class TestCPU {
 //        test_by_type_of_instruction("LDA", (byte) 0xB1);
 
         // All ADC tests
-        test_by_type_of_instruction("ADC", (byte) 0x69);
-        test_by_type_of_instruction("ADC", (byte) 0x65);
-        test_by_type_of_instruction("ADC", (byte) 0x75);
-        test_by_type_of_instruction("ADC", (byte) 0x6D);
-        test_by_type_of_instruction("ADC", (byte) 0x7D);
-        test_by_type_of_instruction("ADC", (byte) 0x79);
-        test_by_type_of_instruction("ADC", (byte) 0x61);
-        test_by_type_of_instruction("ADC", (byte) 0x71);
+//        test_by_type_of_instruction("ADC", (byte) 0x69);
+//        test_by_type_of_instruction("ADC", (byte) 0x65);
+//        test_by_type_of_instruction("ADC", (byte) 0x75);
+//        test_by_type_of_instruction("ADC", (byte) 0x6D);
+//        test_by_type_of_instruction("ADC", (byte) 0x7D);
+//        test_by_type_of_instruction("ADC", (byte) 0x79);
+//        test_by_type_of_instruction("ADC", (byte) 0x61);
+//        test_by_type_of_instruction("ADC", (byte) 0x71);
+
+        // TODO: Add tests above this are working.
+        // All CLI tests
+        test_by_type_of_instruction("CLI", (byte) 0x58);
+
+        // All STA tests
+//        test_by_type_of_instruction("STA", (byte) 0x85);
+//        test_by_type_of_instruction("STA", (byte) 0x95);
+//        test_by_type_of_instruction("STA", (byte) 0x8D);
+//        test_by_type_of_instruction("STA", (byte) 0x9D);
+//        test_by_type_of_instruction("STA", (byte) 0x99);
+//        test_by_type_of_instruction("STA", (byte) 0x81);
+//        test_by_type_of_instruction("STA", (byte) 0x91);
+
+        // All TAX tests
+//        test_by_type_of_instruction("TAX", (byte) 0xAA);
+
+        // All CPX tests
+//        test_by_type_of_instruction("CPX", (byte) 0xE0);
+//        test_by_type_of_instruction("CPX", (byte) 0xE4);
+//        test_by_type_of_instruction("CPX", (byte) 0xEC);
+
+
+        // custom
+        //test_by_type_of_instruction("BCC", (byte) 0x90);
+        //test_by_type_of_instruction("JSR", (byte) 0x20);
+        //test_by_type_of_instruction("LSR", (byte) 0x46);
+        //test_by_type_of_instruction("ADC", (byte) 0x79);
     }
 
     private static Stream<Arguments> test_cases_by_type_of_instruction() {
