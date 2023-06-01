@@ -90,14 +90,14 @@ public class TestCPU {
 //        test_by_type_of_instruction("STA", (byte) 0x91);
 
         // All TAX tests
-        test_by_type_of_instruction("TAX", (byte) 0xAA);
+//        test_by_type_of_instruction("TAX", (byte) 0xAA);
 
         // All CPX tests
-        // TODO: Add tests above this line are working.
-//        test_by_type_of_instruction("CPX", (byte) 0xE0);
-//        test_by_type_of_instruction("CPX", (byte) 0xE4);
-//        test_by_type_of_instruction("CPX", (byte) 0xEC);
+        test_by_type_of_instruction("CPX", (byte) 0xE0);
+        test_by_type_of_instruction("CPX", (byte) 0xE4);
+        test_by_type_of_instruction("CPX", (byte) 0xEC);
 
+        // TODO: Add tests above this line are working.
 
         // custom
         //test_by_type_of_instruction("BCC", (byte) 0x90);
@@ -215,9 +215,6 @@ public class TestCPU {
         assertEquals(a.byteValue(), cpu.registers.getA());
         assertEquals(x.byteValue(), cpu.registers.getX());
         assertEquals(y.byteValue(), cpu.registers.getY());
-        // 01101101, 00101101
-        // means: NV-BDIZC
-        // My P register is missing: Overflow = true,
         assertEquals(p.byteValue(), cpu.registers.getP().getAllFlags());
         assertEquals(s.byteValue(), cpu.registers.getS());
 

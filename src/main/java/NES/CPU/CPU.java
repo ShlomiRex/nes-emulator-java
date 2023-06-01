@@ -206,6 +206,7 @@ public class CPU {
             case CLI -> registers.getP().setInterruptDisable(false);
             case STA -> write_memory(fetched_addr, registers.getA());
             case TAX -> exec_tax();
+            case CPX -> exec_cmp(addrmode, registers.getX());
             default -> throw new RuntimeException("Instruction not implemented: " + instr);
         }
 
@@ -550,6 +551,7 @@ public class CPU {
             case CMP:
             case BIT:
             case NOP:
+            case CPX: // Added CPX because of CMP, it was not mentioned in the documentation (http://www.atarihq.com/danb/files/64doc.txt)
                 // fetch address, increment PC
                 byte addr_low = read_memory(registers.getPC());
                 registers.incrementPC();
@@ -607,6 +609,7 @@ public class CPU {
            case CMP:
            case BIT:
            case NOP:
+           case CPX: // Added CPX because of CMP, it was not mentioned in the documentation (http://www.atarihq.com/danb/files/64doc.txt)
                 //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
                 // LAX
 
@@ -695,24 +698,23 @@ public class CPU {
 
 		*The N flag will be bit 7 of A, X, or Y - Memory
 		*/
-//        byte fetched_memory = fetch_instruction_memory(addrmode).getA();
-//        byte sub = (byte) (register - fetched_memory);
-//        boolean last_bit = Common.Bits.getBit(sub, 7);
-//
-//        boolean new_n = false, new_z = false, new_c = false;
-//
-//        if ((register & 0xFF) < (fetched_memory & 0xFF)) {
-//            new_n = last_bit;
-//        } else if (register == fetched_memory) {
-//            new_z = new_c = true;
-//        } else {
-//            new_n = last_bit;
-//            new_c = true;
-//        }
-//
-//        registers.getP().setNegative(new_n);
-//        registers.getP().setZero(new_z);
-//        registers.getP().setCarry(new_c); // TODO: Expected true
+        byte sub = (byte) (register - fetched_data);
+        boolean last_bit = Common.Bits.getBit(sub, 7);
+
+        boolean new_n = false, new_z = false, new_c = false;
+
+        if ((register & 0xFF) < (fetched_data & 0xFF)) {
+            new_n = last_bit;
+        } else if (register == fetched_data) {
+            new_z = new_c = true;
+        } else {
+            new_n = last_bit;
+            new_c = true;
+        }
+
+        registers.getP().setNegative(new_n);
+        registers.getP().setZero(new_z);
+        registers.getP().setCarry(new_c); // TODO: Expected true
     }
 
     private void nmi_interrupt() {
