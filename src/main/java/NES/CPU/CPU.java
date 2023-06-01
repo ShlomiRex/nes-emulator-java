@@ -373,42 +373,40 @@ public class CPU {
                     // Fetch opcode of next instruction. Fix PCH. If it did not change, increment PC.
                     read_memory(next_instr_addr); // dummy read
                     registers.setPC((short) (pc + offset));
-
                 }
                 break;
             case ROL:
-                // Implement ROL instruction
-
-                byte value;
+                byte old_value;
+                Common.Pair<Byte, Short> fetched = null;
                 if (addrmode == Decoder.AddressingMode.ACCUMULATOR) {
                     // Accumulator
-                    value = registers.getA();
+                    old_value = registers.getA();
                 } else {
                     // Memory
-                    value = fetch_instruction_memory(addrmode).getA();
+                    fetched = fetch_instruction_memory(addrmode);
+                    old_value = fetched.getA();
                 }
 
                 boolean old_carry = registers.getP().getCarry();
-                new_carry = Common.Bits.getBit(value, 7);
+                new_carry = Common.Bits.getBit(old_value, 7);
 
-                value <<= 1;
+                byte new_value = (byte) (old_value << 1);
                 if (old_carry) {
-                    value |= 1;
+                    new_value |= 1;
                 }
 
                 // Now we need to know where to put the result. Register or memory?
                 if (addrmode == Decoder.AddressingMode.ACCUMULATOR) {
-                    registers.setA(value);
+                    registers.setA(new_value);
+                    read_memory((short) (registers.getPC() + 1)); // dummy read
                 } else {
-                    addr = fetch_instruction_address(addrmode);
-                    write_memory(addr, value);
+                    addr = fetched.getB();
+                    write_memory(addr, old_value); // dummy write
+                    write_memory(addr, new_value);
                 }
-
-                registers.getP().modify_n(value);
-                registers.getP().modify_z(value);
+                registers.getP().modify_n(new_value);
+                registers.getP().modify_z(new_value);
                 registers.getP().setCarry(new_carry);
-
-                read_memory((short) (registers.getPC() + 1)); // dummy read
                 break;
             default:
                 throw new RuntimeException("Not implemented yet");
