@@ -205,6 +205,7 @@ public class CPU {
             case ADC -> exec_adc();
             case CLI -> registers.getP().setInterruptDisable(false);
             case STA -> write_memory(fetched_addr, registers.getA());
+            case TAX -> exec_tax();
             default -> throw new RuntimeException("Instruction not implemented: " + instr);
         }
 
@@ -776,5 +777,11 @@ public class CPU {
         registers.getP().setCarry(is_carry || is_carry2);
         registers.getP().setOverflow(negative_flag_set);
         registers.setA(result);
+    }
+
+    private void exec_tax() {
+        registers.setX(registers.getA());
+        registers.getP().setZero(registers.getX() == 0);
+        registers.getP().setNegative(Common.Bits.getBit(registers.getX(), 7));
     }
 }
