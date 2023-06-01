@@ -108,6 +108,30 @@ public class TestCPU {
 //        test_by_type_of_instruction("CPY", (byte) 0xC4);
 //        test_by_type_of_instruction("CPY", (byte) 0xCC);
 
+        // All STX tests
+//        test_by_type_of_instruction("STX", (byte) 0x86);
+//        test_by_type_of_instruction("STX", (byte) 0x96);
+//        test_by_type_of_instruction("STX", (byte) 0x8E);
+
+        // All STY tests
+//        test_by_type_of_instruction("STY", (byte) 0x84);
+//        test_by_type_of_instruction("STY", (byte) 0x94);
+//        test_by_type_of_instruction("STY", (byte) 0x8C);
+
+        // all BCC tests
+        test_by_type_of_instruction("BCC", (byte) 0x90);
+
+        // all CMP tests
+//        test_by_type_of_instruction("CMP", (byte) 0xC9);
+//        test_by_type_of_instruction("CMP", (byte) 0xC5);
+//        test_by_type_of_instruction("CMP", (byte) 0xD5);
+//        test_by_type_of_instruction("CMP", (byte) 0xCD);
+//        test_by_type_of_instruction("CMP", (byte) 0xDD);
+//        test_by_type_of_instruction("CMP", (byte) 0xD9);
+//        test_by_type_of_instruction("CMP", (byte) 0xC1);
+//        test_by_type_of_instruction("CMP", (byte) 0xD1);
+
+
         // custom
         //test_by_type_of_instruction("BCC", (byte) 0x90);
         //test_by_type_of_instruction("JSR", (byte) 0x20);

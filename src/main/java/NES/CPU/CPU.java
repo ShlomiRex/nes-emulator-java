@@ -182,7 +182,8 @@ public class CPU {
                 break;
             // Relative addressing (BCC, BCS, BNE, BEQ, BPL, BMI, BVC, BVS)
             case RELATIVE:
-                throw new RuntimeException("Relative addressing not implemented");
+                relative_addressing(instr);
+                break;
             // Indexed indirect addressing
             case INDIRECT_X:
                 indexed_indirect_addressing(instr);
@@ -210,6 +211,9 @@ public class CPU {
             case CLV -> registers.getP().setOverflow(false);
             case TAY -> exec_tay();
             case CPY -> exec_cmp(addrmode, registers.getY());
+            case STX -> write_memory(fetched_addr, registers.getX());
+            case STY -> write_memory(fetched_addr, registers.getY());
+            case BCC -> exec_bcc();
             default -> throw new RuntimeException("Instruction not implemented: " + instr);
         }
 
@@ -664,6 +668,79 @@ public class CPU {
        }
     }
 
+    private void relative_addressing(Instructions instr) {
+        switch(instr) {
+            // Branch instructions (BCC, BCS, BNE, BEQ, BPL, BMI, BVC, BVS)
+            case BPL:
+            case BMI:
+            case BVC:
+            case BVS:
+            case BCC:
+            case BCS:
+            case BNE:
+                // fetch operand, increment PC
+                byte operand = read_memory(registers.getPC());
+                registers.incrementPC();
+
+                // Fetch opcode of next instruction, If branch is taken, add operand to PCL. Otherwise increment PC.
+                byte opcode = read_memory(registers.getPC());
+                if (
+                        (instr == Instructions.BMI && registers.getP().getNegative()     == true)    ||
+                                (instr == Instructions.BPL && registers.getP().getNegative()     == false)   ||
+                                (instr == Instructions.BNE && registers.getP().getZero()         == false)   ||
+                                (instr == Instructions.BVC && registers.getP().getOverflow()     == false)   ||
+                                (instr == Instructions.BVS && registers.getP().getOverflow()     == true)    ||
+                                (instr == Instructions.BEQ && registers.getP().getZero()         == true)    ||
+                                (instr == Instructions.BCS && registers.getP().getCarry()        == true)    ||
+                                (instr == Instructions.BCC && registers.getP().getCarry()        == false)) {
+                    // Branch taken
+
+                    // add operand to PCL.
+                    byte pc_low = (byte) (registers.getPC() & 0xFF);
+                    pc_low += operand;
+
+                    // Fetch opcode of next instruction. Fix PCH. If it did not change, increment PC.
+                    byte pc_high = (byte) ((registers.getPC() >> 8) & 0xFF);
+                    byte new_pc_high = (byte) ((registers.getPC() + operand) >> 8);
+                    if (pc_high == new_pc_high) {
+                        registers.incrementPC();
+                    } else {
+                        pc_high = new_pc_high;
+                    }
+
+                    // Fetch opcode of next instruction, increment PC.
+                    opcode = read_memory(registers.getPC());
+                    registers.incrementPC();
+                }
+
+
+
+                break;
+            default:
+                throw new RuntimeException("Instruction not implemented: " + instr);
+
+
+
+//            case BPL:
+//            case BMI:
+//            case BVC:
+//            case BVS:
+//            case BCC:
+//            case BCS:
+//            case BNE:
+//            case BEQ:
+//                // fetch relative address, increment PC
+//                byte relative_addr = read_memory(registers.getPC());
+//                registers.incrementPC();
+//
+//                // add relative address to PC
+//                fetched_addr = (short) (registers.getPC() + relative_addr);
+//                break;
+//            default:
+//                throw new RuntimeException("Instruction not implemented: " + instr);
+        }
+    }
+
     private void write_memory(short addr, byte value) {
 //        logger.debug("Writing memory: ["+addr + " (" + Common.shortToHex(addr, true)+")] = "
 //                +value + " ("+Common.byteToHex(value, true)+")");
@@ -796,5 +873,12 @@ public class CPU {
         registers.setY(registers.getA());
         registers.getP().setZero(registers.getY() == 0);
         registers.getP().setNegative(Common.Bits.getBit(registers.getY(), 7));
+    }
+
+    private void exec_bcc() {
+        if (!registers.getP().getCarry()) {
+            registers.setPC((short) (registers.getPC() + fetched_data));
+            cycles ++;
+        }
     }
 }
