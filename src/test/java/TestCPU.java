@@ -77,13 +77,13 @@ public class TestCPU {
 //        test_by_type_of_instruction("ADC", (byte) 0x61);
 //        test_by_type_of_instruction("ADC", (byte) 0x71);
 
-        // TODO: Add tests above this are working.
         // All CLI tests
-        test_by_type_of_instruction("CLI", (byte) 0x58);
+//        test_by_type_of_instruction("CLI", (byte) 0x58);
 
         // All STA tests
 //        test_by_type_of_instruction("STA", (byte) 0x85);
-//        test_by_type_of_instruction("STA", (byte) 0x95);
+        // TODO: Add tests above this line are working.
+        test_by_type_of_instruction("STA", (byte) 0x95);
 //        test_by_type_of_instruction("STA", (byte) 0x8D);
 //        test_by_type_of_instruction("STA", (byte) 0x9D);
 //        test_by_type_of_instruction("STA", (byte) 0x99);

@@ -26,6 +26,7 @@ public class CPU {
     private List<MemoryAccessRecord> recorded_memory; // Only used in testing. If record_memory is true, this will contain all the memory reads and writes.
 
     private byte fetched_data; // Set in addressing modes, used afterwards.
+    private short fetched_addr; // Set in addressing modes, used afterwards.
 
     public CPU(byte[] cpu_memory, PPURegisters ppuRegisters) {
         if (cpu_memory.length != 1024 * 64)
@@ -167,12 +168,12 @@ public class CPU {
                 break;
             // Zero page addressing
             case ZEROPAGE:
-                zeropage_addressing();
+                zeropage_addressing(instr);
                 break;
             // Zero page indexed addressing
             case ZEROPAGE_X:
             case ZEROPAGE_Y:
-                zeropage_indexed_addressing(addrmode);
+                zeropage_indexed_addressing(instr, addrmode);
                 break;
             // Absolute indexed addressing
             case ABSOLUTE_X:
@@ -203,6 +204,7 @@ public class CPU {
             case LDA -> exec_lda();
             case ADC -> exec_adc();
             case CLI -> registers.getP().setInterruptDisable(false);
+            case STA -> write_memory(fetched_addr, registers.getA());
             default -> throw new RuntimeException("Instruction not implemented: " + instr);
         }
 
@@ -392,33 +394,123 @@ public class CPU {
         fetched_data = value;
     }
 
-    private void zeropage_indexed_addressing(AddressingMode addrmode) {
-        // fetch address, increment PC
-        byte addr_low = read_memory(registers.getPC());
-        registers.incrementPC();
+    private void zeropage_indexed_addressing(Instructions instr, AddressingMode addrmode) {
+        switch(instr) {
+            // Read instructions (LDA, LDX, LDY, EOR, AND, ORA, ADC, SBC, CMP, BIT, LAX, NOP)
+            case LDA:
+            case LDX:
+            case LDY:
+            case EOR:
+            case AND:
+            case ORA:
+            case ADC:
+            case SBC:
+            case CMP:
+            case BIT:
+            case NOP:
+                // fetch address, increment PC
+                byte addr_low = read_memory(registers.getPC());
+                registers.incrementPC();
 
-        // read from address, add index register to it
-        read_memory((short) (addr_low & 0xFF));
-        byte register;
-        if (addrmode == AddressingMode.ZEROPAGE_X)
-            register = registers.getX();
-        else
-            register = registers.getY();
-        addr_low += register;
+                // read from address, add index register to it
+                read_memory((short) (addr_low & 0xFF));
+                byte register;
+                if (addrmode == AddressingMode.ZEROPAGE_X)
+                    register = registers.getX();
+                else
+                    register = registers.getY();
+                addr_low += register;
 
-        // read from effective address
-        short effective_addr = Common.makeShort(addr_low, (byte) 0x00);
-        fetched_data = read_memory(effective_addr);
+                // read from effective address
+                short effective_addr = Common.makeShort(addr_low, (byte) 0x00);
+                fetched_data = read_memory(effective_addr);
+                break;
+            // Read-Modify-Write instructions (ASL, LSR, ROL, ROR, INC, DEC, SLO, SRE, RLA, RRA, ISB, DCP)
+            case ASL:
+            case LSR:
+            case ROL:
+            case ROR:
+            case INC:
+            case DEC:
+                //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
+                // SLO, SRE, RLA, RRA, ISB, DCP
+                throw new RuntimeException("Read-Modify-Write instructions not implemented");
+            // Write instructions (STA, STX, STY, SAX)
+            case STA:
+            case STX:
+            case STY:
+                //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
+                // SAX
+
+                // fetch address, increment PC
+                addr_low = read_memory(registers.getPC());
+                registers.incrementPC();
+
+                // read from address, add index register to it
+                read_memory((short) (addr_low & 0xFF));
+                if (addrmode == AddressingMode.ZEROPAGE_X)
+                    register = registers.getX();
+                else
+                    register = registers.getY();
+                addr_low += register;
+
+                // write to effective address
+                // Note: we store address, and after the addressing mode is finished, we execute in different place
+                fetched_addr = Common.makeShort(addr_low, (byte) 0x00);
+                break;
+        }
     }
 
-    private void zeropage_addressing() {
-        // fetch address, increment PC
-        byte addr_low = read_memory(registers.getPC());
-        registers.incrementPC();
+    private void zeropage_addressing(Instructions instr) {
+        switch(instr) {
+            // Read instructions (LDA, LDX, LDY, EOR, AND, ORA, ADC, SBC, CMP, BIT, LAX, NOP)
+            case LDA:
+            case LDX:
+            case LDY:
+            case EOR:
+            case AND:
+            case ORA:
+            case ADC:
+            case SBC:
+            case CMP:
+            case BIT:
+            case NOP:
+                // fetch address, increment PC
+                byte addr_low = read_memory(registers.getPC());
+                registers.incrementPC();
 
-        // read from effective address
-        short effective_addr = Common.makeShort(addr_low, (byte) 0x00);
-        fetched_data = read_memory(effective_addr);
+                // read from effective address
+                short effective_addr = Common.makeShort(addr_low, (byte) 0x00);
+                fetched_data = read_memory(effective_addr);
+                break;
+            // Read-Modify-Write instructions (ASL, LSR, ROL, ROR, INC, DEC, SLO, SRE, RLA, RRA, ISB, DCP)
+            case ASL:
+            case LSR:
+            case ROL:
+            case ROR:
+            case INC:
+            case DEC:
+                //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
+                // SLO, SRE, RLA, RRA, ISB, DCP
+                throw new RuntimeException("Read-Modify-Write instructions not implemented");
+            // Write instructions (STA, STX, STY, SAX)
+            case STA:
+            case STX:
+            case STY:
+                //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
+                // SAX
+
+                // fetch address, increment PC
+                addr_low = read_memory(registers.getPC());
+                registers.incrementPC();
+
+                // write register to effective address
+                // Note: we store address, and after the addressing mode is finished, we execute in different place
+                fetched_addr = Common.makeShort(addr_low, (byte) 0x00);
+                break;
+            default:
+                throw new RuntimeException("Instruction not implemented: " + instr);
+        }
     }
 
     private void absolute_addressing(Instructions instruction) {
