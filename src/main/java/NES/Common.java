@@ -89,7 +89,7 @@ public class Common {
         }
     }
 
-    public static boolean isAdditionOverflow(byte a, byte b) {
+    public static boolean isAdditionCarry(byte a, byte b) {
         int sum = (a & 0xFF) + (b & 0xFF);
         return sum > 0xFF;
     }

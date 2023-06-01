@@ -80,7 +80,7 @@ public class TestCPU {
 
     @Test
     public void custom_test() throws IOException {
-        test_by_type_of_instruction("TAY", (byte) 0xA8);
+        test_by_type_of_instruction("ADC", (byte) 0x61);
     }
 
     private static Stream<Arguments> test_cases_by_type_of_instruction() {
@@ -192,6 +192,9 @@ public class TestCPU {
         assertEquals(a.byteValue(), cpu.registers.getA());
         assertEquals(x.byteValue(), cpu.registers.getX());
         assertEquals(y.byteValue(), cpu.registers.getY());
+        // 01101101, 00101101
+        // means: NV-BDIZC
+        // My P register is missing: Overflow = true,
         assertEquals(p.byteValue(), cpu.registers.getP().getAllFlags());
         assertEquals(s.byteValue(), cpu.registers.getS());
 

@@ -181,9 +181,23 @@ public class CPU {
                 registers.getP().setOverflow(false);
                 break;
             case ADC:
-                // TODO: 08-May-23
-                throw new RuntimeException("Not implemented yet");
-                //break;
+                // Implement ADC
+                fetched_memory = fetch_instruction_memory(addrmode);
+                result = (byte) (registers.getA() + fetched_memory + (registers.getP().getCarry() ? 1 : 0));
+
+                int res = registers.getA() + fetched_memory + (registers.getP().getCarry() ? 1 : 0);
+
+                byte m_plus_a = (byte) (fetched_memory + registers.getA());
+                boolean is_carry = Common.isAdditionCarry(fetched_memory, registers.getA());
+                boolean is_carry2 = Common.isAdditionCarry(m_plus_a, (byte) (registers.getP().getCarry() ? 1 : 0));
+                boolean negative_flag_set = ((registers.getA() ^ result) & (fetched_memory ^ result) & 0x80) != 0;
+
+                registers.getP().modify_n(result);
+                registers.getP().modify_z(result);
+                registers.getP().setCarry(is_carry || is_carry2);
+                registers.getP().setOverflow(negative_flag_set);
+                registers.setA(result);
+                break;
             case STX:
             case STY:
             case STA:
@@ -415,7 +429,7 @@ public class CPU {
                 effective_addr = Common.makeShort(low_addr, abs_addr_high);
 
                 // Check if page boundry crossed
-                if (Common.isAdditionOverflow(abs_addr_low, register)) {
+                if (Common.isAdditionCarry(abs_addr_low, register)) {
                     // Dummy read to pass how the real cpu works
                     dummy_res = read_memory(effective_addr);
 
@@ -460,7 +474,7 @@ public class CPU {
 
                 // fetch effective address high, add Y to low byte of effective address
                 high = read_memory(Common.makeShort((byte) (oper + 1), (byte) 0x00));
-                page_boundary_crossed = Common.isAdditionOverflow(low, registers.getY());
+                page_boundary_crossed = Common.isAdditionCarry(low, registers.getY());
                 low = (byte)(low + registers.getY());
 
                 // read from effective address, fix high byte of effective address
@@ -554,7 +568,7 @@ public class CPU {
 
                 // fetch effective address high, add Y to low byte of effective address
                 high = read_memory(Common.makeShort((byte) (oper + 1), (byte) 0x00));
-                page_boundary_crossed = Common.isAdditionOverflow(low, registers.getY());
+                page_boundary_crossed = Common.isAdditionCarry(low, registers.getY());
                 low = (byte) (low + registers.getY());
 
                 // read from effective address, fix high byte of effective address
@@ -583,7 +597,7 @@ public class CPU {
                 effective_addr = Common.makeShort(low_addr, abs_addr_high);
 
                 // Check if page boundry crossed
-                page_boundary_crossed = Common.isAdditionOverflow(abs_addr_low, register);
+                page_boundary_crossed = Common.isAdditionCarry(abs_addr_low, register);
                 if (page_boundary_crossed) {
                     // Dummy read to pass how the real cpu works
                     dummy_res = read_memory(effective_addr);
