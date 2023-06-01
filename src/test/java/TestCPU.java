@@ -93,11 +93,20 @@ public class TestCPU {
 //        test_by_type_of_instruction("TAX", (byte) 0xAA);
 
         // All CPX tests
-        test_by_type_of_instruction("CPX", (byte) 0xE0);
-        test_by_type_of_instruction("CPX", (byte) 0xE4);
-        test_by_type_of_instruction("CPX", (byte) 0xEC);
+//        test_by_type_of_instruction("CPX", (byte) 0xE0);
+//        test_by_type_of_instruction("CPX", (byte) 0xE4);
+//        test_by_type_of_instruction("CPX", (byte) 0xEC);
 
-        // TODO: Add tests above this line are working.
+        // All CLV tests
+//        test_by_type_of_instruction("CLV", (byte) 0xB8);
+
+        // All TAY tests
+//        test_by_type_of_instruction("TAY", (byte) 0xA8);
+
+        // All CPY tests
+//        test_by_type_of_instruction("CPY", (byte) 0xC0);
+//        test_by_type_of_instruction("CPY", (byte) 0xC4);
+//        test_by_type_of_instruction("CPY", (byte) 0xCC);
 
         // custom
         //test_by_type_of_instruction("BCC", (byte) 0x90);

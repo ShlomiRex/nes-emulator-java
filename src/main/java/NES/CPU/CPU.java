@@ -207,6 +207,9 @@ public class CPU {
             case STA -> write_memory(fetched_addr, registers.getA());
             case TAX -> exec_tax();
             case CPX -> exec_cmp(addrmode, registers.getX());
+            case CLV -> registers.getP().setOverflow(false);
+            case TAY -> exec_tay();
+            case CPY -> exec_cmp(addrmode, registers.getY());
             default -> throw new RuntimeException("Instruction not implemented: " + instr);
         }
 
@@ -552,6 +555,7 @@ public class CPU {
             case BIT:
             case NOP:
             case CPX: // Added CPX because of CMP, it was not mentioned in the documentation (http://www.atarihq.com/danb/files/64doc.txt)
+            case CPY: // Same for CPY
                 // fetch address, increment PC
                 byte addr_low = read_memory(registers.getPC());
                 registers.incrementPC();
@@ -610,6 +614,7 @@ public class CPU {
            case BIT:
            case NOP:
            case CPX: // Added CPX because of CMP, it was not mentioned in the documentation (http://www.atarihq.com/danb/files/64doc.txt)
+           case CPY: // Same for CPY
                 //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
                 // LAX
 
@@ -785,5 +790,11 @@ public class CPU {
         registers.setX(registers.getA());
         registers.getP().setZero(registers.getX() == 0);
         registers.getP().setNegative(Common.Bits.getBit(registers.getX(), 7));
+    }
+
+    private void exec_tay() {
+        registers.setY(registers.getA());
+        registers.getP().setZero(registers.getY() == 0);
+        registers.getP().setNegative(Common.Bits.getBit(registers.getY(), 7));
     }
 }
