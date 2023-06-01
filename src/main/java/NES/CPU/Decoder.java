@@ -62,22 +62,6 @@ public class Decoder {
         TYA  // transfer Y to accumulator
     }
 
-    public enum AddressingMode {
-        IMPLIED,
-        ABSOLUTE,
-        ABSOLUTE_X,
-        ABSOLUTE_Y,
-        ZEROPAGE,
-        ZEROPAGE_X,
-        ZEROPAGE_Y,
-        RELATIVE,
-        ACCUMULATOR,
-        INDIRECT,
-        INDIRECT_X,
-        INDIRECT_Y,
-        IMMEDIATE,
-    }
-
     public enum OopsCycle {
         NONE,
         PageBoundaryCrossed,
@@ -316,7 +300,7 @@ public class Decoder {
         return new AssemblyInfo(info, str_instr_bytes, decoded_operand_or_symbol);
     }
 
-    private String convert_1_operands_to_human_readable_text(Decoder.AddressingMode addrmode, byte operand1, short pc) {
+    private String convert_1_operands_to_human_readable_text(AddressingMode addrmode, byte operand1, short pc) {
         switch (addrmode) {
             case IMMEDIATE -> {
                 return "#$" + Common.byteToHex(operand1, false);
@@ -332,7 +316,7 @@ public class Decoder {
         }
     }
 
-    private String convert_2_operands_to_human_readable_text(Decoder.AddressingMode addrmode, byte operand1, byte operand2) {
+    private String convert_2_operands_to_human_readable_text(AddressingMode addrmode, byte operand1, byte operand2) {
         switch (addrmode) {
             case ABSOLUTE -> {
                 // Little endian = switch order of operands that represent the address

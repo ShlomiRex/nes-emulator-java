@@ -1,5 +1,6 @@
 package NES.UI.Debugger.CPUDebugger;
 
+import NES.CPU.AddressingMode;
 import NES.CPU.CPU;
 import NES.CPU.Decoder;
 import NES.Common;
@@ -88,7 +89,7 @@ public class InstructionsPane extends JPanel {
         this.decoded_instr.setText(decoded_instr);
     }
 
-    private String convert_1_operands_to_human_readable_text(Decoder.AddressingMode addrmode, byte operand1) {
+    private String convert_1_operands_to_human_readable_text(AddressingMode addrmode, byte operand1) {
         switch (addrmode) {
             case IMMEDIATE -> {
                 return "#$"+Common.byteToHex(operand1, false);
@@ -104,7 +105,7 @@ public class InstructionsPane extends JPanel {
         }
     }
 
-    private String convert_2_operands_to_human_readable_text(Decoder.AddressingMode addrmode, byte operand1, byte operand2) {
+    private String convert_2_operands_to_human_readable_text(AddressingMode addrmode, byte operand1, byte operand2) {
         switch (addrmode) {
             case ABSOLUTE -> {
                 // Little endian = switch order of operands that represent the address

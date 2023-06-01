@@ -46,7 +46,7 @@ public class CPU {
         // Decode
         Decoder.InstructionInfo instr_info = decoder.decode_opcode(opcode);
         Decoder.Instructions instr = instr_info.instr;
-        Decoder.AddressingMode addrmode = instr_info.addrmode;
+        AddressingMode addrmode = instr_info.addrmode;
         int bytes = instr_info.bytes;
         int cycles = instr_info.cycles;
         Decoder.OopsCycle oops_cycle = instr_info.oopsCycle;
@@ -125,7 +125,7 @@ public class CPU {
         return Common.makeShort(lsb, msb);
     }
 
-    private void execute_instruction(Decoder.Instructions instr, Decoder.AddressingMode addrmode) {
+    private void execute_instruction(Decoder.Instructions instr, AddressingMode addrmode) {
         byte fetched_memory;
         short addr;
         byte result;
@@ -315,7 +315,7 @@ public class CPU {
                 boolean new_carry = Common.Bits.getBit(fetched_memory, 7);
 
                 // Now we need to know where to put the result. Register or memory?
-                if (addrmode == Decoder.AddressingMode.ACCUMULATOR) {
+                if (addrmode == AddressingMode.ACCUMULATOR) {
                     registers.setA(result);
                 } else {
                     addr = fetch_instruction_address(addrmode);
@@ -378,7 +378,7 @@ public class CPU {
             case ROL:
                 byte old_value;
                 Common.Pair<Byte, Short> fetched = null;
-                if (addrmode == Decoder.AddressingMode.ACCUMULATOR) {
+                if (addrmode == AddressingMode.ACCUMULATOR) {
                     // Accumulator
                     old_value = registers.getA();
                 } else {
@@ -399,7 +399,7 @@ public class CPU {
                 }
 
                 // Now we need to know where to put the result. Register or memory?
-                if (addrmode == Decoder.AddressingMode.ACCUMULATOR) {
+                if (addrmode == AddressingMode.ACCUMULATOR) {
                     registers.setA(new_value);
                     read_memory((short) (registers.getPC() + 1)); // dummy read
                 } else {
@@ -421,7 +421,7 @@ public class CPU {
      * @param addrmode
      * @return Pair of fetched memory and effective address
      */
-    private Common.Pair<Byte, Short> fetch_instruction_memory(Decoder.AddressingMode addrmode) {
+    private Common.Pair<Byte, Short> fetch_instruction_memory(AddressingMode addrmode) {
         byte res;
         byte oper;
         short addr;
@@ -454,7 +454,7 @@ public class CPU {
                 addr = Common.makeShort(oper, (byte) 0x00);
                 read_memory(addr); // Dummy read to pass how the real cpu works
 
-                if (addrmode == Decoder.AddressingMode.ZEROPAGE_X)
+                if (addrmode == AddressingMode.ZEROPAGE_X)
                     register = registers.getX();
                 else
                     register = registers.getY();
@@ -469,7 +469,7 @@ public class CPU {
                 byte abs_addr_low = read_memory((short) (registers.getPC() + 1));
                 // fetch high byte of address, add index register X to low address byte,
                 byte abs_addr_high = read_memory((short) (registers.getPC() + 2));
-                if (addrmode == Decoder.AddressingMode.ABSOLUTE_X)
+                if (addrmode == AddressingMode.ABSOLUTE_X)
                     register = registers.getX();
                 else
                     register = registers.getY();
@@ -545,7 +545,7 @@ public class CPU {
      * @param addrmode
      * @return
      */
-    private short fetch_instruction_address(Decoder.AddressingMode addrmode) {
+    private short fetch_instruction_address(AddressingMode addrmode) {
         short operand1_addr = (short) (registers.getPC() + 1);
         byte res;
         byte oper;
@@ -594,7 +594,7 @@ public class CPU {
                 addr = Common.makeShort(oper, (byte) 0x00);
                 dummy_res = read_memory(addr); // Dummy read to pass how the real cpu works
 
-                if (addrmode == Decoder.AddressingMode.ZEROPAGE_X)
+                if (addrmode == AddressingMode.ZEROPAGE_X)
                     register = registers.getX();
                 else
                     register = registers.getY();
@@ -634,7 +634,7 @@ public class CPU {
                 byte abs_addr_low = read_memory((short) (registers.getPC() + 1));
                 byte abs_addr_high = read_memory((short) (registers.getPC() + 2));
 
-                if (addrmode == Decoder.AddressingMode.ABSOLUTE_X)
+                if (addrmode == AddressingMode.ABSOLUTE_X)
                     register = registers.getX();
                 else
                     register = registers.getY();
@@ -688,7 +688,7 @@ public class CPU {
     /**
      * Execute cmp instruction
      */
-    private void exec_cmp(Decoder.AddressingMode addrmode, byte register) {
+    private void exec_cmp(AddressingMode addrmode, byte register) {
 		/*
 		Link: http://www.6502.org/tutorials/compare_instructions.html
 		Compare Results | N | Z | C
