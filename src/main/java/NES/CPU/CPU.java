@@ -134,7 +134,7 @@ public class CPU {
             case LDX:
             case LDY:
             case LDA:
-                fetched_memory = fetch_instruction_memory(addrmode);
+                fetched_memory = fetch_instruction_memory(addrmode).getA();
                 if (instr == Decoder.Instructions.LDX)
                     registers.setX(fetched_memory);
                 else if (instr == Decoder.Instructions.LDY)
@@ -151,7 +151,7 @@ public class CPU {
                 // No operation
                 break;
             case PLA:
-                fetched_memory = fetch_instruction_memory(addrmode);
+                fetched_memory = fetch_instruction_memory(addrmode).getA();
                 registers.setA(fetched_memory);
 
                 registers.getP().modify_n(fetched_memory);
@@ -182,7 +182,7 @@ public class CPU {
                 break;
             case ADC:
                 // Implement ADC
-                fetched_memory = fetch_instruction_memory(addrmode);
+                fetched_memory = fetch_instruction_memory(addrmode).getA();
                 result = (byte) (registers.getA() + fetched_memory + (registers.getP().getCarry() ? 1 : 0));
 
                 byte m_plus_a = (byte) (fetched_memory + registers.getA());
@@ -221,7 +221,7 @@ public class CPU {
                 break;
             case INC:
             case DEC:
-                fetched_memory = fetch_instruction_memory(addrmode);
+                fetched_memory = fetch_instruction_memory(addrmode).getA();
                 if (instr == Decoder.Instructions.INC)
                     fetched_memory += 1;
                 else
@@ -295,7 +295,7 @@ public class CPU {
                 registers.getP().modify_z(registers.getA());
                 break;
             case AND:
-                fetched_memory = fetch_instruction_memory(addrmode);
+                fetched_memory = fetch_instruction_memory(addrmode).getA();
 
                 registers.setA((byte) (registers.getA() & fetched_memory));
                 registers.getP().modify_n(registers.getA());
@@ -303,7 +303,7 @@ public class CPU {
                 break;
             case ASL:
             case LSR:
-                fetched_memory = fetch_instruction_memory(addrmode);
+                fetched_memory = fetch_instruction_memory(addrmode).getA();
                 result = fetched_memory;
                 if (instr == Decoder.Instructions.ASL) {
                     result <<= 1;
@@ -328,7 +328,7 @@ public class CPU {
                 break;
             case BIT:
                 // Test Bits in Memory with Accumulator
-                fetched_memory = fetch_instruction_memory(addrmode);
+                fetched_memory = fetch_instruction_memory(addrmode).getA();
                 result = (byte) (registers.getA() & fetched_memory);
                 boolean bit7 = Common.Bits.getBit(fetched_memory, 7);
                 boolean bit6 = Common.Bits.getBit(fetched_memory, 6);
@@ -385,7 +385,7 @@ public class CPU {
                     value = registers.getA();
                 } else {
                     // Memory
-                    value = fetch_instruction_memory(addrmode);
+                    value = fetch_instruction_memory(addrmode).getA();
                 }
 
                 boolean old_carry = registers.getP().getCarry();
@@ -418,14 +418,13 @@ public class CPU {
     /**
      * Fetch memory required by the instruction. All load instructions use this.
      * @param addrmode
-     * @return
+     * @return Pair of fetched memory and effective address
      */
-    private byte fetch_instruction_memory(Decoder.AddressingMode addrmode) {
+    private Common.Pair<Byte, Short> fetch_instruction_memory(Decoder.AddressingMode addrmode) {
         byte res;
         byte oper;
         short addr;
         short effective_addr;
-        byte dummy_res;
         byte register;
         boolean page_boundary_crossed;
 
@@ -434,29 +433,25 @@ public class CPU {
                 throw new RuntimeException("Instruction with implied addressing mode should never ask to fetch memory.");
             case IMMEDIATE:
                 res = read_memory((short) (registers.getPC() +1));
-                logger.debug("Fetched immediate: "+Common.byteToHex(res, true));
-                return res;
+                return new Common.Pair<>(res, (short) (registers.getPC() + 1));
             case ACCUMULATOR:
                 res = registers.getA();
-                logger.debug("Fetched accumulator: "+Common.byteToHex(res, true));
-                return res;
+                return new Common.Pair<>(res, null);
             case ABSOLUTE:
                 addr = read_address_from_memory((short) (registers.getPC() + 1));
                 res = read_memory(addr);
-                logger.debug("Fetched absolute: "+Common.byteToHex(res, true));
-                return res;
+                return new Common.Pair<>(res, addr);
             case ZEROPAGE:
                 oper = read_memory((short) (registers.getPC() + 1));
-                addr = Common.makeShort(oper, (byte) 0x00);
-                res = read_memory(addr);
-                logger.debug("Fetched zeropage: "+Common.byteToHex(res, true));
-                return res;
+                effective_addr = Common.makeShort(oper, (byte) 0x00);
+                res = read_memory(effective_addr);
+                return new Common.Pair<>(res, effective_addr);
             case ZEROPAGE_Y:
             case ZEROPAGE_X:
                 oper = read_memory((short) (registers.getPC() + 1));
 
                 addr = Common.makeShort(oper, (byte) 0x00);
-                dummy_res = read_memory(addr); // Dummy read to pass how the real cpu works
+                read_memory(addr); // Dummy read to pass how the real cpu works
 
                 if (addrmode == Decoder.AddressingMode.ZEROPAGE_X)
                     register = registers.getX();
@@ -466,7 +461,7 @@ public class CPU {
 
                 res = read_memory(effective_addr);
                 logger.debug("Fetched zeropage_x: "+Common.byteToHex(res, true));
-                return res;
+                return new Common.Pair<>(res, effective_addr);
             case ABSOLUTE_X:
             case ABSOLUTE_Y:
                 byte abs_addr_low = read_memory((short) (registers.getPC() + 1));
@@ -482,8 +477,7 @@ public class CPU {
 
                 // Check if page boundry crossed
                 if (Common.isAdditionCarry(abs_addr_low, register)) {
-                    // Dummy read to pass how the real cpu works
-                    dummy_res = read_memory(effective_addr);
+                    read_memory(effective_addr); // Dummy read to pass how the real cpu works
 
                     // Fix the effective address
                     effective_addr += 0x100;
@@ -492,7 +486,7 @@ public class CPU {
                 res = read_memory(effective_addr);
                 logger.debug("Fetched absolute_x: "+Common.byteToHex(res, true));
 
-                return res;
+                return new Common.Pair<>(res, effective_addr);
             case INDIRECT_X:
                 // Pre-Indexed Indirect, "(Zero-Page,X)"
 
@@ -500,7 +494,7 @@ public class CPU {
                 oper = read_memory((short) (registers.getPC() + 1));
 
                 // read from the address, add X to it
-                dummy_res = read_memory(Common.makeShort(oper, (byte) 0x00)); // Dummy read to pass how the real cpu works
+                read_memory(Common.makeShort(oper, (byte) 0x00)); // Dummy read to pass how the real cpu works
                 addr = (short) (oper + registers.getX() & 0xFF);
 
                 // fetch effective address low
@@ -514,7 +508,7 @@ public class CPU {
                 res = read_memory(effective_addr);
 
                 logger.debug("Fetched indirect_x: "+Common.byteToHex(res, true));
-                return res;
+                return new Common.Pair<>(res, effective_addr);
             case INDIRECT_Y:
                 // Post-Indexed Indirect, "(Zero-Page),Y"
 
@@ -538,9 +532,7 @@ public class CPU {
                     effective_addr += 0x100;
                     res = read_memory(effective_addr);
                 }
-
-                logger.debug("Fetched indirect_y: "+Common.byteToHex(res, true));
-                return res;
+                return new Common.Pair<>(res, effective_addr);
             default:
                 throw new RuntimeException("Not implemented yet");
         }
@@ -705,7 +697,7 @@ public class CPU {
 
 		*The N flag will be bit 7 of A, X, or Y - Memory
 		*/
-        byte fetched_memory = fetch_instruction_memory(addrmode);
+        byte fetched_memory = fetch_instruction_memory(addrmode).getA();
         byte sub = (byte) (register - fetched_memory);
         boolean last_bit = Common.Bits.getBit(sub, 7);
 
