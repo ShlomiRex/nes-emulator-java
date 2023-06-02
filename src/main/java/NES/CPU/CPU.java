@@ -684,7 +684,10 @@ public class CPU {
                 registers.incrementPC();
 
                 // Fetch opcode of next instruction, If branch is taken, add operand to PCL. Otherwise increment PC.
-                byte opcode = read_memory(registers.getPC());
+                read_memory(registers.getPC()); // dummy read
+
+                short addr_tmp = (short) (registers.getPC() + operand);
+                byte addr_tmp_high = (byte) ((addr_tmp >> 8) & 0xFF);
                 if (
                         (instr == Instructions.BMI && registers.getP().getNegative()     == true)    ||
                                 (instr == Instructions.BPL && registers.getP().getNegative()     == false)   ||
@@ -698,24 +701,25 @@ public class CPU {
 
                     // add operand to PCL.
                     byte pc_low = (byte) (registers.getPC() & 0xFF);
+                    byte pc_high = (byte) ((registers.getPC() >> 8) & 0xFF);
                     pc_low += operand;
+                    registers.setPC(Common.makeShort(pc_low, pc_high));
 
                     // Fetch opcode of next instruction. Fix PCH. If it did not change, increment PC.
-                    byte pc_high = (byte) ((registers.getPC() >> 8) & 0xFF);
-                    byte new_pc_high = (byte) ((registers.getPC() + operand) >> 8);
-                    if (pc_high == new_pc_high) {
+                    read_memory(registers.getPC()); // dummy read
+                    if (addr_tmp != registers.getPC()) {
+                        // Fix PCH
+                        registers.setPC(Common.makeShort(pc_low, addr_tmp_high));
                         registers.incrementPC();
-                    } else {
-                        pc_high = new_pc_high;
                     }
 
                     // Fetch opcode of next instruction, increment PC.
-                    opcode = read_memory(registers.getPC());
+                    read_memory(registers.getPC()); // dummy read
+                    registers.incrementPC();
+                } else {
+                    // Branch is not taken
                     registers.incrementPC();
                 }
-
-
-
                 break;
             default:
                 throw new RuntimeException("Instruction not implemented: " + instr);
