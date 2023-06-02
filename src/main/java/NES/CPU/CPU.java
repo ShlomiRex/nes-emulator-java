@@ -216,6 +216,7 @@ public class CPU {
             case BCC -> {
                 // we already delt with it in relative addressing mode
             }
+            case CMP -> exec_cmp(addrmode, registers.getA());
             default -> throw new RuntimeException("Instruction not implemented: " + instr);
         }
 
