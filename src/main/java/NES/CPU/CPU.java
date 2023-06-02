@@ -704,11 +704,11 @@ public class CPU {
                         read_memory(registers.getPC()); // dummy read
                         registers.setPC(addr_tmp);
                     }
-                    read_memory(registers.getPC()); // dummy read
-                    registers.incrementPC();
+//                    read_memory(registers.getPC()); // dummy read
+//                    registers.incrementPC();
                 } else {
                     // Branch is not taken
-                    registers.incrementPC();
+                    //registers.incrementPC();
                 }
                 break;
             default:
