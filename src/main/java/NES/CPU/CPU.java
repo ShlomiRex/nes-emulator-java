@@ -679,12 +679,8 @@ public class CPU {
             case BCS:
             case BNE:
             case BEQ:
-                // fetch operand, increment PC
                 byte operand = read_memory(registers.getPC());
                 registers.incrementPC();
-
-                // Fetch opcode of next instruction, If branch is taken, add operand to PCL. Otherwise increment PC.
-                read_memory(registers.getPC()); // dummy read
 
                 short addr_tmp = (short) (registers.getPC() + operand);
                 byte addr_tmp_high = (byte) ((addr_tmp >> 8) & 0xFF);
@@ -699,21 +695,15 @@ public class CPU {
                                 (instr == Instructions.BCC && registers.getP().getCarry()        == false)) {
                     // Branch taken
 
-                    // add operand to PCL.
-                    byte pc_low = (byte) (registers.getPC() & 0xFF);
-                    byte pc_high = (byte) ((registers.getPC() >> 8) & 0xFF);
-                    pc_low += operand;
-                    registers.setPC(Common.makeShort(pc_low, pc_high));
-
-                    // Fetch opcode of next instruction. Fix PCH. If it did not change, increment PC.
                     read_memory(registers.getPC()); // dummy read
-                    if (addr_tmp != registers.getPC()) {
-                        // Fix PCH
-                        registers.setPC(Common.makeShort(pc_low, addr_tmp_high));
-                        registers.incrementPC();
-                    }
 
-                    // Fetch opcode of next instruction, increment PC.
+                    // Set low 8-bits of PC to low 8-bits of addr_tmp
+                    registers.setPC((short) ((registers.getPC() & 0xFF00) | (addr_tmp & 0xFF)));
+                    if (addr_tmp_high != (byte) (registers.getPC() >> 8)) {
+                        // Page boundary crossed
+                        read_memory(registers.getPC()); // dummy read
+                        registers.setPC(addr_tmp);
+                    }
                     read_memory(registers.getPC()); // dummy read
                     registers.incrementPC();
                 } else {
