@@ -40,8 +40,8 @@ public class CPU {
     }
 
     public void clock_tick() {
-        logger.debug("Tick, cycle: " + this.cycles);
-        logger.debug(registers.toString());
+//        logger.debug("Tick, cycle: " + this.cycles);
+//        logger.debug(registers.toString());
 
         // Fetch
         byte opcode = read_memory(registers.getPC()); // Read at address of Program Counter (duh!)
@@ -51,15 +51,15 @@ public class CPU {
         Decoder.InstructionInfo instr_info = decoder.decode_opcode(opcode);
         Instructions instr = instr_info.instr;
         AddressingMode addrmode = instr_info.addrmode;
-        int bytes = instr_info.bytes;
-        int cycles = instr_info.cycles;
-        Decoder.OopsCycle oops_cycle = instr_info.oopsCycle;
-        logger.debug(
-                instr.toString()+"("+Common.byteToHex(opcode, true)+")\t"
-                +addrmode+"\tBytes: "
-                +bytes+"\tCycles: "
-                +cycles+"\tOops cycle: "
-                +oops_cycle);
+//        int bytes = instr_info.bytes;
+//        int cycles = instr_info.cycles;
+//        Decoder.OopsCycle oops_cycle = instr_info.oopsCycle;
+//        logger.debug(
+//                instr.toString()+"("+Common.byteToHex(opcode, true)+")\t"
+//                +addrmode+"\tBytes: "
+//                +bytes+"\tCycles: "
+//                +cycles+"\tOops cycle: "
+//                +oops_cycle);
 
         // Execute
         execute_instruction(instr, addrmode);
@@ -213,7 +213,9 @@ public class CPU {
             case CPY -> exec_cmp(addrmode, registers.getY());
             case STX -> write_memory(fetched_addr, registers.getX());
             case STY -> write_memory(fetched_addr, registers.getY());
-            case BCC -> exec_bcc();
+            case BCC -> {
+                // we already delt with it in relative addressing mode
+            }
             default -> throw new RuntimeException("Instruction not implemented: " + instr);
         }
 
@@ -868,12 +870,5 @@ public class CPU {
         registers.setY(registers.getA());
         registers.getP().setZero(registers.getY() == 0);
         registers.getP().setNegative(Common.Bits.getBit(registers.getY(), 7));
-    }
-
-    private void exec_bcc() {
-        if (!registers.getP().getCarry()) {
-            registers.setPC((short) (registers.getPC() + fetched_data));
-            cycles ++;
-        }
     }
 }

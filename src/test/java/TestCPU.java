@@ -51,72 +51,72 @@ public class TestCPU {
     @ParameterizedTest(name = "{0}")
     @MethodSource("test_cases_by_type_of_instruction")
     public void test_by_type_of_instruction(String test_name, byte opcode) throws IOException {
-        logger.debug("Running test: " + test_name);
+        logger.debug("Running test: " + test_name + " " + Common.byteToHex(opcode, true));
         cpu_tests_by_opcode(opcode);
     }
 
     @Test
     public void custom_test() throws IOException {
         // All LDA tests
-//        test_by_type_of_instruction("LDA", (byte) 0xA9);
-//        test_by_type_of_instruction("LDA", (byte) 0xA5);
-//        test_by_type_of_instruction("LDA", (byte) 0xB5);
-//        test_by_type_of_instruction("LDA", (byte) 0xAD);
-//        test_by_type_of_instruction("LDA", (byte) 0xBD);
-//        test_by_type_of_instruction("LDA", (byte) 0xB9);
-//        test_by_type_of_instruction("LDA", (byte) 0xA1);
-//        test_by_type_of_instruction("LDA", (byte) 0xB1);
+        test_by_type_of_instruction("LDA", (byte) 0xA9);
+        test_by_type_of_instruction("LDA", (byte) 0xA5);
+        test_by_type_of_instruction("LDA", (byte) 0xB5);
+        test_by_type_of_instruction("LDA", (byte) 0xAD);
+        test_by_type_of_instruction("LDA", (byte) 0xBD);
+        test_by_type_of_instruction("LDA", (byte) 0xB9);
+        test_by_type_of_instruction("LDA", (byte) 0xA1);
+        test_by_type_of_instruction("LDA", (byte) 0xB1);
 
         // All ADC tests
-//        test_by_type_of_instruction("ADC", (byte) 0x69);
-//        test_by_type_of_instruction("ADC", (byte) 0x65);
-//        test_by_type_of_instruction("ADC", (byte) 0x75);
-//        test_by_type_of_instruction("ADC", (byte) 0x6D);
-//        test_by_type_of_instruction("ADC", (byte) 0x7D);
-//        test_by_type_of_instruction("ADC", (byte) 0x79);
-//        test_by_type_of_instruction("ADC", (byte) 0x61);
-//        test_by_type_of_instruction("ADC", (byte) 0x71);
+        test_by_type_of_instruction("ADC", (byte) 0x69);
+        test_by_type_of_instruction("ADC", (byte) 0x65);
+        test_by_type_of_instruction("ADC", (byte) 0x75);
+        test_by_type_of_instruction("ADC", (byte) 0x6D);
+        test_by_type_of_instruction("ADC", (byte) 0x7D);
+        test_by_type_of_instruction("ADC", (byte) 0x79);
+        test_by_type_of_instruction("ADC", (byte) 0x61);
+        test_by_type_of_instruction("ADC", (byte) 0x71);
 
         // All CLI tests
-//        test_by_type_of_instruction("CLI", (byte) 0x58);
+        test_by_type_of_instruction("CLI", (byte) 0x58);
 
         // All STA tests
-//        test_by_type_of_instruction("STA", (byte) 0x85);
-//        test_by_type_of_instruction("STA", (byte) 0x95);
-//        test_by_type_of_instruction("STA", (byte) 0x8D);
-//        test_by_type_of_instruction("STA", (byte) 0x9D);
-//        test_by_type_of_instruction("STA", (byte) 0x99);
-//        test_by_type_of_instruction("STA", (byte) 0x81);
-//        test_by_type_of_instruction("STA", (byte) 0x91);
+        test_by_type_of_instruction("STA", (byte) 0x85);
+        test_by_type_of_instruction("STA", (byte) 0x95);
+        test_by_type_of_instruction("STA", (byte) 0x8D);
+        test_by_type_of_instruction("STA", (byte) 0x9D);
+        test_by_type_of_instruction("STA", (byte) 0x99);
+        test_by_type_of_instruction("STA", (byte) 0x81);
+        test_by_type_of_instruction("STA", (byte) 0x91);
 
         // All TAX tests
-//        test_by_type_of_instruction("TAX", (byte) 0xAA);
+        test_by_type_of_instruction("TAX", (byte) 0xAA);
 
         // All CPX tests
-//        test_by_type_of_instruction("CPX", (byte) 0xE0);
-//        test_by_type_of_instruction("CPX", (byte) 0xE4);
-//        test_by_type_of_instruction("CPX", (byte) 0xEC);
+        test_by_type_of_instruction("CPX", (byte) 0xE0);
+        test_by_type_of_instruction("CPX", (byte) 0xE4);
+        test_by_type_of_instruction("CPX", (byte) 0xEC);
 
         // All CLV tests
-//        test_by_type_of_instruction("CLV", (byte) 0xB8);
+        test_by_type_of_instruction("CLV", (byte) 0xB8);
 
         // All TAY tests
-//        test_by_type_of_instruction("TAY", (byte) 0xA8);
+        test_by_type_of_instruction("TAY", (byte) 0xA8);
 
         // All CPY tests
-//        test_by_type_of_instruction("CPY", (byte) 0xC0);
-//        test_by_type_of_instruction("CPY", (byte) 0xC4);
-//        test_by_type_of_instruction("CPY", (byte) 0xCC);
+        test_by_type_of_instruction("CPY", (byte) 0xC0);
+        test_by_type_of_instruction("CPY", (byte) 0xC4);
+        test_by_type_of_instruction("CPY", (byte) 0xCC);
 
         // All STX tests
-//        test_by_type_of_instruction("STX", (byte) 0x86);
-//        test_by_type_of_instruction("STX", (byte) 0x96);
-//        test_by_type_of_instruction("STX", (byte) 0x8E);
+        test_by_type_of_instruction("STX", (byte) 0x86);
+        test_by_type_of_instruction("STX", (byte) 0x96);
+        test_by_type_of_instruction("STX", (byte) 0x8E);
 
         // All STY tests
-//        test_by_type_of_instruction("STY", (byte) 0x84);
-//        test_by_type_of_instruction("STY", (byte) 0x94);
-//        test_by_type_of_instruction("STY", (byte) 0x8C);
+        test_by_type_of_instruction("STY", (byte) 0x84);
+        test_by_type_of_instruction("STY", (byte) 0x94);
+        test_by_type_of_instruction("STY", (byte) 0x8C);
 
         // all BCC tests
         test_by_type_of_instruction("BCC", (byte) 0x90);
@@ -178,7 +178,7 @@ public class TestCPU {
         for (int i = 0; i < test.length(); i++) {
             JSONObject test_obj = test.getJSONObject(i);
             String test_name = (String) test_obj.get("name");
-            logger.debug("Running test: " + (i+1) +"/"+test.length() + ", test name: " + test_name);
+            //logger.debug("Running test: " + (i+1) +"/"+test.length() + ", test name: " + test_name);
 
             JSONObject initial = (JSONObject) test_obj.get("initial");
             init_cpu(cpu, cpu_memory, initial);
