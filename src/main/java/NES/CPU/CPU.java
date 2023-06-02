@@ -128,11 +128,36 @@ public class CPU {
         // This help me to make the CPU cycle accurate:
         // http://www.atarihq.com/danb/files/64doc.txt
 
-        boolean is_instructions_accessing_the_stack;
+        boolean is_instructions_accessing_the_stack = false;
         switch(instr) {
             // Instructions accessing the stack
             case BRK:
-                throw new RuntimeException("BRK instruction not implemented");
+                // read next instruction byte (and throw it away), increment PC
+                read_memory(registers.getPC());
+                registers.incrementPC();
+
+                // push PCH on stack, decrement S
+                push_stack((byte) (registers.getPC() >> 8));
+
+                // push PCL on stack, decrement S
+                push_stack((byte) (registers.getPC() & 0xFF));
+
+                // push P on stack (with B flag set), decrement S
+                // TODO: Expected to write 113 (0x71) but mine is writing 105 (0x69)
+                push_stack((byte) (registers.getP().getAllFlags() | 0b00010000));
+
+                // fetch PCL
+                byte pcl = read_memory((short) 0xFFFE);
+
+                // fetch PCH
+                byte pch = read_memory((short) 0xFFFF);
+
+                registers.setPC(Common.makeShort(pcl, pch));
+
+                // Set interrupt disable flag (bit 2 of status register)
+                registers.getP().setInterruptDisable(true);
+
+                break;
             case RTI:
                 throw new RuntimeException("RTI instruction not implemented");
             case RTS:
@@ -144,6 +169,12 @@ public class CPU {
             case PLP:
                 throw new RuntimeException("PLA/PLP instruction not implemented");
             case JSR:
+//                // fetch low address byte, increment PC
+//                short low_addr = read_memory(registers.getPC());
+//                registers.incrementPC();
+//
+//                // internal operation (predecrement S?)
+
                 throw new RuntimeException("JSR instruction not implemented");
             default:
                 is_instructions_accessing_the_stack = true;
@@ -749,7 +780,9 @@ public class CPU {
     }
 
     private void push_stack(byte data) {
-        write_memory((short)(0x100 + registers.getS()), data);
+        // TODO: Expected to write at addres: 498 (0x1F2) but instead it writes at 242 (0xF2)
+        write_memory(Common.makeShort(registers.getS(), (byte) 0x01), data);
+        registers.setS((byte) (registers.getS() - 1));
     }
 
     /**

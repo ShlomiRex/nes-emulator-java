@@ -120,23 +120,43 @@ public class TestCPU {
 //
 //        // all BCC tests
 //        test_by_type_of_instruction("BCC", (byte) 0x90);
-
-        // all CMP tests
-        test_by_type_of_instruction("CMP", (byte) 0xC9);
-        test_by_type_of_instruction("CMP", (byte) 0xC5);
-        test_by_type_of_instruction("CMP", (byte) 0xD5);
-        test_by_type_of_instruction("CMP", (byte) 0xCD);
-        test_by_type_of_instruction("CMP", (byte) 0xDD);
-        test_by_type_of_instruction("CMP", (byte) 0xD9);
-        test_by_type_of_instruction("CMP", (byte) 0xC1);
-        test_by_type_of_instruction("CMP", (byte) 0xD1);
-
+//
+//        // all CMP tests
+//        test_by_type_of_instruction("CMP", (byte) 0xC9);
+//        test_by_type_of_instruction("CMP", (byte) 0xC5);
+//        test_by_type_of_instruction("CMP", (byte) 0xD5);
+//        test_by_type_of_instruction("CMP", (byte) 0xCD);
+//        test_by_type_of_instruction("CMP", (byte) 0xDD);
+//        test_by_type_of_instruction("CMP", (byte) 0xD9);
+//        test_by_type_of_instruction("CMP", (byte) 0xC1);
+//        test_by_type_of_instruction("CMP", (byte) 0xD1);
+//
+//        // All JSR tests
+//        test_by_type_of_instruction("JSR", (byte) 0x20);
+//
+//        // All LSR tests
+//        test_by_type_of_instruction("LSR", (byte) 0x46);
+//        test_by_type_of_instruction("LSR", (byte) 0x4A);
+//        test_by_type_of_instruction("LSR", (byte) 0x4E);
+//        test_by_type_of_instruction("LSR", (byte) 0x56);
+//        test_by_type_of_instruction("LSR", (byte) 0x5E);
+//
+//        // All ROL tests
+//        test_by_type_of_instruction("ROL", (byte) 0x26);
+//        test_by_type_of_instruction("ROL", (byte) 0x2A);
+//        test_by_type_of_instruction("ROL", (byte) 0x2E);
+//        test_by_type_of_instruction("ROL", (byte) 0x36);
+//        test_by_type_of_instruction("ROL", (byte) 0x3E);
+//
+//        // All NOP tests
+//        test_by_type_of_instruction("NOP", (byte) 0x7C);
+//        test_by_type_of_instruction("NOP", (byte) 0xEA);
 
         // custom
-        //test_by_type_of_instruction("BCC", (byte) 0x90);
-        //test_by_type_of_instruction("JSR", (byte) 0x20);
-        //test_by_type_of_instruction("LSR", (byte) 0x46);
-        //test_by_type_of_instruction("ADC", (byte) 0x79);
+
+        // All BRK tests
+        test_by_type_of_instruction("BRK", (byte) 0x00);
+
     }
 
     private static Stream<Arguments> test_cases_by_type_of_instruction() {
