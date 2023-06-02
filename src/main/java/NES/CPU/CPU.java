@@ -678,6 +678,7 @@ public class CPU {
             case BCC:
             case BCS:
             case BNE:
+            case BEQ:
                 // fetch operand, increment PC
                 byte operand = read_memory(registers.getPC());
                 registers.incrementPC();
