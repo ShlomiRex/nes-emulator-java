@@ -170,17 +170,17 @@ public class TestCPU {
 //        test_by_type_of_instruction("ROR", (byte) 0x7E);
 //
 //        // All SEI tests
-        test_by_type_of_instruction("SEI", (byte) 0x78);
+//        test_by_type_of_instruction("SEI", (byte) 0x78);
 //
 //        // All AND tests
-//        test_by_type_of_instruction("AND", (byte) 0x29);
-//        test_by_type_of_instruction("AND", (byte) 0x25);
-//        test_by_type_of_instruction("AND", (byte) 0x35);
-//        test_by_type_of_instruction("AND", (byte) 0x2D);
-//        test_by_type_of_instruction("AND", (byte) 0x3D);
-//        test_by_type_of_instruction("AND", (byte) 0x39);
-//        test_by_type_of_instruction("AND", (byte) 0x21);
-//        test_by_type_of_instruction("AND", (byte) 0x31);
+        test_by_type_of_instruction("AND", (byte) 0x29);
+        test_by_type_of_instruction("AND", (byte) 0x25);
+        test_by_type_of_instruction("AND", (byte) 0x35);
+        test_by_type_of_instruction("AND", (byte) 0x2D);
+        test_by_type_of_instruction("AND", (byte) 0x3D);
+        test_by_type_of_instruction("AND", (byte) 0x39);
+        test_by_type_of_instruction("AND", (byte) 0x21);
+        test_by_type_of_instruction("AND", (byte) 0x31);
 
 
     }

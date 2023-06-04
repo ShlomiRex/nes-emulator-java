@@ -301,6 +301,9 @@ public class CPU {
             case SEI:
                 registers.getP().setInterruptDisable(true);
                 break;
+            case AND:
+                exec_and();
+                break;
             default:
                 throw new RuntimeException("Instruction not implemented: " + instr);
         }
@@ -1090,5 +1093,11 @@ public class CPU {
             registers.setA(result);
         else
             write_memory(fetched_addr, result);
+    }
+
+    private void exec_and() {
+        registers.setA((byte) (registers.getA() & fetched_data));
+        registers.getP().setNegative(Common.Bits.getBit(registers.getA(), 7));
+        registers.getP().setZero(registers.getA() == 0);
     }
 }
