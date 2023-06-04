@@ -287,13 +287,16 @@ public class CPU {
                 exec_cmp(addrmode, registers.getA());
                 break;
             case ROL:
-                exec_rol(addrmode == AddressingMode.ACCUMULATOR);
+                exec_rol_or_ror(addrmode == AddressingMode.ACCUMULATOR, true);
                 break;
             case SEC:
                 registers.getP().setCarry(true);
                 break;
             case SED:
                 registers.getP().setDecimal(true);
+                break;
+            case ROR:
+                exec_rol_or_ror(addrmode == AddressingMode.ACCUMULATOR, false);
                 break;
             default:
                 throw new RuntimeException("Instruction not implemented: " + instr);
@@ -1054,7 +1057,7 @@ public class CPU {
             write_memory(fetched_addr, result);
     }
 
-    private void exec_rol(boolean is_accumulator) {
+    private void exec_rol_or_ror(boolean is_accumulator, boolean is_left_shift) {
         if (is_accumulator)
             fetched_data = registers.getA();
 
@@ -1063,9 +1066,19 @@ public class CPU {
 //            fetched_data = read_memory(fetched_addr);
 
         boolean in_carry = registers.getP().getCarry();
-        boolean out_carry = Common.Bits.getBit(fetched_data, 7);
-        byte result = (byte) ((fetched_data & 0xFF) << 1);
-        result = Common.Bits.setBit(result, 0, in_carry);
+        boolean out_carry;
+        byte result;
+        if (is_left_shift) {
+            result = (byte) ((fetched_data & 0xFF) << 1);
+            out_carry = Common.Bits.getBit(fetched_data, 7);
+            result = Common.Bits.setBit(result, 0, in_carry);
+        }
+        else {
+            result = (byte) ((fetched_data & 0xFF) >> 1);
+            out_carry = Common.Bits.getBit(fetched_data, 0);
+            result = Common.Bits.setBit(result, 7, in_carry);
+        }
+
         registers.getP().setCarry(out_carry);
         registers.getP().setZero(result == 0);
         registers.getP().setNegative(Common.Bits.getBit(result, 7));
