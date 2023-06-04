@@ -173,14 +173,49 @@ public class TestCPU {
 //        test_by_type_of_instruction("SEI", (byte) 0x78);
 //
 //        // All AND tests
-        test_by_type_of_instruction("AND", (byte) 0x29);
-        test_by_type_of_instruction("AND", (byte) 0x25);
-        test_by_type_of_instruction("AND", (byte) 0x35);
-        test_by_type_of_instruction("AND", (byte) 0x2D);
-        test_by_type_of_instruction("AND", (byte) 0x3D);
-        test_by_type_of_instruction("AND", (byte) 0x39);
-        test_by_type_of_instruction("AND", (byte) 0x21);
-        test_by_type_of_instruction("AND", (byte) 0x31);
+//        test_by_type_of_instruction("AND", (byte) 0x29);
+//        test_by_type_of_instruction("AND", (byte) 0x25);
+//        test_by_type_of_instruction("AND", (byte) 0x35);
+//        test_by_type_of_instruction("AND", (byte) 0x2D);
+//        test_by_type_of_instruction("AND", (byte) 0x3D);
+//        test_by_type_of_instruction("AND", (byte) 0x39);
+//        test_by_type_of_instruction("AND", (byte) 0x21);
+//        test_by_type_of_instruction("AND", (byte) 0x31);
+
+        // All TSX tests
+        test_by_type_of_instruction("TSX", (byte) 0xBA);
+//
+//        // All TXA tests
+//        test_by_type_of_instruction("TXA", (byte) 0x8A);
+//
+//        // All ORA tests
+//        test_by_type_of_instruction("ORA", (byte) 0x09);
+//        test_by_type_of_instruction("ORA", (byte) 0x05);
+//        test_by_type_of_instruction("ORA", (byte) 0x15);
+//        test_by_type_of_instruction("ORA", (byte) 0x0D);
+//        test_by_type_of_instruction("ORA", (byte) 0x1D);
+//        test_by_type_of_instruction("ORA", (byte) 0x19);
+//        test_by_type_of_instruction("ORA", (byte) 0x01);
+//        test_by_type_of_instruction("ORA", (byte) 0x11);
+//
+//        // All BPL tests
+//        test_by_type_of_instruction("BPL", (byte) 0x10);
+//
+//        // All INC tests
+//        test_by_type_of_instruction("INC", (byte) 0xE6);
+//        test_by_type_of_instruction("INC", (byte) 0xF6);
+//        test_by_type_of_instruction("INC", (byte) 0xEE);
+//        test_by_type_of_instruction("INC", (byte) 0xFE);
+//
+//        // All PLA tests
+//        test_by_type_of_instruction("PLA", (byte) 0x68);
+//
+//        // All RTI tests
+//        test_by_type_of_instruction("RTI", (byte) 0x40);
+//
+//        // All PHA tests
+//        test_by_type_of_instruction("PHA", (byte) 0x48);
+
 
 
     }

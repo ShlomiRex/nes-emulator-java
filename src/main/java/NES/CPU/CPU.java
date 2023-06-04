@@ -304,6 +304,9 @@ public class CPU {
             case AND:
                 exec_and();
                 break;
+            case TSX:
+                exec_tsx();
+                break;
             default:
                 throw new RuntimeException("Instruction not implemented: " + instr);
         }
@@ -1099,5 +1102,11 @@ public class CPU {
         registers.setA((byte) (registers.getA() & fetched_data));
         registers.getP().setNegative(Common.Bits.getBit(registers.getA(), 7));
         registers.getP().setZero(registers.getA() == 0);
+    }
+
+    private void exec_tsx() {
+        registers.setX(registers.getS());
+        registers.getP().setNegative(Common.Bits.getBit(registers.getX(), 7));
+        registers.getP().setZero(registers.getX() == 0);
     }
 }
