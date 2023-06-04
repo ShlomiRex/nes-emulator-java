@@ -132,10 +132,10 @@ public class TestCPU {
 //        test_by_type_of_instruction("CMP", (byte) 0xD1);
 //
 //        // All JSR tests
-        test_by_type_of_instruction("JSR", (byte) 0x20);
+//        test_by_type_of_instruction("JSR", (byte) 0x20);
 //
 //        // All LSR tests
-//        test_by_type_of_instruction("LSR", (byte) 0x46);
+        test_by_type_of_instruction("LSR", (byte) 0x46);
 //        test_by_type_of_instruction("LSR", (byte) 0x4A);
 //        test_by_type_of_instruction("LSR", (byte) 0x4E);
 //        test_by_type_of_instruction("LSR", (byte) 0x56);

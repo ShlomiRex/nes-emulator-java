@@ -243,22 +243,53 @@ public class CPU {
 
         // Execute
         switch (instr) {
-            case LDA -> exec_lda();
-            case ADC -> exec_adc();
-            case CLI -> registers.getP().setInterruptDisable(false);
-            case STA -> write_memory(fetched_addr, registers.getA());
-            case TAX -> exec_tax();
-            case CPX -> exec_cmp(addrmode, registers.getX());
-            case CLV -> registers.getP().setOverflow(false);
-            case TAY -> exec_tay();
-            case CPY -> exec_cmp(addrmode, registers.getY());
-            case STX -> write_memory(fetched_addr, registers.getX());
-            case STY -> write_memory(fetched_addr, registers.getY());
-            case BCC -> {
-                // we already delt with it in relative addressing mode
-            }
-            case CMP -> exec_cmp(addrmode, registers.getA());
-            default -> throw new RuntimeException("Instruction not implemented: " + instr);
+            case LDA:
+                exec_lda();
+                break;
+            case ADC:
+                exec_adc();
+                break;
+            case CLI:
+                registers.getP().setInterruptDisable(false);
+                break;
+            case STA:
+                write_memory(fetched_addr, registers.getA());
+                break;
+            case TAX:
+                exec_tax();
+                break;
+            case CPX:
+                exec_cmp(addrmode, registers.getX());
+                break;
+            case CLV:
+                registers.getP().setOverflow(false);
+                break;
+            case TAY:
+                exec_tay();
+                break;
+            case CPY:
+                exec_cmp(addrmode, registers.getY());
+                break;
+            case STX:
+                write_memory(fetched_addr, registers.getX());
+                break;
+            case STY:
+                write_memory(fetched_addr, registers.getY());
+                break;
+            case BCC:
+            case LSR:
+                boolean carry = (fetched_data & 0x01) == 1;
+                byte data = (byte) ((fetched_data & 0xFF)>> 1);
+                write_memory(fetched_addr, data);
+                registers.getP().setNegative(false);
+                registers.getP().modify_z(data);
+                registers.getP().setCarry(carry);
+                break;
+            case CMP:
+                exec_cmp(addrmode, registers.getA());
+                break;
+            default:
+                throw new RuntimeException("Instruction not implemented: " + instr);
         }
 
     }
@@ -589,6 +620,9 @@ public class CPU {
     }
 
     private void zeropage_addressing(Instructions instr) {
+        byte addr_low;
+        short effective_addr;
+
         switch(instr) {
             // Read instructions (LDA, LDX, LDY, EOR, AND, ORA, ADC, SBC, CMP, BIT, LAX, NOP)
             case LDA:
@@ -605,11 +639,11 @@ public class CPU {
             case CPX: // Added CPX because of CMP, it was not mentioned in the documentation (http://www.atarihq.com/danb/files/64doc.txt)
             case CPY: // Same for CPY
                 // fetch address, increment PC
-                byte addr_low = read_memory(registers.getPC());
+                addr_low = read_memory(registers.getPC());
                 registers.incrementPC();
 
                 // read from effective address
-                short effective_addr = Common.makeShort(addr_low, (byte) 0x00);
+                effective_addr = Common.makeShort(addr_low, (byte) 0x00);
                 fetched_data = read_memory(effective_addr);
                 break;
             // Read-Modify-Write instructions (ASL, LSR, ROL, ROR, INC, DEC, SLO, SRE, RLA, RRA, ISB, DCP)
@@ -621,7 +655,22 @@ public class CPU {
             case DEC:
                 //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
                 // SLO, SRE, RLA, RRA, ISB, DCP
-                throw new RuntimeException("Read-Modify-Write instructions not implemented");
+
+                // fetch address, increment PC
+                addr_low = read_memory(registers.getPC());
+                registers.incrementPC();
+
+                // read from effective address
+                effective_addr = Common.makeShort(addr_low, (byte) 0x00);
+                fetched_data = read_memory(effective_addr);
+
+                // write the value back to effective address, and do the operation on it
+                write_memory(effective_addr, fetched_data);
+
+                // Note: here we do the operation on the fetched data. We only store effective address and each
+                // instruction will do what is meant to do (not in addressing mode, but in the execute function of the CPU
+                this.fetched_addr = effective_addr;
+                break;
             // Write instructions (STA, STX, STY, SAX)
             case STA:
             case STX:
