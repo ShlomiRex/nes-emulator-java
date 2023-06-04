@@ -186,17 +186,17 @@ public class TestCPU {
 //        test_by_type_of_instruction("TSX", (byte) 0xBA);
 //
 //        // All TXA tests
-        test_by_type_of_instruction("TXA", (byte) 0x8A);
+//        test_by_type_of_instruction("TXA", (byte) 0x8A);
 //
 //        // All ORA tests
-//        test_by_type_of_instruction("ORA", (byte) 0x09);
-//        test_by_type_of_instruction("ORA", (byte) 0x05);
-//        test_by_type_of_instruction("ORA", (byte) 0x15);
-//        test_by_type_of_instruction("ORA", (byte) 0x0D);
-//        test_by_type_of_instruction("ORA", (byte) 0x1D);
-//        test_by_type_of_instruction("ORA", (byte) 0x19);
-//        test_by_type_of_instruction("ORA", (byte) 0x01);
-//        test_by_type_of_instruction("ORA", (byte) 0x11);
+        test_by_type_of_instruction("ORA", (byte) 0x09);
+        test_by_type_of_instruction("ORA", (byte) 0x05);
+        test_by_type_of_instruction("ORA", (byte) 0x15);
+        test_by_type_of_instruction("ORA", (byte) 0x0D);
+        test_by_type_of_instruction("ORA", (byte) 0x1D);
+        test_by_type_of_instruction("ORA", (byte) 0x19);
+        test_by_type_of_instruction("ORA", (byte) 0x01);
+        test_by_type_of_instruction("ORA", (byte) 0x11);
 //
 //        // All BPL tests
 //        test_by_type_of_instruction("BPL", (byte) 0x10);

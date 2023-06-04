@@ -310,6 +310,9 @@ public class CPU {
             case TXA:
                 exec_txa();
                 break;
+            case ORA:
+                exec_ora();
+                break;
             default:
                 throw new RuntimeException("Instruction not implemented: " + instr);
         }
@@ -1115,6 +1118,12 @@ public class CPU {
 
     private void exec_txa() {
         registers.setA(registers.getX());
+        registers.getP().setNegative(Common.Bits.getBit(registers.getA(), 7));
+        registers.getP().setZero(registers.getA() == 0);
+    }
+
+    private void exec_ora() {
+        registers.setA((byte) (registers.getA() | fetched_data));
         registers.getP().setNegative(Common.Bits.getBit(registers.getA(), 7));
         registers.getP().setZero(registers.getA() == 0);
     }
