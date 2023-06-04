@@ -283,6 +283,9 @@ public class CPU {
             case CMP:
                 exec_cmp(addrmode, registers.getA());
                 break;
+            case ROL:
+                exec_rol(addrmode == AddressingMode.ACCUMULATOR);
+                break;
             default:
                 throw new RuntimeException("Instruction not implemented: " + instr);
         }
@@ -1036,6 +1039,28 @@ public class CPU {
         boolean is_carry = Common.Bits.getBit(fetched_data, 0);
         byte result = (byte) ((fetched_data & 0xFF) >> 1);
         registers.getP().setCarry(is_carry);
+        registers.getP().setZero(result == 0);
+        registers.getP().setNegative(Common.Bits.getBit(result, 7));
+
+        if (is_accumulator)
+            registers.setA(result);
+        else
+            write_memory(fetched_addr, result);
+    }
+
+    private void exec_rol(boolean is_accumulator) {
+        if (is_accumulator)
+            fetched_data = registers.getA();
+
+        // In addressing mode we already fetched it. So we don't need to read again.
+//        else
+//            fetched_data = read_memory(fetched_addr);
+
+        boolean in_carry = registers.getP().getCarry();
+        boolean out_carry = Common.Bits.getBit(fetched_data, 7);
+        byte result = (byte) ((fetched_data & 0xFF) << 1);
+        result = Common.Bits.setBit(result, 0, in_carry);
+        registers.getP().setCarry(out_carry);
         registers.getP().setZero(result == 0);
         registers.getP().setNegative(Common.Bits.getBit(result, 7));
 

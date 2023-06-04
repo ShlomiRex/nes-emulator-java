@@ -139,10 +139,10 @@ public class TestCPU {
 //        test_by_type_of_instruction("LSR", (byte) 0x4A);
 //        test_by_type_of_instruction("LSR", (byte) 0x4E);
 //        test_by_type_of_instruction("LSR", (byte) 0x56);
-        test_by_type_of_instruction("LSR", (byte) 0x5E);
+//        test_by_type_of_instruction("LSR", (byte) 0x5E);
 //
 //        // All ROL tests
-//        test_by_type_of_instruction("ROL", (byte) 0x26);
+        test_by_type_of_instruction("ROL", (byte) 0x26);
 //        test_by_type_of_instruction("ROL", (byte) 0x2A);
 //        test_by_type_of_instruction("ROL", (byte) 0x2E);
 //        test_by_type_of_instruction("ROL", (byte) 0x36);
