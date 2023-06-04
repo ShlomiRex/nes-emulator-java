@@ -278,11 +278,21 @@ public class CPU {
                 break;
             case BCC:
             case LSR:
-                boolean carry = (fetched_data & 0x01) == 1;
-                byte data = (byte) ((fetched_data & 0xFF)>> 1);
-                write_memory(fetched_addr, data);
+                boolean carry;
+                if (addrmode == AddressingMode.ACCUMULATOR) {
+//                    fetched_data = registers.getA();
+//                    carry = (fetched_data & 0x01) == 1;
+//                    fetched_data = (byte) ((fetched_data & 0xFF)>> 1);
+//                    registers.setA(fetched_data);
+                    exec_lsr(true);
+                    break;
+                } else {
+                    carry = (fetched_data & 0x01) == 1;
+                    fetched_data = (byte) ((fetched_data & 0xFF)>> 1);
+                    write_memory(fetched_addr, fetched_data);
+                }
                 registers.getP().setNegative(false);
-                registers.getP().modify_z(data);
+                registers.getP().modify_z(fetched_data);
                 registers.getP().setCarry(carry);
                 break;
             case CMP:
@@ -963,5 +973,23 @@ public class CPU {
         registers.setY(registers.getA());
         registers.getP().setZero(registers.getY() == 0);
         registers.getP().setNegative(Common.Bits.getBit(registers.getY(), 7));
+    }
+
+    private void exec_lsr(boolean is_accumulator) {
+        if (is_accumulator)
+            fetched_data = registers.getA();
+        else
+            fetched_data = read_memory(fetched_addr);
+
+        boolean is_carry = Common.Bits.getBit(fetched_data, 0);
+        byte result = (byte) ((fetched_data & 0xFF) >> 1);
+        registers.getP().setCarry(is_carry);
+        registers.getP().setZero(result == 0);
+        registers.getP().setNegative(Common.Bits.getBit(result, 7));
+
+        if (is_accumulator)
+            registers.setA(result);
+        else
+            write_memory(fetched_addr, result);
     }
 }
