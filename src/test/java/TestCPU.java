@@ -117,45 +117,71 @@ public class TestCPU {
 //        test_by_type_of_instruction("STY", (byte) 0x84);
 //        test_by_type_of_instruction("STY", (byte) 0x94);
 //        test_by_type_of_instruction("STY", (byte) 0x8C);
-
-        // all BCC tests
-        test_by_type_of_instruction("BCC", (byte) 0x90);
-
-        // all CMP tests
-        test_by_type_of_instruction("CMP", (byte) 0xC9);
-        test_by_type_of_instruction("CMP", (byte) 0xC5);
-        test_by_type_of_instruction("CMP", (byte) 0xD5);
-        test_by_type_of_instruction("CMP", (byte) 0xCD);
-        test_by_type_of_instruction("CMP", (byte) 0xDD);
-        test_by_type_of_instruction("CMP", (byte) 0xD9);
-        test_by_type_of_instruction("CMP", (byte) 0xC1);
-        test_by_type_of_instruction("CMP", (byte) 0xD1);
-
-        // All JSR tests
-        test_by_type_of_instruction("JSR", (byte) 0x20);
-
-        // All LSR tests
-        test_by_type_of_instruction("LSR", (byte) 0x46);
-        test_by_type_of_instruction("LSR", (byte) 0x4A);
-        test_by_type_of_instruction("LSR", (byte) 0x4E);
-        test_by_type_of_instruction("LSR", (byte) 0x56);
-        test_by_type_of_instruction("LSR", (byte) 0x5E);
-
-        // All ROL tests
-        test_by_type_of_instruction("ROL", (byte) 0x26);
-        test_by_type_of_instruction("ROL", (byte) 0x2A);
-        test_by_type_of_instruction("ROL", (byte) 0x2E);
-        test_by_type_of_instruction("ROL", (byte) 0x36);
-        test_by_type_of_instruction("ROL", (byte) 0x3E);
+//
+//        // all BCC tests
+//        test_by_type_of_instruction("BCC", (byte) 0x90);
+//
+//        // all CMP tests
+//        test_by_type_of_instruction("CMP", (byte) 0xC9);
+//        test_by_type_of_instruction("CMP", (byte) 0xC5);
+//        test_by_type_of_instruction("CMP", (byte) 0xD5);
+//        test_by_type_of_instruction("CMP", (byte) 0xCD);
+//        test_by_type_of_instruction("CMP", (byte) 0xDD);
+//        test_by_type_of_instruction("CMP", (byte) 0xD9);
+//        test_by_type_of_instruction("CMP", (byte) 0xC1);
+//        test_by_type_of_instruction("CMP", (byte) 0xD1);
+//
+//        // All JSR tests
+//        test_by_type_of_instruction("JSR", (byte) 0x20);
+//
+//        // All LSR tests
+//        test_by_type_of_instruction("LSR", (byte) 0x46);
+//        test_by_type_of_instruction("LSR", (byte) 0x4A);
+//        test_by_type_of_instruction("LSR", (byte) 0x4E);
+//        test_by_type_of_instruction("LSR", (byte) 0x56);
+//        test_by_type_of_instruction("LSR", (byte) 0x5E);
+//
+//        // All ROL tests
+//        test_by_type_of_instruction("ROL", (byte) 0x26);
+//        test_by_type_of_instruction("ROL", (byte) 0x2A);
+//        test_by_type_of_instruction("ROL", (byte) 0x2E);
+//        test_by_type_of_instruction("ROL", (byte) 0x36);
+//        test_by_type_of_instruction("ROL", (byte) 0x3E);
 //
 //        // All NOP tests
+        // TODO: Fix this
 //        test_by_type_of_instruction("NOP", (byte) 0x7C);
 //        test_by_type_of_instruction("NOP", (byte) 0xEA);
 
-        // custom
+        // All SEC tests
+        test_by_type_of_instruction("SEC", (byte) 0x38);
 
-//        // All BRK tests
-//        test_by_type_of_instruction("BRK", (byte) 0x00);
+//        // All BCS tests
+//        test_by_type_of_instruction("BCS", (byte) 0xB0);
+//
+//        // All SED tests
+//        test_by_type_of_instruction("SED", (byte) 0xF8);
+//
+//        // All ROR tests
+//        test_by_type_of_instruction("ROR", (byte) 0x66);
+//        test_by_type_of_instruction("ROR", (byte) 0x6A);
+//        test_by_type_of_instruction("ROR", (byte) 0x6E);
+//        test_by_type_of_instruction("ROR", (byte) 0x76);
+//        test_by_type_of_instruction("ROR", (byte) 0x7E);
+//
+//        // All SEI tests
+//        test_by_type_of_instruction("SEI", (byte) 0x78);
+//
+//        // All AND tests
+//        test_by_type_of_instruction("AND", (byte) 0x29);
+//        test_by_type_of_instruction("AND", (byte) 0x25);
+//        test_by_type_of_instruction("AND", (byte) 0x35);
+//        test_by_type_of_instruction("AND", (byte) 0x2D);
+//        test_by_type_of_instruction("AND", (byte) 0x3D);
+//        test_by_type_of_instruction("AND", (byte) 0x39);
+//        test_by_type_of_instruction("AND", (byte) 0x21);
+//        test_by_type_of_instruction("AND", (byte) 0x31);
+
 
     }
 

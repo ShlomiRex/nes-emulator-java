@@ -492,9 +492,6 @@ public class CPU {
 
                     // re-read from effective address
                     fetched_data = read_memory(effective_addr);
-
-                    // This cycle will be executed only if the effective address was invalid during cycle #4, i.e. page boundary was crossed.
-                    cycles ++;
                 }
                 break;
             // Read-Modify-Write instructions (ASL, LSR, ROL, ROR, INC, DEC, SLO, SRE, RLA, RRA, ISB, DCP)
