@@ -181,12 +181,12 @@ public class TestCPU {
 //        test_by_type_of_instruction("AND", (byte) 0x39);
 //        test_by_type_of_instruction("AND", (byte) 0x21);
 //        test_by_type_of_instruction("AND", (byte) 0x31);
-
-        // All TSX tests
-        test_by_type_of_instruction("TSX", (byte) 0xBA);
+//
+//        // All TSX tests
+//        test_by_type_of_instruction("TSX", (byte) 0xBA);
 //
 //        // All TXA tests
-//        test_by_type_of_instruction("TXA", (byte) 0x8A);
+        test_by_type_of_instruction("TXA", (byte) 0x8A);
 //
 //        // All ORA tests
 //        test_by_type_of_instruction("ORA", (byte) 0x09);
