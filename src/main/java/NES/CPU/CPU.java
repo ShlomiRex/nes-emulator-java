@@ -278,22 +278,7 @@ public class CPU {
                 break;
             case BCC:
             case LSR:
-                boolean carry;
-                if (addrmode == AddressingMode.ACCUMULATOR) {
-//                    fetched_data = registers.getA();
-//                    carry = (fetched_data & 0x01) == 1;
-//                    fetched_data = (byte) ((fetched_data & 0xFF)>> 1);
-//                    registers.setA(fetched_data);
-                    exec_lsr(true);
-                    break;
-                } else {
-                    carry = (fetched_data & 0x01) == 1;
-                    fetched_data = (byte) ((fetched_data & 0xFF)>> 1);
-                    write_memory(fetched_addr, fetched_data);
-                }
-                registers.getP().setNegative(false);
-                registers.getP().modify_z(fetched_data);
-                registers.getP().setCarry(carry);
+                exec_lsr(addrmode == AddressingMode.ACCUMULATOR);
                 break;
             case CMP:
                 exec_cmp(addrmode, registers.getA());
@@ -978,8 +963,10 @@ public class CPU {
     private void exec_lsr(boolean is_accumulator) {
         if (is_accumulator)
             fetched_data = registers.getA();
-        else
-            fetched_data = read_memory(fetched_addr);
+
+        // In addressing mode we already fetched it. So we don't need to read again.
+//        else
+//            fetched_data = read_memory(fetched_addr);
 
         boolean is_carry = Common.Bits.getBit(fetched_data, 0);
         byte result = (byte) ((fetched_data & 0xFF) >> 1);
