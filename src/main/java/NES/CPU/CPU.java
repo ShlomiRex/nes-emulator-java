@@ -159,7 +159,21 @@ public class CPU {
 
                 break;
             case RTI:
-                throw new RuntimeException("RTI instruction not implemented");
+                // read next instruction byte (and throw it away)
+                read_memory(registers.getPC());
+
+                // pull P from stack, increment S
+                byte p = pop_stack();
+
+                // pull PCL from stack, increment S
+                byte pcl2 = pop_stack();
+
+                // pull PCH from stack
+                byte pch2 = pop_stack();
+
+                registers.setPC(Common.makeShort(pcl2, pch2));
+                registers.getP().setAllFlags(p);
+                break;
             case RTS:
                 throw new RuntimeException("RTS instruction not implemented");
             case PHA:
@@ -948,7 +962,7 @@ public class CPU {
     }
 
     public byte pop_stack() {
-        read_memory(Common.makeShort(registers.getS(), (byte) 0x01)); // dummy read
+        //read_memory(Common.makeShort(registers.getS(), (byte) 0x01)); // dummy read
         registers.setS((byte) ((registers.getS() & 0xFF) + 1));
         return read_memory(Common.makeShort(registers.getS(), (byte) 0x01));
     }

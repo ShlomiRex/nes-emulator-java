@@ -88,4 +88,7 @@ public class StatusFlags {
     }
 
 
+    public void setAllFlags(byte p) {
+        this.p = p;
+    }
 }
