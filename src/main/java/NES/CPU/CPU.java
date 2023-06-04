@@ -278,6 +278,7 @@ public class CPU {
                 break;
             case BCC:
             case NOP:
+            case BCS:
                 break;
             case LSR:
                 exec_lsr(addrmode == AddressingMode.ACCUMULATOR);
@@ -287,6 +288,12 @@ public class CPU {
                 break;
             case ROL:
                 exec_rol(addrmode == AddressingMode.ACCUMULATOR);
+                break;
+            case SEC:
+                registers.getP().setCarry(true);
+                break;
+            case SED:
+                registers.getP().setDecimal(true);
                 break;
             default:
                 throw new RuntimeException("Instruction not implemented: " + instr);

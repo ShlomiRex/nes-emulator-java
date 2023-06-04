@@ -156,11 +156,11 @@ public class TestCPU {
         // All SEC tests
         test_by_type_of_instruction("SEC", (byte) 0x38);
 
-//        // All BCS tests
-//        test_by_type_of_instruction("BCS", (byte) 0xB0);
-//
-//        // All SED tests
-//        test_by_type_of_instruction("SED", (byte) 0xF8);
+        // All BCS tests
+        test_by_type_of_instruction("BCS", (byte) 0xB0);
+
+        // All SED tests
+        test_by_type_of_instruction("SED", (byte) 0xF8);
 //
 //        // All ROR tests
 //        test_by_type_of_instruction("ROR", (byte) 0x66);
