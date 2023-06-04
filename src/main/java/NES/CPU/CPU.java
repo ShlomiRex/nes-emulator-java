@@ -722,16 +722,35 @@ public class CPU {
                 short effective_addr = Common.makeShort(addr_low, addr_high);
                 fetched_data = read_memory(effective_addr);
                 break;
-            // Read-Modify-Write instructions (ASL, LSR, ROL, ROR, INC, DEC, SLO, SRE, RLA, RRA, ISB, DCP)
+           // Read-Modify-Write instructions (ASL, LSR, ROL, ROR, INC, DEC, SLO, SRE, RLA, RRA, ISB, DCP)
            case ASL:
            case LSR:
            case ROL:
            case ROR:
            case INC:
            case DEC:
-                //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
-                // SLO, SRE, RLA, RRA, ISB, DCP
-                throw new RuntimeException("Not implemented yet");
+               //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
+               // SLO, SRE, RLA, RRA, ISB, DCP
+
+               //fetch low byte of address, increment PC
+               addr_low = read_memory(registers.getPC());
+               registers.incrementPC();
+
+               // fetch high byte of address, increment PC
+               addr_high = read_memory(registers.getPC());
+               registers.incrementPC();
+
+               // read from effective address
+               effective_addr = Common.makeShort(addr_low, addr_high);
+               fetched_data = read_memory(effective_addr);
+
+               // write the value back to effective address, and do the operation on it
+               // Note: we store address, and after the addressing mode is finished, we execute in different place
+               fetched_addr = effective_addr;
+
+               // write the new value to effective address
+                write_memory(effective_addr, fetched_data);
+               break;
            // Write instructions (STA, STX, STY, SAX)
            case STA:
            case STX:
