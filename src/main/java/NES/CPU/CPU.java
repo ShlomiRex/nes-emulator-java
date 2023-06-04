@@ -129,8 +129,8 @@ public class CPU {
         // http://www.atarihq.com/danb/files/64doc.txt
 
         boolean is_instructions_accessing_the_stack = true;
+        // Instructions accessing the stack.
         switch(instr) {
-            // Instructions accessing the stack
             case BRK:
                 // read next instruction byte (and throw it away), increment PC
                 read_memory(registers.getPC());
@@ -167,7 +167,20 @@ public class CPU {
                 throw new RuntimeException("PHA/PHP instruction not implemented");
             case PLA:
             case PLP:
-                throw new RuntimeException("PLA/PLP instruction not implemented");
+                // read next instruction byte (and throw it away)
+                read_memory(registers.getPC());
+                //registers.incrementPC();
+
+                // increment S
+                //read_memory(Common.makeShort(registers.getS(), (byte) 0x01));
+                //registers.setS((byte) (registers.getS() + 1));
+
+                // pull register from stack
+                byte reg = pop_stack();
+                registers.setA(reg);
+                registers.getP().setNegative(Common.Bits.getBit(registers.getA(), 7));
+                registers.getP().setZero(registers.getA() == 0);
+                break;
             case JSR:
                 // fetch low address byte, increment PC
                 byte addr_low = read_memory(registers.getPC());
@@ -279,6 +292,7 @@ public class CPU {
             case BCC:
             case NOP:
             case BCS:
+            case BPL:
                 break;
             case LSR:
                 exec_lsr(addrmode == AddressingMode.ACCUMULATOR);
@@ -312,6 +326,9 @@ public class CPU {
                 break;
             case ORA:
                 exec_ora();
+                break;
+            case INC:
+                exec_inc_or_dec(true);
                 break;
             default:
                 throw new RuntimeException("Instruction not implemented: " + instr);
@@ -926,9 +943,14 @@ public class CPU {
     }
 
     private void push_stack(byte data) {
-        // TODO: Expected to write at addres: 498 (0x1F2) but instead it writes at 242 (0xF2)
         write_memory(Common.makeShort(registers.getS(), (byte) 0x01), data);
         registers.setS((byte) (registers.getS() - 1));
+    }
+
+    public byte pop_stack() {
+        read_memory(Common.makeShort(registers.getS(), (byte) 0x01)); // dummy read
+        registers.setS((byte) ((registers.getS() & 0xFF) + 1));
+        return read_memory(Common.makeShort(registers.getS(), (byte) 0x01));
     }
 
     /**
@@ -1126,5 +1148,12 @@ public class CPU {
         registers.setA((byte) (registers.getA() | fetched_data));
         registers.getP().setNegative(Common.Bits.getBit(registers.getA(), 7));
         registers.getP().setZero(registers.getA() == 0);
+    }
+
+    private void exec_inc_or_dec(boolean is_inc) {
+        byte result = (byte) (fetched_data + (is_inc ? 1 : -1));
+        registers.getP().setNegative(Common.Bits.getBit(result, 7));
+        registers.getP().setZero(result == 0);
+        write_memory(fetched_addr, result);
     }
 }
