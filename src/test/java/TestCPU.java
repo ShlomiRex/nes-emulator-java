@@ -143,10 +143,10 @@ public class TestCPU {
 //
 //        // All ROL tests
         test_by_type_of_instruction("ROL", (byte) 0x26);
-//        test_by_type_of_instruction("ROL", (byte) 0x2A);
-//        test_by_type_of_instruction("ROL", (byte) 0x2E);
-//        test_by_type_of_instruction("ROL", (byte) 0x36);
-//        test_by_type_of_instruction("ROL", (byte) 0x3E);
+        test_by_type_of_instruction("ROL", (byte) 0x2A);
+        test_by_type_of_instruction("ROL", (byte) 0x2E);
+        test_by_type_of_instruction("ROL", (byte) 0x36);
+        test_by_type_of_instruction("ROL", (byte) 0x3E);
 //
 //        // All NOP tests
 //        test_by_type_of_instruction("NOP", (byte) 0x7C);
