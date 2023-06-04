@@ -137,8 +137,8 @@ public class TestCPU {
 //        // All LSR tests
 //        test_by_type_of_instruction("LSR", (byte) 0x46);
 //        test_by_type_of_instruction("LSR", (byte) 0x4A);
-        test_by_type_of_instruction("LSR", (byte) 0x4E);
-//        test_by_type_of_instruction("LSR", (byte) 0x56);
+//        test_by_type_of_instruction("LSR", (byte) 0x4E);
+        test_by_type_of_instruction("LSR", (byte) 0x56);
 //        test_by_type_of_instruction("LSR", (byte) 0x5E);
 //
 //        // All ROL tests

@@ -568,6 +568,7 @@ public class CPU {
                 // read from address, add index register to it
                 read_memory((short) (addr_low & 0xFF));
                 byte register;
+                // TODO: Move register outside of switch-case this should be at top of function
                 if (addrmode == AddressingMode.ZEROPAGE_X)
                     register = registers.getX();
                 else
@@ -587,7 +588,26 @@ public class CPU {
             case DEC:
                 //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
                 // SLO, SRE, RLA, RRA, ISB, DCP
-                throw new RuntimeException("Read-Modify-Write instructions not implemented");
+
+                // fetch address, increment PC
+                addr_low = read_memory(registers.getPC());
+                registers.incrementPC();
+
+                // read from address, add index register X to it
+                read_memory((short) (addr_low & 0xFF));
+                addr_low += registers.getX();
+
+                // read from effective address
+                effective_addr = Common.makeShort(addr_low, (byte) 0x00);
+                fetched_data = read_memory(effective_addr);
+
+                // write the value back to effective address, and do the operation on it
+                write_memory(effective_addr, fetched_data);
+
+                // write the new value to effective address
+                // Note: we store address, and after the addressing mode is finished, we execute in different place
+                fetched_addr = effective_addr;
+                break;
             // Write instructions (STA, STX, STY, SAX)
             case STA:
             case STX:
