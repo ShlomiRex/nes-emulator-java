@@ -163,14 +163,14 @@ public class TestCPU {
 //        test_by_type_of_instruction("SED", (byte) 0xF8);
 //
 //        // All ROR tests
-        test_by_type_of_instruction("ROR", (byte) 0x66);
-        test_by_type_of_instruction("ROR", (byte) 0x6A);
-        test_by_type_of_instruction("ROR", (byte) 0x6E);
-        test_by_type_of_instruction("ROR", (byte) 0x76);
-        test_by_type_of_instruction("ROR", (byte) 0x7E);
+//        test_by_type_of_instruction("ROR", (byte) 0x66);
+//        test_by_type_of_instruction("ROR", (byte) 0x6A);
+//        test_by_type_of_instruction("ROR", (byte) 0x6E);
+//        test_by_type_of_instruction("ROR", (byte) 0x76);
+//        test_by_type_of_instruction("ROR", (byte) 0x7E);
 //
 //        // All SEI tests
-//        test_by_type_of_instruction("SEI", (byte) 0x78);
+        test_by_type_of_instruction("SEI", (byte) 0x78);
 //
 //        // All AND tests
 //        test_by_type_of_instruction("AND", (byte) 0x29);

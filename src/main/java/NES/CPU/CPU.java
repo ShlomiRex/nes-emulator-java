@@ -298,6 +298,9 @@ public class CPU {
             case ROR:
                 exec_rol_or_ror(addrmode == AddressingMode.ACCUMULATOR, false);
                 break;
+            case SEI:
+                registers.getP().setInterruptDisable(true);
+                break;
             default:
                 throw new RuntimeException("Instruction not implemented: " + instr);
         }
