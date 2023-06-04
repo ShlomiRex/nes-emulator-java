@@ -169,13 +169,23 @@ public class CPU {
             case PLP:
                 throw new RuntimeException("PLA/PLP instruction not implemented");
             case JSR:
-//                // fetch low address byte, increment PC
-//                short low_addr = read_memory(registers.getPC());
-//                registers.incrementPC();
-//
-//                // internal operation (predecrement S?)
+                // fetch low address byte, increment PC
+                byte addr_low = read_memory(registers.getPC());
+                registers.incrementPC();
 
-                throw new RuntimeException("JSR instruction not implemented");
+                // internal operation (predecrement S?)
+                read_memory(Common.makeShort(registers.getS(), (byte) 0x01));
+
+                // push PCH on stack, decrement S
+                push_stack((byte) ((registers.getPC()) >> 8));
+
+                // push PCL on stack, decrement S
+                push_stack((byte) ((registers.getPC()) & 0xFF));
+
+                // copy low address byte to PCL, fetch high address byte to PCH
+                byte pc_high = read_memory(registers.getPC());
+                registers.setPC(Common.makeShort(addr_low, pc_high));
+                break;
             default:
                 is_instructions_accessing_the_stack = true;
                 break;

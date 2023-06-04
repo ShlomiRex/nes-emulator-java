@@ -132,7 +132,7 @@ public class TestCPU {
 //        test_by_type_of_instruction("CMP", (byte) 0xD1);
 //
 //        // All JSR tests
-//        test_by_type_of_instruction("JSR", (byte) 0x20);
+        test_by_type_of_instruction("JSR", (byte) 0x20);
 //
 //        // All LSR tests
 //        test_by_type_of_instruction("LSR", (byte) 0x46);
@@ -154,8 +154,8 @@ public class TestCPU {
 
         // custom
 
-        // All BRK tests
-        test_by_type_of_instruction("BRK", (byte) 0x00);
+//        // All BRK tests
+//        test_by_type_of_instruction("BRK", (byte) 0x00);
 
     }
 
@@ -198,7 +198,7 @@ public class TestCPU {
         for (int i = 0; i < test.length(); i++) {
             JSONObject test_obj = test.getJSONObject(i);
             String test_name = (String) test_obj.get("name");
-            //logger.debug("Running test: " + (i+1) +"/"+test.length() + ", test name: " + test_name);
+            logger.debug("Running test: " + (i+1) +"/"+test.length() + ", test name: " + test_name);
 
             JSONObject initial = (JSONObject) test_obj.get("initial");
             init_cpu(cpu, cpu_memory, initial);
