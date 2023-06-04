@@ -501,7 +501,33 @@ public class CPU {
             case DEC:
                 //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
                 // SLO, SRE, RLA, RRA, ISB, DCP
-                throw new RuntimeException("Read-Modify-Write instructions not implemented");
+
+                // fetch low byte of address, increment PC
+                low_byte = read_memory(registers.getPC());
+                registers.incrementPC();
+
+                // fetch high byte of address, add index register X to low address byte, increment PC
+                high_byte = read_memory(registers.getPC());
+                new_low_byte = (byte) (low_byte + register);
+                registers.incrementPC();
+
+                // read from effective address, fix the high byte of effective address
+                effective_addr = Common.makeShort(new_low_byte, high_byte);
+                fetched_data = read_memory(effective_addr);
+                if (Common.isAdditionCarry(low_byte, register))
+                    effective_addr += 0x100;
+
+                // re-read from effective address
+                fetched_data = read_memory(effective_addr);
+
+                // write the value back to effective address, and do the operation on it
+                write_memory(effective_addr, fetched_data);
+
+                // write the new value to effective address
+                // Note: we store address, and after the addressing mode is finished, we execute in different place:
+                fetched_addr = effective_addr;
+
+                break;
             // Write instructions (STA, STX, STY, SHA, SHX, SHY)
             case STA:
             case STX:
