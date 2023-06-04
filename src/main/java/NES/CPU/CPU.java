@@ -128,7 +128,7 @@ public class CPU {
         // This help me to make the CPU cycle accurate:
         // http://www.atarihq.com/danb/files/64doc.txt
 
-        boolean is_instructions_accessing_the_stack = false;
+        boolean is_instructions_accessing_the_stack = true;
         switch(instr) {
             // Instructions accessing the stack
             case BRK:
@@ -187,11 +187,11 @@ public class CPU {
                 registers.setPC(Common.makeShort(addr_low, pc_high));
                 break;
             default:
-                is_instructions_accessing_the_stack = true;
+                is_instructions_accessing_the_stack = false;
                 break;
         }
 
-        if (!is_instructions_accessing_the_stack)
+        if (is_instructions_accessing_the_stack)
             return;
 
         // Fetch / Set in any addressing mode
@@ -277,6 +277,8 @@ public class CPU {
                 write_memory(fetched_addr, registers.getY());
                 break;
             case BCC:
+            case NOP:
+                break;
             case LSR:
                 exec_lsr(addrmode == AddressingMode.ACCUMULATOR);
                 break;

@@ -117,31 +117,31 @@ public class TestCPU {
 //        test_by_type_of_instruction("STY", (byte) 0x84);
 //        test_by_type_of_instruction("STY", (byte) 0x94);
 //        test_by_type_of_instruction("STY", (byte) 0x8C);
-//
-//        // all BCC tests
-//        test_by_type_of_instruction("BCC", (byte) 0x90);
-//
-//        // all CMP tests
-//        test_by_type_of_instruction("CMP", (byte) 0xC9);
-//        test_by_type_of_instruction("CMP", (byte) 0xC5);
-//        test_by_type_of_instruction("CMP", (byte) 0xD5);
-//        test_by_type_of_instruction("CMP", (byte) 0xCD);
-//        test_by_type_of_instruction("CMP", (byte) 0xDD);
-//        test_by_type_of_instruction("CMP", (byte) 0xD9);
-//        test_by_type_of_instruction("CMP", (byte) 0xC1);
-//        test_by_type_of_instruction("CMP", (byte) 0xD1);
-//
-//        // All JSR tests
-//        test_by_type_of_instruction("JSR", (byte) 0x20);
-//
-//        // All LSR tests
-//        test_by_type_of_instruction("LSR", (byte) 0x46);
-//        test_by_type_of_instruction("LSR", (byte) 0x4A);
-//        test_by_type_of_instruction("LSR", (byte) 0x4E);
-//        test_by_type_of_instruction("LSR", (byte) 0x56);
-//        test_by_type_of_instruction("LSR", (byte) 0x5E);
-//
-//        // All ROL tests
+
+        // all BCC tests
+        test_by_type_of_instruction("BCC", (byte) 0x90);
+
+        // all CMP tests
+        test_by_type_of_instruction("CMP", (byte) 0xC9);
+        test_by_type_of_instruction("CMP", (byte) 0xC5);
+        test_by_type_of_instruction("CMP", (byte) 0xD5);
+        test_by_type_of_instruction("CMP", (byte) 0xCD);
+        test_by_type_of_instruction("CMP", (byte) 0xDD);
+        test_by_type_of_instruction("CMP", (byte) 0xD9);
+        test_by_type_of_instruction("CMP", (byte) 0xC1);
+        test_by_type_of_instruction("CMP", (byte) 0xD1);
+
+        // All JSR tests
+        test_by_type_of_instruction("JSR", (byte) 0x20);
+
+        // All LSR tests
+        test_by_type_of_instruction("LSR", (byte) 0x46);
+        test_by_type_of_instruction("LSR", (byte) 0x4A);
+        test_by_type_of_instruction("LSR", (byte) 0x4E);
+        test_by_type_of_instruction("LSR", (byte) 0x56);
+        test_by_type_of_instruction("LSR", (byte) 0x5E);
+
+        // All ROL tests
         test_by_type_of_instruction("ROL", (byte) 0x26);
         test_by_type_of_instruction("ROL", (byte) 0x2A);
         test_by_type_of_instruction("ROL", (byte) 0x2E);
