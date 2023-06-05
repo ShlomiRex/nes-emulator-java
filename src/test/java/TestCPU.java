@@ -222,8 +222,8 @@ public class TestCPU {
         // custom
 
         // All JMP tests
-        test_by_type_of_instruction("JMP", (byte) 0x4C);
-//        test_by_type_of_instruction("JMP", (byte) 0x6C);
+//        test_by_type_of_instruction("JMP", (byte) 0x4C);
+        test_by_type_of_instruction("JMP", (byte) 0x6C);
 
 
     }

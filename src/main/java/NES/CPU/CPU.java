@@ -261,9 +261,9 @@ public class CPU {
                 break;
             // Indirect indexed addressing
             // TODO: ??
-
-            // Absolute indirect addressing (JMP)
-            // TODO: ??
+            case ABSOLUTE_INDIRECT:
+                indirect_addressing();
+                break;
             default:
                 throw new RuntimeException("Addressing mode not implemented: " + addrmode);
         }
@@ -349,6 +349,26 @@ public class CPU {
                 throw new RuntimeException("Instruction not implemented: " + instr);
         }
 
+    }
+
+    /**
+     * Only for JMP
+     */
+    private void indirect_addressing() {
+        // fetch pointer address low, increment PC
+        byte pointer_addr_low = read_memory(registers.getPC());
+        registers.incrementPC();
+
+        // fetch pointer address high, increment PC
+        byte pointer_addr_high = read_memory(registers.getPC());
+        registers.incrementPC();
+
+        // fetch low address to latch
+        byte latch_low = read_memory(Common.makeShort(pointer_addr_low, pointer_addr_high));
+
+        // fetch PCH, copy latch to PCL
+        byte latch_high = read_memory(Common.makeShort((byte) (pointer_addr_low + 1), pointer_addr_high));
+        registers.setPC(Common.makeShort(latch_low, latch_high));
     }
 
     /**

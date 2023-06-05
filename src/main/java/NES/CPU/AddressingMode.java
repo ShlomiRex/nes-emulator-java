@@ -10,7 +10,7 @@ public enum AddressingMode {
     ZEROPAGE_Y,
     RELATIVE,
     ACCUMULATOR,
-    INDIRECT,
+    ABSOLUTE_INDIRECT,
     INDIRECT_X,
     INDIRECT_Y,
     IMMEDIATE,
