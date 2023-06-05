@@ -307,6 +307,7 @@ public class CPU {
             case NOP:
             case BCS:
             case BPL:
+            case JMP:
                 break;
             case LSR:
                 exec_lsr(addrmode == AddressingMode.ACCUMULATOR);
@@ -796,7 +797,13 @@ public class CPU {
        switch(instruction) {
            // JMP
            case JMP:
-                throw new RuntimeException("Not implemented yet");
+               // fetch low address byte, increment PC
+               addr_low = read_memory(registers.getPC());
+               registers.incrementPC();
+
+               // copy low address byte to PCL, fetch high address byte to PCH
+               registers.setPC(Common.makeShort(addr_low, read_memory(registers.getPC())));
+               break;
            // Read instructions: LDA, LDX, LDY, EOR, AND, ORA, ADC, SBC, CMP, BIT, LAX, NOP
            case LDA:
            case LDX:
