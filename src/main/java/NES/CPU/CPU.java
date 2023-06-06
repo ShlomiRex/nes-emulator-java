@@ -51,15 +51,15 @@ public class CPU {
         Decoder.InstructionInfo instr_info = decoder.decode_opcode(opcode);
         Instructions instr = instr_info.instr;
         AddressingMode addrmode = instr_info.addrmode;
-//        int bytes = instr_info.bytes;
-//        int cycles = instr_info.cycles;
-//        Decoder.OopsCycle oops_cycle = instr_info.oopsCycle;
-//        logger.debug(
-//                instr.toString()+"("+Common.byteToHex(opcode, true)+")\t"
-//                +addrmode+"\tBytes: "
-//                +bytes+"\tCycles: "
-//                +cycles+"\tOops cycle: "
-//                +oops_cycle);
+        int bytes = instr_info.bytes;
+        int cycles = instr_info.cycles;
+        Decoder.OopsCycle oops_cycle = instr_info.oopsCycle;
+        logger.debug(
+                instr.toString()+"("+Common.byteToHex(opcode, true)+")\t"
+                +addrmode+"\tBytes: "
+                +bytes+"\tCycles: "
+                +cycles+"\tOops cycle: "
+                +oops_cycle);
 
         // Execute
         execute_instruction(instr, addrmode);
@@ -344,6 +344,9 @@ public class CPU {
                 break;
             case INC:
                 exec_inc_or_dec(true);
+                break;
+            case LDX:
+                exec_ldx();
                 break;
             default:
                 throw new RuntimeException("Instruction not implemented: " + instr);
@@ -1196,5 +1199,11 @@ public class CPU {
         registers.getP().setNegative(Common.Bits.getBit(result, 7));
         registers.getP().setZero(result == 0);
         write_memory(fetched_addr, result);
+    }
+
+    private void exec_ldx() {
+        registers.setX(fetched_data);
+        registers.getP().setNegative(Common.Bits.getBit(registers.getX(), 7));
+        registers.getP().setZero(registers.getX() == 0);
     }
 }
