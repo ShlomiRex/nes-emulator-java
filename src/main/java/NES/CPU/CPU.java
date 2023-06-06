@@ -178,7 +178,23 @@ public class CPU {
                 registers.getP().setAllFlags(p);
                 break;
             case RTS:
-                throw new RuntimeException("RTS instruction not implemented");
+                // read next instruction byte (and throw it away)
+                read_memory(registers.getPC());
+
+                // increment S
+                read_memory(Common.makeShort(registers.getS(), (byte) 0x01)); // dummy read
+
+                // pull PCL from stack, increment S
+                pcl = pop_stack();
+
+                // pull PCH from stack
+                pch = pop_stack();
+
+                // increment PC
+                registers.setPC(Common.makeShort(pcl, pch));
+                read_memory(registers.getPC()); // dummy read
+                registers.incrementPC();
+                break;
             case PHA:
             case PHP:
                 throw new RuntimeException("PHA/PHP instruction not implemented");

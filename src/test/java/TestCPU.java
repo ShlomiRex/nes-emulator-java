@@ -223,10 +223,12 @@ public class TestCPU {
 //        test_by_type_of_instruction("LDX", (byte) 0xB6);
 //        test_by_type_of_instruction("LDX", (byte) 0xAE);
 //        test_by_type_of_instruction("LDX", (byte) 0xBE);
+//
+//        // All BEQ tests
+//        test_by_type_of_instruction("BEQ", (byte) 0xF0);
 
-        // All BEQ tests
-        test_by_type_of_instruction("BEQ", (byte) 0xF0);
-
+        // All RTS tests
+        test_by_type_of_instruction("RTS", (byte) 0x60);
 
 
 

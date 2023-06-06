@@ -42,7 +42,7 @@ public class TestCPU_Nestest {
     public void test() throws IOException {
         CPU cpu = nes.cpu;
 
-        for (int i = 0; i < 45; i ++) {
+        for (int i = 0; i < 100; i ++) {
             String line = reader.readLine();
 
             logger.debug("Running test: " + (i+1));
