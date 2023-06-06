@@ -351,6 +351,9 @@ public class CPU {
             case LDX:
                 exec_ldx();
                 break;
+            case CLC:
+                registers.getP().setCarry(false);
+                break;
             default:
                 throw new RuntimeException("Instruction not implemented: " + instr);
         }
