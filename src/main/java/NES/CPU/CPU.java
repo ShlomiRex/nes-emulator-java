@@ -40,8 +40,8 @@ public class CPU {
     }
 
     public void clock_tick() {
-//        logger.debug("Tick, cycle: " + this.cycles);
-//        logger.debug(registers.toString());
+        logger.debug("Tick, cycle: " + this.cycles);
+        logger.debug(registers.toString());
 
         // Fetch
         byte opcode = read_memory(registers.getPC()); // Read at address of Program Counter (duh!)
@@ -54,12 +54,12 @@ public class CPU {
         int bytes = instr_info.bytes;
         int cycles = instr_info.cycles;
         Decoder.OopsCycle oops_cycle = instr_info.oopsCycle;
-        logger.debug(
-                instr.toString()+"("+Common.byteToHex(opcode, true)+")\t"
-                +addrmode+"\tBytes: "
-                +bytes+"\tCycles: "
-                +cycles+"\tOops cycle: "
-                +oops_cycle);
+//        logger.debug(
+//                instr.toString()+"("+Common.byteToHex(opcode, true)+")\t"
+//                +addrmode+"\tBytes: "
+//                +bytes+"\tCycles: "
+//                +cycles+"\tOops cycle: "
+//                +oops_cycle);
 
         // Execute
         execute_instruction(instr, addrmode);
@@ -74,6 +74,9 @@ public class CPU {
         }
 
         instructions ++;
+
+        logger.debug(registers.toString());
+        logger.debug("End of tick");
     }
 
     private byte read_memory(short addr) {
@@ -115,7 +118,7 @@ public class CPU {
         logger.debug("Jumping to interrupt address: " + Common.shortToHex(new_pc, true));
 
         registers.setPC(new_pc);
-        cycles = 8;
+        cycles = 7;
     }
 
     private short read_address_from_memory(short addr) {

@@ -26,7 +26,7 @@ public class CPURegisters {
         String y = "Y: " + Common.byteToHex(Y, false);
         String s = "S: " + Common.byteToHex(S, false);
         String pc = "PC: " + Common.shortToHex(PC, false);
-        String p = "P: NV-BDIZC " + Common.byteToBinary(P.getAllFlags());
+        String p = "P: NV-BDIZC " + Common.byteToBinary(P.getAllFlags()) + " (" + Common.byteToHex(P.getAllFlags(), true) + ")";
 
         StringBuilder sb = new StringBuilder();
         sb.append(a).append("\t");
