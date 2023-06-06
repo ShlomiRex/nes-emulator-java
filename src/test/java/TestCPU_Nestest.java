@@ -1,3 +1,4 @@
+import NES.CPU.AddressingMode;
 import NES.CPU.CPU;
 import NES.CPU.Decoder;
 import NES.Cartridge.ROMParser;
@@ -38,10 +39,10 @@ public class TestCPU_Nestest {
     }
 
     @Test
-    public void test() throws IOException, ROMParser.ParsingException {
+    public void test() throws IOException {
         CPU cpu = nes.cpu;
 
-        for (int i = 0; i < 5; i ++) {
+        for (int i = 0; i < 10; i ++) {
             String line = reader.readLine();
 
             logger.debug("Running test: " + (i+1));
@@ -80,7 +81,7 @@ public class TestCPU_Nestest {
         int split_index = 0;
 
         switch (instr_info.bytes) {
-            case 1 -> split_index = 6;
+            case 1 -> split_index = 2;
             case 2 -> {
                 split_index = 3;
                 str_oper1 = split[2];
@@ -96,7 +97,13 @@ public class TestCPU_Nestest {
         }
 
         String instr = split[split_index++];
-        String addr = split[split_index++];
+        String addr = "";
+
+        if (instr_info.addrmode == AddressingMode.IMPLIED) {
+            //split_index++;
+        } else {
+            addr = split[split_index++];
+        }
 
         String equals_to = "";
         if (instr.equals("STX")) {
@@ -111,7 +118,16 @@ public class TestCPU_Nestest {
         String str_sp = split[split_index++];
         String ppu_txt = split[split_index++];
         String ppu_1 = split[split_index++];
-        String ppu_2 = split[split_index++];
+
+        String ppu_2 = "";
+        if (ppu_1.substring(ppu_1.indexOf(',')).length() > 1) {
+            String[] split2 = ppu_1.split(",");
+            ppu_1 = split2[0];
+            ppu_2 = split2[1];
+        } else {
+            ppu_2 = split[split_index++];
+        }
+
         String str_cycles = split[split_index++];
 
         short pc = (short) Integer.parseInt(str_pc, 16);
