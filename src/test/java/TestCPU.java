@@ -216,13 +216,18 @@ public class TestCPU {
 //
 //        // All PHA tests
 //        test_by_type_of_instruction("PHA", (byte) 0x48);
+//
+//      // All LDX tests
+//        test_by_type_of_instruction("LDX", (byte) 0xA2);
+//        test_by_type_of_instruction("LDX", (byte) 0xA6);
+//        test_by_type_of_instruction("LDX", (byte) 0xB6);
+//        test_by_type_of_instruction("LDX", (byte) 0xAE);
+//        test_by_type_of_instruction("LDX", (byte) 0xBE);
 
-        // All LDX tests
-        test_by_type_of_instruction("LDX", (byte) 0xA2);
-        test_by_type_of_instruction("LDX", (byte) 0xA6);
-        test_by_type_of_instruction("LDX", (byte) 0xB6);
-        test_by_type_of_instruction("LDX", (byte) 0xAE);
-        test_by_type_of_instruction("LDX", (byte) 0xBE);
+        // All BEQ tests
+        test_by_type_of_instruction("BEQ", (byte) 0xF0);
+
+
 
 
         // custom

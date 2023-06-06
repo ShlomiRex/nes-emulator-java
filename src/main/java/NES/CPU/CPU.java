@@ -311,6 +311,8 @@ public class CPU {
             case BCS:
             case BPL:
             case JMP:
+            case BEQ:
+                // do nothing, sometimes the addressing mode already done what we needed.
                 break;
             case LSR:
                 exec_lsr(addrmode == AddressingMode.ACCUMULATOR);
