@@ -211,7 +211,7 @@ public class CPU {
                 //registers.incrementPC();
 
                 // increment S
-                //read_memory(Common.makeShort(registers.getS(), (byte) 0x01));
+                read_memory(Common.makeShort(registers.getS(), (byte) 0x01));
                 //registers.setS((byte) (registers.getS() + 1));
 
                 // pull register from stack
