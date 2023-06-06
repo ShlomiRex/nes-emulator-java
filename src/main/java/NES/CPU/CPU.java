@@ -197,7 +197,13 @@ public class CPU {
                 break;
             case PHA:
             case PHP:
-                throw new RuntimeException("PHA/PHP instruction not implemented");
+                // read next instruction byte (and throw it away)
+                read_memory(registers.getPC());
+                //registers.incrementPC();
+
+                // push register on stack, decrement S
+                push_stack(registers.getA());
+                break;
             case PLA:
             case PLP:
                 // read next instruction byte (and throw it away)

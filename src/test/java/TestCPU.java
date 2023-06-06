@@ -226,17 +226,24 @@ public class TestCPU {
 //
 //        // All BEQ tests
 //        test_by_type_of_instruction("BEQ", (byte) 0xF0);
+//
+//        // All RTS tests
+//        test_by_type_of_instruction("RTS", (byte) 0x60);
+//
+//        // All JMP tests
+//        test_by_type_of_instruction("JMP", (byte) 0x4C);
+//        test_by_type_of_instruction("JMP", (byte) 0x6C);
+//
+        // All PHA tests
+        test_by_type_of_instruction("PHA", (byte) 0x48);
 
-        // All RTS tests
-        test_by_type_of_instruction("RTS", (byte) 0x60);
-
+        // All PHP tests
+//        test_by_type_of_instruction("PHP", (byte) 0x08);
 
 
         // custom
 
-        // All JMP tests
-//        test_by_type_of_instruction("JMP", (byte) 0x4C);
-        test_by_type_of_instruction("JMP", (byte) 0x6C);
+
 
 
     }
