@@ -201,8 +201,15 @@ public class CPU {
                 read_memory(registers.getPC());
                 //registers.incrementPC();
 
-                // push register on stack, decrement S
-                push_stack(registers.getA());
+                if (instr == Instructions.PHP) {
+                    byte new_p = registers.getP().getAllFlags();
+                    new_p |= 0b00110000; // Set B and U flags
+                    push_stack(new_p);
+
+                } else {
+                    push_stack(registers.getA());
+                }
+
                 break;
             case PLA:
             case PLP:
