@@ -216,9 +216,18 @@ public class CPU {
 
                 // pull register from stack
                 byte reg = pop_stack();
-                registers.setA(reg);
-                registers.getP().setNegative(Common.Bits.getBit(registers.getA(), 7));
-                registers.getP().setZero(registers.getA() == 0);
+
+                if (instr == Instructions.PLA) {
+                    registers.setA(reg);
+                    registers.getP().setNegative(Common.Bits.getBit(registers.getA(), 7));
+                    registers.getP().setZero(registers.getA() == 0);
+                }
+                else {
+                    registers.getP().setAllFlags(reg);
+                    registers.getP().setBreakBit5(true);
+                    registers.getP().setBreakBit4(false);
+                }
+
                 break;
             case JSR:
                 // fetch low address byte, increment PC

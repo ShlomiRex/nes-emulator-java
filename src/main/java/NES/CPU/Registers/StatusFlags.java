@@ -91,4 +91,12 @@ public class StatusFlags {
     public void setAllFlags(byte p) {
         this.p = p;
     }
+
+    public void setBreakBit4(boolean b) {
+        this.p = Common.Bits.setBit(this.p, 4, b);
+    }
+
+    public void setBreakBit5(boolean b) {
+        this.p = Common.Bits.setBit(this.p, 5, b);
+    }
 }
