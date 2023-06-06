@@ -165,8 +165,11 @@ public class CPU {
                 // read next instruction byte (and throw it away)
                 read_memory(registers.getPC());
 
+                read_memory(Common.makeShort(registers.getS(), (byte) 0x01)); // dummy read
+
                 // pull P from stack, increment S
                 byte p = pop_stack();
+                p |= 0b00100000; // Set bit 5 to 1 (always 1)
 
                 // pull PCL from stack, increment S
                 byte pcl2 = pop_stack();
@@ -353,6 +356,7 @@ public class CPU {
             case BNE:
             case BVS:
             case BVC:
+            case BMI:
                 // do nothing, sometimes the addressing mode already done what we needed.
                 break;
             case LSR:
@@ -399,6 +403,21 @@ public class CPU {
                 break;
             case BIT:
                 exec_bit();
+                break;
+            case CLD:
+                registers.getP().setDecimal(false);
+                break;
+            case EOR:
+                exec_eor();
+                break;
+            case LDY:
+                exec_ldy();
+                break;
+            case SBC:
+                exec_sbc();
+                break;
+            case INY:
+                exec_iny();
                 break;
             default:
                 throw new RuntimeException("Instruction not implemented: " + instr);
@@ -1263,5 +1282,35 @@ public class CPU {
         registers.getP().setNegative(Common.Bits.getBit(fetched_data, 7));
         registers.getP().setOverflow(Common.Bits.getBit(fetched_data, 6));
         registers.getP().setZero((registers.getA() & fetched_data) == 0);
+    }
+
+    private void exec_eor() {
+        registers.setA((byte) (registers.getA() ^ fetched_data));
+        registers.getP().setNegative(Common.Bits.getBit(registers.getA(), 7));
+        registers.getP().setZero(registers.getA() == 0);
+    }
+
+    private void exec_ldy() {
+        registers.setY(fetched_data);
+        registers.getP().setNegative(Common.Bits.getBit(registers.getY(), 7));
+        registers.getP().setZero(registers.getY() == 0);
+    }
+
+    private void exec_sbc() {
+        int complement = (fetched_data ^ 0xFF);
+        int tmp = ((registers.getA() + complement + (registers.getP().getCarry() ? 1 : 0)) & 0x01FF);
+
+        registers.getP().setCarry(tmp > 0xFF);
+        registers.getP().setZero((tmp & 0xFF) == 0);
+        registers.getP().setNegative((tmp & 0x80) == 0x80);
+        registers.getP().setOverflow(((tmp ^ registers.getA()) & (tmp ^ complement) & 0x80) == 0x80);
+
+        registers.setA((byte) (tmp & 0xFF));
+    }
+
+    private void exec_iny() {
+        registers.setY((byte) (registers.getY() + 1));
+        registers.getP().setNegative(Common.Bits.getBit(registers.getY(), 7));
+        registers.getP().setZero(registers.getY() == 0);
     }
 }

@@ -235,10 +235,10 @@ public class TestCPU {
 //        test_by_type_of_instruction("JMP", (byte) 0x6C);
 //
 //        // All PHA tests
-        test_by_type_of_instruction("PHA", (byte) 0x48);
+//        test_by_type_of_instruction("PHA", (byte) 0x48);
 //
 //        // All PHP tests
-        test_by_type_of_instruction("PHP", (byte) 0x08);
+//        test_by_type_of_instruction("PHP", (byte) 0x08);
 //
 //        // All PLA tests
 //        test_by_type_of_instruction("PLA", (byte) 0x68);
@@ -246,6 +246,16 @@ public class TestCPU {
 //        // All PLP tests
 //        test_by_type_of_instruction("PLP", (byte) 0x28);
 
+        // All SBC tests
+        //TODO: Pass these tests
+        test_by_type_of_instruction("SBC", (byte) 0xE9);
+        test_by_type_of_instruction("SBC", (byte) 0xE5);
+        test_by_type_of_instruction("SBC", (byte) 0xF5);
+        test_by_type_of_instruction("SBC", (byte) 0xED);
+        test_by_type_of_instruction("SBC", (byte) 0xFD);
+        test_by_type_of_instruction("SBC", (byte) 0xF9);
+        test_by_type_of_instruction("SBC", (byte) 0xE1);
+        test_by_type_of_instruction("SBC", (byte) 0xF1);
 
 
 
