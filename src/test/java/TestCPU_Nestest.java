@@ -42,7 +42,7 @@ public class TestCPU_Nestest {
     public void test() throws IOException {
         CPU cpu = nes.cpu;
 
-        for (int i = 0; i < 25; i ++) {
+        for (int i = 0; i < 45; i ++) {
             String line = reader.readLine();
 
             logger.debug("Running test: " + (i+1));
@@ -106,7 +106,7 @@ public class TestCPU_Nestest {
         }
 
         String equals_to = "";
-        if (instr.equals("STX")) {
+        if (split[split_index].equals("=")) {
             equals_to = split[split_index+1];
             split_index += 2;
         }

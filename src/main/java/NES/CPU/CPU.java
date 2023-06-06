@@ -312,6 +312,9 @@ public class CPU {
             case BPL:
             case JMP:
             case BEQ:
+            case BNE:
+            case BVS:
+            case BVC:
                 // do nothing, sometimes the addressing mode already done what we needed.
                 break;
             case LSR:
@@ -355,6 +358,9 @@ public class CPU {
                 break;
             case CLC:
                 registers.getP().setCarry(false);
+                break;
+            case BIT:
+                exec_bit();
                 break;
             default:
                 throw new RuntimeException("Instruction not implemented: " + instr);
@@ -1213,5 +1219,11 @@ public class CPU {
         registers.setX(fetched_data);
         registers.getP().setNegative(Common.Bits.getBit(registers.getX(), 7));
         registers.getP().setZero(registers.getX() == 0);
+    }
+
+    private void exec_bit() {
+        registers.getP().setNegative(Common.Bits.getBit(fetched_data, 7));
+        registers.getP().setOverflow(Common.Bits.getBit(fetched_data, 6));
+        registers.getP().setZero((registers.getA() & fetched_data) == 0);
     }
 }
