@@ -115,7 +115,6 @@ public class Decoder {
         abc[0x76] = new InstructionInfo(Instructions.ROR, AddressingMode.ZEROPAGE_X, 2, 6, OopsCycle.NONE);
         abc[0x78] = new InstructionInfo(Instructions.SEI, AddressingMode.IMPLIED, 1, 2, OopsCycle.NONE);
         abc[0x79] = new InstructionInfo(Instructions.ADC, AddressingMode.ABSOLUTE_Y, 3, 4, OopsCycle.NONE);
-        abc[0x7C] = new InstructionInfo(Instructions.NOP, AddressingMode.ABSOLUTE_X, 3, 4, OopsCycle.NONE);
         abc[0x7D] = new InstructionInfo(Instructions.ADC, AddressingMode.ABSOLUTE_X, 3, 4, OopsCycle.NONE);
         abc[0x7E] = new InstructionInfo(Instructions.ROR, AddressingMode.ABSOLUTE_X, 3, 7, OopsCycle.NONE);
         abc[0x81] = new InstructionInfo(Instructions.STA, AddressingMode.INDIRECT_X, 2, 6, OopsCycle.NONE);

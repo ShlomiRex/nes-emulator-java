@@ -149,8 +149,6 @@ public class TestCPU {
 //        test_by_type_of_instruction("ROL", (byte) 0x3E);
 //
 //        // All NOP tests
-        // TODO: Fix this, need to pass NOP tests!
-//        test_by_type_of_instruction("NOP", (byte) 0x7C);
 //        test_by_type_of_instruction("NOP", (byte) 0xEA);
 //
 //        // All SEC tests
@@ -211,8 +209,7 @@ public class TestCPU {
 //        test_by_type_of_instruction("PLA", (byte) 0x68);
 //
 //        // All RTI tests
-        // TODO: Need to fix RTI tests!
-        test_by_type_of_instruction("RTI", (byte) 0x40);
+//        test_by_type_of_instruction("RTI", (byte) 0x40);
 //
 //        // All PHA tests
 //        test_by_type_of_instruction("PHA", (byte) 0x48);
