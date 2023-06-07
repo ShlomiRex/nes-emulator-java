@@ -56,5 +56,5 @@ public enum Instructions {
     TSX, // transfer stack pointer to X
     TXA, // transfer X to accumulator
     TXS, // transfer X to stack pointer
-    TYA  // transfer Y to accumulator
+    LAX, SAX, DCP, TYA  // transfer Y to accumulator
 }

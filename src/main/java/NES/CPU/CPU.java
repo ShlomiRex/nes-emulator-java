@@ -302,11 +302,10 @@ public class CPU {
             case INDIRECT_X:
                 indexed_indirect_addressing(instr);
                 break;
+            // Indirect indexed addressing
             case INDIRECT_Y:
                 indirect_indexed_addressing(instr, addrmode);
                 break;
-            // Indirect indexed addressing
-            // TODO: ??
             case ABSOLUTE_INDIRECT:
                 indirect_addressing();
                 break;
@@ -442,6 +441,15 @@ public class CPU {
             case DEC:
                 exec_inc_or_dec(false);
                 break;
+            case LAX:
+                exec_lax();
+                break;
+            case SAX:
+                exec_sax();
+                break;
+            case DCP:
+                exec_dcp();
+                break;
             default:
                 throw new RuntimeException("Instruction not implemented: " + instr);
         }
@@ -482,9 +490,7 @@ public class CPU {
             case ADC:
             case CMP:
             case SBC:
-                //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
-                // LAX
-
+            case LAX:
                 // fetch pointer address, increment PC
                 byte pointer_addr = read_memory(registers.getPC());
                 registers.incrementPC();
@@ -509,15 +515,38 @@ public class CPU {
 //            case RLA:
 //            case RRA:
 //            case ISB:
-//            case DCP:
+            case DCP:
                 //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
                 // SLO, SRE, RLA, RRA, ISB, DCP
-//                throw new RuntimeException("Read-Modify-Write instructions not implemented: " + instr);
+
+                // fetch pointer address, increment PC
+                pointer_addr = read_memory(registers.getPC());
+                registers.incrementPC();
+
+                // read from the address, add X to it
+                addr = (short) (pointer_addr & 0xFF);
+                effective_addr = read_memory((short) (pointer_addr & 0xFF));
+                addr += registers.getX();
+
+                // fetch effective address low
+                effective_addr_low = read_memory((short) (addr & 0xFF));
+
+                // fetch effective address high
+                effective_addr_high = read_memory((short) ((addr + 1) & 0xFF));
+
+                // read from effective address
+                fetched_data = read_memory(Common.makeShort(effective_addr_low, effective_addr_high));
+
+                // write the value back to effective address, and do the operation on it
+                write_memory(Common.makeShort(effective_addr_low, effective_addr_high), fetched_data);
+
+                // write the new value to effective address
+                write_memory(Common.makeShort(effective_addr_low, effective_addr_high), fetched_data);
+
+                break;
             // Write instructions (STA, SAX)
             case STA:
-                //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
-                // SAX
-
+            case SAX:
                 // fetch pointer address, increment PC
                 pointer_addr = read_memory(registers.getPC());
                 registers.incrementPC();
@@ -557,6 +586,7 @@ public class CPU {
             case ADC:
             case SBC:
             case CMP:
+            case LAX:
                 // fetch pointer address, increment PC
                 byte pointer_addr = read_memory(registers.getPC());
                 registers.incrementPC();
@@ -643,8 +673,9 @@ public class CPU {
             case CMP:
             case BIT:
             case NOP:
+            case LAX:
                 //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
-                // LAX, LAE, SHS
+                // LAE, SHS
 
                 // fetch low byte of address, increment PC
                 byte low_byte = read_memory(registers.getPC());
@@ -762,6 +793,7 @@ public class CPU {
             case CMP:
             case BIT:
             case NOP:
+            case LAX:
                 // fetch address, increment PC
                 byte addr_low = read_memory(registers.getPC());
                 registers.incrementPC();
@@ -813,9 +845,7 @@ public class CPU {
             case STA:
             case STX:
             case STY:
-                //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
-                // SAX
-
+            case SAX:
                 // fetch address, increment PC
                 addr_low = read_memory(registers.getPC());
                 registers.incrementPC();
@@ -832,6 +862,8 @@ public class CPU {
                 // Note: we store address, and after the addressing mode is finished, we execute in different place
                 fetched_addr = Common.makeShort(addr_low, (byte) 0x00);
                 break;
+            default:
+                throw new IllegalArgumentException("Invalid instruction: " + instr);
         }
     }
 
@@ -854,6 +886,7 @@ public class CPU {
             case NOP:
             case CPX: // Added CPX because of CMP, it was not mentioned in the documentation (http://www.atarihq.com/danb/files/64doc.txt)
             case CPY: // Same for CPY
+            case LAX:
                 // fetch address, increment PC
                 addr_low = read_memory(registers.getPC());
                 registers.incrementPC();
@@ -891,9 +924,7 @@ public class CPU {
             case STA:
             case STX:
             case STY:
-                //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
-                // SAX
-
+            case SAX:
                 // fetch address, increment PC
                 addr_low = read_memory(registers.getPC());
                 registers.incrementPC();
@@ -934,9 +965,7 @@ public class CPU {
            case NOP:
            case CPX: // Added CPX because of CMP, it was not mentioned in the documentation (http://www.atarihq.com/danb/files/64doc.txt)
            case CPY: // Same for CPY
-                //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
-                // LAX
-
+           case LAX:
                 //fetch low byte of address, increment PC
                 addr_low = read_memory(registers.getPC());
                 registers.incrementPC();
@@ -982,9 +1011,7 @@ public class CPU {
            case STA:
            case STX:
            case STY:
-                //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
-                // SAX
-
+           case SAX:
                 // fetch low byte of address, increment PC
                 addr_low = read_memory(registers.getPC());
                 registers.incrementPC();
@@ -1384,5 +1411,25 @@ public class CPU {
             registers.setA(result);
         else
             write_memory(fetched_addr, result);
+    }
+
+    private void exec_lax() {
+        registers.setA(fetched_data);
+        registers.setX(fetched_data);
+        registers.getP().setNegative(Common.Bits.getBit(registers.getA(), 7));
+        registers.getP().setZero(registers.getA() == 0);
+    }
+
+    private void exec_sax() {
+        byte result = (byte) (registers.getA() & registers.getX());
+        write_memory(fetched_addr, result);
+    }
+
+    private void exec_dcp() {
+        byte result = (byte) (fetched_data - 1);
+        write_memory(fetched_addr, result);
+        registers.getP().setNegative(Common.Bits.getBit(result, 7));
+        registers.getP().setZero(result == 0);
+        registers.getP().setCarry(registers.getA() >= result);
     }
 }
