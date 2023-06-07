@@ -418,6 +418,24 @@ public class CPU {
             case INY:
                 exec_iny();
                 break;
+            case INX:
+                exec_inx();
+                break;
+            case DEY:
+                exec_dey();
+                break;
+            case DEX:
+                exec_dex();
+                break;
+            case TYA:
+                exec_tya();
+                break;
+            case TXS:
+                registers.setS(registers.getX());
+                break;
+            case ASL:
+                exec_asl(addrmode == AddressingMode.ACCUMULATOR);
+                break;
             default:
                 throw new RuntimeException("Instruction not implemented: " + instr);
         }
@@ -1316,5 +1334,49 @@ public class CPU {
         registers.setY((byte) (registers.getY() + 1));
         registers.getP().setNegative(Common.Bits.getBit(registers.getY(), 7));
         registers.getP().setZero(registers.getY() == 0);
+    }
+
+    private void exec_inx() {
+        registers.setX((byte) (registers.getX() + 1));
+        registers.getP().setNegative(Common.Bits.getBit(registers.getX(), 7));
+        registers.getP().setZero(registers.getX() == 0);
+    }
+
+    private void exec_dey() {
+        registers.setY((byte) (registers.getY() - 1));
+        registers.getP().setNegative(Common.Bits.getBit(registers.getY(), 7));
+        registers.getP().setZero(registers.getY() == 0);
+    }
+
+    private void exec_dex() {
+        registers.setX((byte) (registers.getX() - 1));
+        registers.getP().setNegative(Common.Bits.getBit(registers.getX(), 7));
+        registers.getP().setZero(registers.getX() == 0);
+    }
+
+    private void exec_tya() {
+        registers.setA(registers.getY());
+        registers.getP().setNegative(Common.Bits.getBit(registers.getA(), 7));
+        registers.getP().setZero(registers.getA() == 0);
+    }
+
+    private void exec_asl(boolean is_accumulator) {
+        if (is_accumulator)
+            fetched_data = registers.getA();
+
+        // In addressing mode we already fetched it. So we don't need to read again.
+//        else
+//            fetched_data = read_memory(fetched_addr);
+
+        boolean carry_out = Common.Bits.getBit(fetched_data, 7);
+        byte result = (byte) ((fetched_data & 0xFF) << 1);
+        registers.getP().setCarry(carry_out);
+        registers.getP().setZero(result == 0);
+        registers.getP().setNegative(Common.Bits.getBit(result, 7));
+
+        if (is_accumulator)
+            registers.setA(result);
+        else
+            write_memory(fetched_addr, result);
     }
 }

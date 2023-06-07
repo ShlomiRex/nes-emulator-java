@@ -245,18 +245,23 @@ public class TestCPU {
 //
 //        // All PLP tests
 //        test_by_type_of_instruction("PLP", (byte) 0x28);
+//
+//        // All SBC tests
+//        test_by_type_of_instruction("SBC", (byte) 0xE9);
+//        test_by_type_of_instruction("SBC", (byte) 0xE5);
+//        test_by_type_of_instruction("SBC", (byte) 0xF5);
+//        test_by_type_of_instruction("SBC", (byte) 0xED);
+//        test_by_type_of_instruction("SBC", (byte) 0xFD);
+//        test_by_type_of_instruction("SBC", (byte) 0xF9);
+//        test_by_type_of_instruction("SBC", (byte) 0xE1);
+//        test_by_type_of_instruction("SBC", (byte) 0xF1);
 
-        // All SBC tests
-        //TODO: Pass these tests
-        test_by_type_of_instruction("SBC", (byte) 0xE9);
-        test_by_type_of_instruction("SBC", (byte) 0xE5);
-        test_by_type_of_instruction("SBC", (byte) 0xF5);
-        test_by_type_of_instruction("SBC", (byte) 0xED);
-        test_by_type_of_instruction("SBC", (byte) 0xFD);
-        test_by_type_of_instruction("SBC", (byte) 0xF9);
-        test_by_type_of_instruction("SBC", (byte) 0xE1);
-        test_by_type_of_instruction("SBC", (byte) 0xF1);
-
+        // All ASL tests
+        test_by_type_of_instruction("ASL", (byte) 0x0A);
+        test_by_type_of_instruction("ASL", (byte) 0x06);
+        test_by_type_of_instruction("ASL", (byte) 0x16);
+        test_by_type_of_instruction("ASL", (byte) 0x0E);
+        test_by_type_of_instruction("ASL", (byte) 0x1E);
 
 
         // custom
