@@ -436,6 +436,9 @@ public class CPU {
             case ASL:
                 exec_asl(addrmode == AddressingMode.ACCUMULATOR);
                 break;
+            case DEC:
+                exec_inc_or_dec(false);
+                break;
             default:
                 throw new RuntimeException("Instruction not implemented: " + instr);
         }
