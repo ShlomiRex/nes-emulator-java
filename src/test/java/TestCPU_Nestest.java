@@ -42,7 +42,7 @@ public class TestCPU_Nestest {
     public void test() throws IOException {
         CPU cpu = nes.cpu;
 
-        for (int i = 0; i < 1000; i ++) {
+        for (int i = 0; i < 2000; i ++) {
             String line = reader.readLine();
 
             logger.debug("Running test: " + (i+1));
@@ -109,6 +109,9 @@ public class TestCPU_Nestest {
         if (split[split_index].equals("=")) {
             equals_to = split[split_index+1];
             split_index += 2;
+        } else if (split[split_index].equals("@")) {
+            equals_to = split[split_index+2];
+            split_index += 6;
         }
 
         String str_a = split[split_index++];
