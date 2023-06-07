@@ -212,7 +212,7 @@ public class TestCPU {
 //
 //        // All RTI tests
         // TODO: Need to fix RTI tests!
-//        test_by_type_of_instruction("RTI", (byte) 0x40);
+        test_by_type_of_instruction("RTI", (byte) 0x40);
 //
 //        // All PHA tests
 //        test_by_type_of_instruction("PHA", (byte) 0x48);
@@ -255,13 +255,13 @@ public class TestCPU {
 //        test_by_type_of_instruction("SBC", (byte) 0xF9);
 //        test_by_type_of_instruction("SBC", (byte) 0xE1);
 //        test_by_type_of_instruction("SBC", (byte) 0xF1);
-
-        // All ASL tests
-        test_by_type_of_instruction("ASL", (byte) 0x0A);
-        test_by_type_of_instruction("ASL", (byte) 0x06);
-        test_by_type_of_instruction("ASL", (byte) 0x16);
-        test_by_type_of_instruction("ASL", (byte) 0x0E);
-        test_by_type_of_instruction("ASL", (byte) 0x1E);
+//
+//        // All ASL tests
+//        test_by_type_of_instruction("ASL", (byte) 0x0A);
+//        test_by_type_of_instruction("ASL", (byte) 0x06);
+//        test_by_type_of_instruction("ASL", (byte) 0x16);
+//        test_by_type_of_instruction("ASL", (byte) 0x0E);
+//        test_by_type_of_instruction("ASL", (byte) 0x1E);
 
 
         // custom

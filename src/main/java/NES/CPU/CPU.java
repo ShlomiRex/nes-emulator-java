@@ -54,12 +54,12 @@ public class CPU {
         int bytes = instr_info.bytes;
         int cycles = instr_info.cycles;
         Decoder.OopsCycle oops_cycle = instr_info.oopsCycle;
-//        logger.debug(
-//                instr.toString()+"("+Common.byteToHex(opcode, true)+")\t"
-//                +addrmode+"\tBytes: "
-//                +bytes+"\tCycles: "
-//                +cycles+"\tOops cycle: "
-//                +oops_cycle);
+        logger.debug(
+                instr.toString()+"("+Common.byteToHex(opcode, true)+")\t"
+                +addrmode+"\tBytes: "
+                +bytes+"\tCycles: "
+                +cycles+"\tOops cycle: "
+                +oops_cycle);
 
         // Execute
         execute_instruction(instr, addrmode);
@@ -162,13 +162,12 @@ public class CPU {
                 break;
             case RTI:
                 // read next instruction byte (and throw it away)
-                read_memory(registers.getPC());
+                read_memory(registers.getPC()); // dummy read
 
                 read_memory(Common.makeShort(registers.getS(), (byte) 0x01)); // dummy read
 
                 // pull P from stack, increment S
                 byte p = pop_stack();
-                p |= 0b00100000; // Set bit 5 to 1 (always 1)
 
                 // pull PCL from stack, increment S
                 byte pcl2 = pop_stack();
@@ -177,7 +176,11 @@ public class CPU {
                 byte pch2 = pop_stack();
 
                 registers.setPC(Common.makeShort(pcl2, pch2));
+
+                p |= 0b00100000; // Set bits 5
+                p &= 0b11101111; // Clear bits 4
                 registers.getP().setAllFlags(p);
+
                 break;
             case RTS:
                 // read next instruction byte (and throw it away)
