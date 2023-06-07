@@ -52,7 +52,7 @@ public class TestCPU_Nestest {
             CPUState state = parse_nestest_log_line(line);
 
             // Assert before clock tick, since it changes the state of the CPU
-            assertEquals(state.pc & 0xFFFF, cpu.registers.getPC() & 0xFFFF);
+            assertEquals(state.pc, cpu.registers.getPC());
             assertEquals(state.cycles, cpu.cycles);
             assertEquals(state.a, cpu.registers.getA());
             assertEquals(state.x, cpu.registers.getX());

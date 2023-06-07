@@ -146,7 +146,6 @@ public class CPU {
                 push_stack((byte) (registers.getPC() & 0xFF));
 
                 // push P on stack (with B flag set), decrement S
-                // TODO: Expected to write 113 (0x71) but mine is writing 105 (0x69)
                 push_stack((byte) (registers.getP().getAllFlags() | 0b00010000));
 
                 // fetch PCL
@@ -542,7 +541,6 @@ public class CPU {
                 byte effective_addr_low = read_memory((short) (pointer_addr & 0xFF));
 
                 // fetch effective address high, add Y to low byte of effective address
-                // TODO: Need to read at address 149 (0x95)
                 byte effective_addr_high = read_memory((short) ((pointer_addr +1) & 0xFF));
                 byte new_effective_addr_low = (byte) (effective_addr_low + register);
 
@@ -1297,15 +1295,21 @@ public class CPU {
     }
 
     private void exec_sbc() {
-        int complement = (fetched_data ^ 0xFF);
-        int tmp = ((registers.getA() + complement + (registers.getP().getCarry() ? 1 : 0)) & 0x01FF);
+        // Like ADC but we invert the fetched data
+        fetched_data = (byte) (fetched_data ^ 0xFF);
 
-        registers.getP().setCarry(tmp > 0xFF);
-        registers.getP().setZero((tmp & 0xFF) == 0);
-        registers.getP().setNegative((tmp & 0x80) == 0x80);
-        registers.getP().setOverflow(((tmp ^ registers.getA()) & (tmp ^ complement) & 0x80) == 0x80);
+        byte result = (byte) (registers.getA() + fetched_data + (registers.getP().getCarry() ? 1 : 0));
 
-        registers.setA((byte) (tmp & 0xFF));
+        byte m_plus_a = (byte) (fetched_data + registers.getA());
+        boolean is_carry = Common.isAdditionCarry(fetched_data, registers.getA());
+        boolean is_carry2 = Common.isAdditionCarry(m_plus_a, (byte) (registers.getP().getCarry() ? 1 : 0));
+        boolean negative_flag_set = ((registers.getA() ^ result) & (fetched_data ^ result) & 0x80) != 0;
+
+        registers.getP().modify_n(result);
+        registers.getP().modify_z(result);
+        registers.getP().setCarry(is_carry || is_carry2);
+        registers.getP().setOverflow(negative_flag_set);
+        registers.setA(result);
     }
 
     private void exec_iny() {
