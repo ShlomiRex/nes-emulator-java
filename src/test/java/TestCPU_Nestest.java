@@ -42,7 +42,7 @@ public class TestCPU_Nestest {
     public void test() throws IOException {
         CPU cpu = nes.cpu;
 
-        for (int i = 0; i < 4000; i ++) {
+        for (int i = 0; i < 10000; i ++) {
             String line = reader.readLine();
 
             logger.debug("Running test: " + (i+1));
@@ -66,77 +66,21 @@ public class TestCPU_Nestest {
     }
 
     private CPUState parse_nestest_log_line(String line) {
-        String[] split = line.split("\\s+");
+        int index_pc = line.indexOf(" ");
+        int index_a = line.indexOf("A:");
+        int index_x = line.indexOf("X:");
+        int index_y = line.indexOf("Y:");
+        int index_p = line.indexOf("P:");
+        int index_sp = line.indexOf("SP:");
 
-        String str_pc = split[0];
-        String str_opcode = split[1];
-
-        byte opcode = (byte) Integer.parseInt(str_opcode, 16);
-        Decoder.InstructionInfo instr_info = decoder.decode_opcode(opcode);
-
-        String str_oper1 = "  ";
-        String str_oper2 = "  ";
-        Byte oper1 = null;
-        Byte oper2 = null;
-        int split_index = 0;
-
-        switch (instr_info.bytes) {
-            case 1 -> split_index = 2;
-            case 2 -> {
-                split_index = 3;
-                str_oper1 = split[2];
-                oper1 = (byte) Integer.parseInt(str_oper1, 16);
-            }
-            case 3 -> {
-                split_index = 4;
-                str_oper1 = split[2];
-                str_oper2 = split[3];
-                oper1 = (byte) Integer.parseInt(str_oper1, 16);
-                oper2 = (byte) Integer.parseInt(str_oper2, 16);
-            }
-        }
-
-        String instr = split[split_index++];
-        String addr = "";
-
-        if (instr_info.addrmode == AddressingMode.IMPLIED) {
-            //split_index++;
-        } else {
-            addr = split[split_index++];
-        }
-
-        switch(instr_info.addrmode) {
-            case ZEROPAGE:
-                split_index += 2;
-                break;
-            case INDIRECT_X:
-            case INDIRECT_Y:
-                split_index += 6;
-                break;
-        }
-
-        if (split[split_index].equals("=")) {
-            split_index += 2;
-        }
-
-        String str_a = split[split_index++];
-        String str_x = split[split_index++];
-        String str_y = split[split_index++];
-        String str_p = split[split_index++];
-        String str_sp = split[split_index++];
-        String ppu_txt = split[split_index++];
-        String ppu_1 = split[split_index++];
-
-        String ppu_2 = "";
-        if (ppu_1.substring(ppu_1.indexOf(',')).length() > 1) {
-            String[] split2 = ppu_1.split(",");
-            ppu_1 = split2[0];
-            ppu_2 = split2[1];
-        } else {
-            ppu_2 = split[split_index++];
-        }
-
-        String str_cycles = split[split_index++];
+        String str_pc = line.substring(0, index_pc);
+        String str_a = line.substring(index_a, index_a+4);
+        String str_x = line.substring(index_x, index_x+4);
+        String str_y = line.substring(index_y, index_y+4);
+        String str_p = line.substring(index_p, index_p+4);
+        String str_sp = line.substring(index_sp, index_sp+5);
+        String ppu_txt = line.substring(line.indexOf("PPU:"), line.indexOf("CYC"));
+        String str_cycles = line.substring(line.indexOf("CYC:"));
 
         short pc = (short) Integer.parseInt(str_pc, 16);
         byte a = (byte) Integer.parseInt(str_a.substring(2), 16);

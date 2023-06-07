@@ -100,9 +100,9 @@ public class CPU {
 //            }
 //        }\
         res = memory[addr & 0xFFFF];
-//        logger.debug("Reading memory: [" +
-//                (addr & 0xFFFF) + " (" + Common.shortToHex(addr, true) + ")] = " + (res & 0xFF) +" ("+
-//                Common.byteToHex(res, true) + ")");
+        logger.debug("Reading memory: [" +
+                (addr & 0xFFFF) + " (" + Common.shortToHex(addr, true) + ")] = " + (res & 0xFF) +" ("+
+                Common.byteToHex(res, true) + ")");
         if (is_record_memory)
             recorded_memory.add(new MemoryAccessRecord(addr, res, true));
         cycles ++;
@@ -580,7 +580,7 @@ public class CPU {
                     fetched_data = read_memory(effective_addr);
 
                     // This cycle will be executed only if the effective address was invalid during cycle #5, i.e. page boundary was crossed.
-                    cycles ++;
+                    //cycles ++;
                 }
 
 
@@ -1071,8 +1071,8 @@ public class CPU {
     }
 
     private void write_memory(short addr, byte value) {
-//        logger.debug("Writing memory: ["+addr + " (" + Common.shortToHex(addr, true)+")] = "
-//                +value + " ("+Common.byteToHex(value, true)+")");
+        logger.debug("Writing memory: ["+addr + " (" + Common.shortToHex(addr, true)+")] = "
+                +value + " ("+Common.byteToHex(value, true)+")");
         memory[addr & 0xFFFF] = value;
         cycles ++;
         if (is_record_memory)
