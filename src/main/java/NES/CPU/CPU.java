@@ -902,8 +902,9 @@ public class CPU {
             case ROR:
             case INC:
             case DEC:
+            case DCP:
                 //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
-                // SLO, SRE, RLA, RRA, ISB, DCP
+                // SLO, SRE, RLA, RRA, ISB
 
                 // fetch address, increment PC
                 addr_low = read_memory(registers.getPC());
@@ -1428,8 +1429,9 @@ public class CPU {
     private void exec_dcp() {
         byte result = (byte) (fetched_data - 1);
         write_memory(fetched_addr, result);
-        registers.getP().setNegative(Common.Bits.getBit(result, 7));
-        registers.getP().setZero(result == 0);
+
+        registers.getP().modify_n(result);
+        registers.getP().modify_z(result);
         registers.getP().setCarry(registers.getA() >= result);
     }
 }

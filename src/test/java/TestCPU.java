@@ -260,10 +260,14 @@ public class TestCPU {
 //        test_by_type_of_instruction("ASL", (byte) 0x0E);
 //        test_by_type_of_instruction("ASL", (byte) 0x1E);
 
-
-        // custom
-
-
+        // All DCP tests
+        test_by_type_of_instruction("DCP", (byte) 0xC7);
+        test_by_type_of_instruction("DCP", (byte) 0xD7);
+        test_by_type_of_instruction("DCP", (byte) 0xCF);
+        test_by_type_of_instruction("DCP", (byte) 0xDF);
+        test_by_type_of_instruction("DCP", (byte) 0xDB);
+        test_by_type_of_instruction("DCP", (byte) 0xC3);
+        test_by_type_of_instruction("DCP", (byte) 0xD3);
 
 
     }
