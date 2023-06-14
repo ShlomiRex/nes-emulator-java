@@ -1427,11 +1427,20 @@ public class CPU {
     }
 
     private void exec_dcp() {
-        byte result = (byte) (fetched_data - 1);
-        write_memory(fetched_addr, result);
+        // Decrement the value at the specified memory address
+        byte value = read_memory(fetched_addr);
+        value = (byte) ((value - 1) & 0xFF); // Decrement and wrap around to 0xFF if necessary
+        write_memory(fetched_addr, value);
 
-        registers.getP().modify_n(result);
-        registers.getP().modify_z(result);
-        registers.getP().setCarry(registers.getA() >= result);
+        // Compare the updated value with the accumulator
+        int accumulator = registers.getA() & 0xFF;
+        int result = accumulator - value;
+
+        boolean carry = (accumulator & 0xFF) > (value & 0xFF);
+
+        // Set the processor flags accordingly
+        registers.getP().modify_n((byte) result);
+        registers.getP().modify_z((byte) result);
+        registers.getP().setCarry(carry);
     }
 }

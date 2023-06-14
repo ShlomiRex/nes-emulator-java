@@ -376,12 +376,37 @@ public class TestCPU {
         Integer s = (Integer) final_result.get("s");
         JSONArray ram = (JSONArray) final_result.get("ram");
 
+        // Bit flags
+        byte curr_p = cpu.registers.getP().getAllFlags();
+        boolean curr_carry = Common.Bits.getBit(curr_p, 0); // carry
+        boolean curr_zero = Common.Bits.getBit(curr_p, 1); // zero
+        boolean curr_int_disable = Common.Bits.getBit(curr_p, 2); // interrupt disable
+        boolean curr_decimal = Common.Bits.getBit(curr_p, 3); // decimal
+        boolean curr_break = Common.Bits.getBit(curr_p, 4); // break
+        boolean curr_overflow = Common.Bits.getBit(curr_p, 6); // overflow
+        boolean curr_negative = Common.Bits.getBit(curr_p, 7); // negative
+
+        boolean final_carry = Common.Bits.getBit(p.byteValue(), 0); // carry
+        boolean final_zero = Common.Bits.getBit(p.byteValue(), 1); // zero
+        boolean final_int_disable = Common.Bits.getBit(p.byteValue(), 2); // interrupt disable
+        boolean final_decimal = Common.Bits.getBit(p.byteValue(), 3); // decimal
+        boolean final_break = Common.Bits.getBit(p.byteValue(), 4); // break
+        boolean final_overflow = Common.Bits.getBit(p.byteValue(), 6); // overflow
+        boolean final_negative = Common.Bits.getBit(p.byteValue(), 7); // negative
+
         // Test CPU flags
         assertEquals(pc.shortValue(), cpu.registers.getPC());
         assertEquals(a.byteValue(), cpu.registers.getA());
         assertEquals(x.byteValue(), cpu.registers.getX());
         assertEquals(y.byteValue(), cpu.registers.getY());
-        assertEquals(p.byteValue(), cpu.registers.getP().getAllFlags());
+        assertEquals(final_carry, curr_carry, "Carry flag is not equal, expected: " + final_carry + ", actual: " + curr_carry);
+        assertEquals(final_zero, curr_zero, "Zero flag is not equal, expected: " + final_zero + ", actual: " + curr_zero);
+        assertEquals(final_int_disable, curr_int_disable, "Interrupt disable flag is not equal, expected: " + final_int_disable + ", actual: " + curr_int_disable);
+        assertEquals(final_decimal, curr_decimal, "Decimal flag is not equal, expected: " + final_decimal + ", actual: " + curr_decimal);
+        assertEquals(final_break, curr_break, "Break flag is not equal, expected: " + final_break + ", actual: " + curr_break);
+        assertEquals(final_overflow, curr_overflow, "Overflow flag is not equal, expected: " + final_overflow + ", actual: " + curr_overflow);
+        assertEquals(final_negative, curr_negative, "Negative flag is not equal, expected: " + final_negative + ", actual: " + curr_negative);
+        assertEquals(p.byteValue(), cpu.registers.getP().getAllFlags()); // just in case
         assertEquals(s.byteValue(), cpu.registers.getS());
 
         // Test ram
