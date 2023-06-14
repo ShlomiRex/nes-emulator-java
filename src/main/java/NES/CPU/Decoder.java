@@ -294,33 +294,48 @@ public class Decoder {
                 short relative_addr = (short) (pc + operand1 + 2);
                 return "$" + Common.shortToHex(relative_addr, false);
             }
+            case ZEROPAGE -> {
+                return "$" + Common.byteToHex(operand1, false);
+            }
+            case ZEROPAGE_X -> {
+                return "$" + Common.byteToHex(operand1, false) + ",X";
+            }
             default -> throw new RuntimeException("Not implemented yet");
         }
     }
 
     private String convert_2_operands_to_human_readable_text(AddressingMode addrmode, byte operand1, byte operand2) {
+        short addr;
+        String knownSymbol;
         switch (addrmode) {
-            case ABSOLUTE -> {
+            case ABSOLUTE:
                 // Little endian = switch order of operands that represent the address
-                short addr = Common.makeShort(operand2, operand1);
-                String knownSymbol = convert_addr_to_symbol(addr);
+                addr = Common.makeShort(operand2, operand1);
+                knownSymbol = convert_addr_to_symbol(addr);
                 if (knownSymbol != null) {
                     return knownSymbol;
                 }
                 else {
                     return "#$" + Common.byteToHex(operand1, false);
                 }
-            }
-            case ABSOLUTE_X -> {
-                short addr = Common.makeShort(operand2, operand1);
-                String knownSymbol = convert_addr_to_symbol(addr);
+            case ABSOLUTE_X:
+                addr = Common.makeShort(operand2, operand1);
+                knownSymbol = convert_addr_to_symbol(addr);
                 if (knownSymbol != null) {
                     return knownSymbol;
                 } else {
                     return "$" + Common.shortToHex(addr, false) + ",X";
                 }
-            }
-            default -> throw new RuntimeException("Not implemented yet");
+            case ABSOLUTE_INDIRECT:
+                addr = Common.makeShort(operand2, operand1);
+                knownSymbol = convert_addr_to_symbol(addr);
+                if (knownSymbol != null) {
+                    return knownSymbol;
+                } else {
+                    return "($" + Common.shortToHex(addr, false) + ")";
+                }
+            default:
+                throw new RuntimeException("Not implemented yet");
         }
     }
 

@@ -42,7 +42,7 @@ public class DebuggerWindow extends JFrame {
 
         add(assembly_main_pane, BorderLayout.LINE_START);
         add(main_pane, BorderLayout.CENTER);
-        //pack();
+        pack();
         setVisible(true);
         setLocationRelativeTo(null);
     }

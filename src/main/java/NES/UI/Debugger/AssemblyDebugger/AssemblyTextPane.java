@@ -12,15 +12,15 @@ import java.awt.*;
 public class AssemblyTextPane extends JTextPane {
 
     private final CPURegisters cpuRegisters;
-    private Highlighter.HighlightPainter highlightPainter;
+    private final Highlighter.HighlightPainter highlightPainter;
     private String text;
 
     public AssemblyTextPane(CPURegisters cpuRegisters) {
         this.cpuRegisters = cpuRegisters;
+
         highlightPainter = new DefaultHighlighter.DefaultHighlightPainter(Color.YELLOW);
 
         setEditable(false);
-        setAutoscrolls(true);
         setFont(new Font("monospaced", Font.PLAIN, 12));
     }
 
