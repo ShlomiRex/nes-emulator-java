@@ -7,15 +7,14 @@ import NES.PPU.PPU;
 
 public class NES {
 
-    private ROMParser romParser;
     public final CPU cpu;
     public PPU ppu;
+    private boolean is_running;
 
     public final byte[] cpu_memory; // All 64KB addressable memory
 
     // We want to deal with creating the memory here, so its more manageable, and each component can take modular memory.
     public NES(ROMParser romParser) {
-        this.romParser = romParser;
         byte[] prg_rom = romParser.getPrg_rom();
         byte[] chr_rom = romParser.getChr_rom();
 
@@ -41,5 +40,26 @@ public class NES {
         ppu = new PPU(pattern_tables);
         cpu = new CPU(cpu_memory, ppu.registers);
         cpu.res_interrupt();
+    }
+
+    public void run(Runnable update_debugger) {
+        is_running = true;
+        while (is_running) {
+            cpu.clock_tick();
+            ppu.clock_tick();
+            ppu.clock_tick();
+            ppu.clock_tick();
+            if (update_debugger != null)
+                update_debugger.run();
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    public void stop() {
+        is_running = false;
     }
 }

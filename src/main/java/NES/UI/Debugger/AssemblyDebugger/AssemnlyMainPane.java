@@ -101,4 +101,9 @@ public class AssemnlyMainPane extends JPanel {
         doc.insertString(doc.getLength(), str, set);
     }
 
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        assembly_text_area.ready_next_instruction();
+    }
 }

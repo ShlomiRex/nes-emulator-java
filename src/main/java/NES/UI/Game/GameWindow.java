@@ -1,16 +1,13 @@
 package NES.UI.Game;
 
-import NES.UI.Game.Canvas;
-
 import javax.swing.*;
 
-public class Window extends JFrame {
-    private Canvas canvas;
-    public Window() {
+public class GameWindow extends JFrame {
+    public GameWindow() {
         setSize(800, 600);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        canvas = new Canvas(this);
+        GamePanel canvas = new GamePanel();
         add(canvas);
         setVisible(true);
     }

@@ -46,4 +46,8 @@ public class DebuggerWindow extends JFrame {
         setVisible(true);
         setLocationRelativeTo(null);
     }
+
+    public Runnable getUpdateRunnable() {
+        return this::repaint;
+    }
 }
