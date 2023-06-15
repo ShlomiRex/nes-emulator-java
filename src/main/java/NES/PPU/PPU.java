@@ -4,6 +4,8 @@ import NES.Common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.*;
+
 public class PPU {
 
     private final Logger logger = LoggerFactory.getLogger(PPU.class);
@@ -17,9 +19,14 @@ public class PPU {
     public int scanline;
     public int frame;
 
+    private static final int SCREEN_WIDTH = 256;
+    private static final int SCREEN_HEIGHT = 240;
+    private final byte[] frameBuffer;
+
     public PPU(byte[] pattern_tables) {
         this.registers = new PPURegisters();
         this.pattern_tables = pattern_tables;
+        this.frameBuffer = new byte[SCREEN_WIDTH * SCREEN_HEIGHT];
 
         if (pattern_tables.length != 1024 * 8)
             throw new RuntimeException("Unexpected pattern table length");
@@ -85,6 +92,11 @@ public class PPU {
      * Clock tick for PPU.
      */
     public void clock_tick() {
+        // Simulate PPU updates with random data for demonstration
+        for (int i = 0; i < frameBuffer.length; i++) {
+            frameBuffer[i] = (byte) (Math.random() * 256); // Random pixel value between 0-255
+        }
+
         if (frame == 60) {
             frame = 0;
             return;
@@ -113,5 +125,16 @@ public class PPU {
         }
 
         cycle ++;
+    }
+
+    public static Color getColorFromPalette(byte paletteIndex) {
+        // Return the appropriate color based on the palette index
+
+        // For example, a simple implementation that alternates between two colors:
+        return (paletteIndex % 2 == 0) ? Color.WHITE : Color.GRAY;
+    }
+
+    public byte[] getFrameBuffer() {
+        return frameBuffer;
     }
 }

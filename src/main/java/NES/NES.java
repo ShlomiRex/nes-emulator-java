@@ -49,13 +49,13 @@ public class NES {
             ppu.clock_tick();
             ppu.clock_tick();
             ppu.clock_tick();
-            if (update_debugger != null)
-                update_debugger.run();
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+//            if (update_debugger != null)
+//                update_debugger.run();
+//            try {
+//                Thread.sleep(10);
+//            } catch (InterruptedException e) {
+//                throw new RuntimeException(e);
+//            }
         }
     }
 
