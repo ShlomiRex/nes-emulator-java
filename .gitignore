@@ -3,3 +3,4 @@ target/
 *.deb
 *.fdb
 test_resources/**
+.DS_Store

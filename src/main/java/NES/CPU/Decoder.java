@@ -316,7 +316,7 @@ public class Decoder {
                     return knownSymbol;
                 }
                 else {
-                    return "#$" + Common.byteToHex(operand1, false);
+                    return "#$" + Common.byteToHex(operand2, false) + Common.byteToHex(operand1, false);
                 }
             case ABSOLUTE_X:
                 addr = Common.makeShort(operand2, operand1);

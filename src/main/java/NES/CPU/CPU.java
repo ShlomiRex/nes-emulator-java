@@ -40,8 +40,8 @@ public class CPU {
     }
 
     public void clock_tick() {
-        logger.debug("Tick, cycle: " + this.cycles);
-        logger.debug(registers.toString());
+        //logger.debug("Tick, cycle: " + this.cycles);
+        //logger.debug(registers.toString());
 
         // Fetch
         byte opcode = read_memory(registers.getPC()); // Read at address of Program Counter (duh!)
@@ -54,12 +54,12 @@ public class CPU {
         int bytes = instr_info.bytes;
         int cycles = instr_info.cycles;
         Decoder.OopsCycle oops_cycle = instr_info.oopsCycle;
-        logger.debug(
-                instr.toString()+"("+Common.byteToHex(opcode, true)+")\t"
-                +addrmode+"\tBytes: "
-                +bytes+"\tCycles: "
-                +cycles+"\tOops cycle: "
-                +oops_cycle);
+//        logger.debug(
+//                instr.toString()+"("+Common.byteToHex(opcode, true)+")\t"
+//                +addrmode+"\tBytes: "
+//                +bytes+"\tCycles: "
+//                +cycles+"\tOops cycle: "
+//                +oops_cycle);
 
         // Execute
         execute_instruction(instr, addrmode);
@@ -75,8 +75,8 @@ public class CPU {
 
         instructions ++;
 
-        logger.debug(registers.toString());
-        logger.debug("End of tick");
+//        logger.debug(registers.toString());
+//        logger.debug("End of tick");
     }
 
     private byte read_memory(short addr) {
@@ -100,9 +100,9 @@ public class CPU {
 //            }
 //        }\
         res = memory[addr & 0xFFFF];
-        logger.debug("Reading memory: [" +
-                (addr & 0xFFFF) + " (" + Common.shortToHex(addr, true) + ")] = " + (res & 0xFF) +" ("+
-                Common.byteToHex(res, true) + ")");
+//        logger.debug("Reading memory: [" +
+//                (addr & 0xFFFF) + " (" + Common.shortToHex(addr, true) + ")] = " + (res & 0xFF) +" ("+
+//                Common.byteToHex(res, true) + ")");
         if (is_record_memory)
             recorded_memory.add(new MemoryAccessRecord(addr, res, true));
         cycles ++;
@@ -1099,8 +1099,8 @@ public class CPU {
     }
 
     private void write_memory(short addr, byte value) {
-        logger.debug("Writing memory: ["+addr + " (" + Common.shortToHex(addr, true)+")] = "
-                +value + " ("+Common.byteToHex(value, true)+")");
+//        logger.debug("Writing memory: ["+addr + " (" + Common.shortToHex(addr, true)+")] = "
+//                +value + " ("+Common.byteToHex(value, true)+")");
         memory[addr & 0xFFFF] = value;
         cycles ++;
         if (is_record_memory)

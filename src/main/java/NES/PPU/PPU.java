@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
+import java.util.Arrays;
 
 public class PPU {
 
@@ -22,6 +23,7 @@ public class PPU {
     private static final int SCREEN_WIDTH = 256;
     private static final int SCREEN_HEIGHT = 240;
     private final byte[] frameBuffer;
+    private Runnable redraw_runnable;
 
     public PPU(byte[] pattern_tables) {
         this.registers = new PPURegisters();
@@ -93,9 +95,9 @@ public class PPU {
      */
     public void clock_tick() {
         // Simulate PPU updates with random data for demonstration
-        for (int i = 0; i < frameBuffer.length; i++) {
-            frameBuffer[i] = (byte) (Math.random() * 256); // Random pixel value between 0-255
-        }
+//        for (int i = 0; i < frameBuffer.length; i++) {
+//            frameBuffer[i] = (byte) (Math.random() * 256); // Random pixel value between 0-255
+//        }
 
         if (frame == 60) {
             frame = 0;
@@ -117,6 +119,9 @@ public class PPU {
         if (scanline == 241 && cycle == 1) {
             // VBlank start
             registers.setNmiEnabled(true);
+            // Clear screen
+            Arrays.fill(frameBuffer, (byte) 107); // gray
+            this.redraw_runnable.run();
         }
 
         if (scanline == 261 && cycle == 1) {
@@ -136,5 +141,9 @@ public class PPU {
 
     public byte[] getFrameBuffer() {
         return frameBuffer;
+    }
+
+    public void set_redraw_runnable_trigger(Runnable runnable) {
+        this.redraw_runnable = runnable;
     }
 }

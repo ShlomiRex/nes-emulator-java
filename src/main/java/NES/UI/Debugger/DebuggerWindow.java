@@ -32,13 +32,15 @@ public class DebuggerWindow extends JFrame {
         CPUMainPane main_cpu_debugging_pane = new CPUMainPane(nes.cpu, nes.cpu_memory, assembly_main_pane.assembly_text_area);
         JPanel main_ppu_debugging_pane = new PPUMainPane(nes.ppu);
 
+        JScrollPane cpu_scroll_pane = new JScrollPane(main_cpu_debugging_pane);
+        JScrollPane ppu_scroll_pane = new JScrollPane(main_ppu_debugging_pane);
 
         Runnable repaint_ppu_pane = main_ppu_debugging_pane::repaint;
 
         main_cpu_debugging_pane.setRepaintPpuPane(repaint_ppu_pane);
 
-        main_pane.add(main_cpu_debugging_pane);
-        main_pane.add(main_ppu_debugging_pane);
+        main_pane.add(cpu_scroll_pane);
+        main_pane.add(ppu_scroll_pane);
 
         add(assembly_main_pane, BorderLayout.LINE_START);
         add(main_pane, BorderLayout.CENTER);

@@ -51,13 +51,14 @@ public class AssemnlyMainPane extends JPanel {
         assembly_text_area.ready_next_instruction();
 
         JScrollPane scrollPane = new JScrollPane(assembly_text_area);
-        scrollPane.setPreferredSize(new Dimension(250, 800));
+        scrollPane.setPreferredSize(new Dimension(250, 600));
         add(scrollPane);
     }
 
     private void initializeAssemblyText() throws BadLocationException {
         short pc = (short) (cpuRegisters.getPC() & 0xFFFF);
 
+        //TODO: Change assembly_line_num to something bigger... it should write all the assembly lines
         for (int assembly_line_num = 0; assembly_line_num < 129; assembly_line_num++) {
             Decoder.AssemblyInfo info = decoder.decode_assembly_line(cpu_memory, pc);
 
@@ -74,21 +75,17 @@ public class AssemnlyMainPane extends JPanel {
             // Operands
             String operands = info.decoded_operand_or_symbol;
             if (operands != null) {
-                if (operands.contains("#")) {
-                    // Not symbol - get the prefix and suffix
-                    String[] split = operands.split("\\$");
-                    append(split[0], attr_blue);
-                    append("$"+split[1], attr_green);
-                } else if (operands.contains("$")) {
-                    // Not symbol - get the prefix and suffix
-                    String[] split = operands.split("\\$");
-                    append(split[0], attr_blue);
-                    append("$"+split[1], attr_green);
-                }
-                else {
-                    // Symbol
-                    append(operands, attr_blue);
-                }
+//                if (operands.contains("#")) {
+//                    // Not symbol - get the prefix and suffix
+//                    String[] split = operands.split("\\$");
+//                    append(split[0], attr_blue);
+//                    append("$"+split[1], attr_green);
+//                }
+//                else {
+//                    // Symbol
+//                    append(operands, attr_blue);
+//                }
+                append(operands, attr_green);
             }
 
             append("\n", attr_black);
