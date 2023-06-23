@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.List;
 
@@ -19,7 +20,6 @@ public class CPUButtonPane extends JPanel {
 
     /**
      * @param debugger_pane      The panel to repaint to update UI once the tick is done
-     * @param assembly_main_pane
      */
     public CPUButtonPane(CPU cpu, JPanel debugger_pane, AssemblyTextPane assembly_text_pane) {
         this.debugger_pane = debugger_pane;
@@ -28,7 +28,16 @@ public class CPUButtonPane extends JPanel {
         JButton btn_run = new JButton("Run");
         JButton btn_stop = new JButton("Stop");
 
+        JPanel box_pane = new JPanel();
+        box_pane.setLayout(new BoxLayout(box_pane, BoxLayout.PAGE_AXIS));
+        box_pane.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+        box_pane.add(btn_tick);
+        box_pane.add(btn_run);
+        box_pane.add(btn_stop);
+
         btn_stop.setEnabled(false);
+
+        add(box_pane);
 
         btn_tick.addActionListener(new AbstractAction() {
             @Override
@@ -102,10 +111,6 @@ public class CPUButtonPane extends JPanel {
                 debugger_pane.repaint();
             }
         });
-
-        add(btn_tick);
-        add(btn_run);
-        add(btn_stop);
     }
 
     // Called when we need to update the PPU panel

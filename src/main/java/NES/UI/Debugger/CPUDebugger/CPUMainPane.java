@@ -10,7 +10,7 @@ import java.awt.*;
 public class CPUMainPane extends JPanel {
     private final CPUButtonPane button_pane;
 
-    public CPUMainPane(CPU cpu, byte[] cpu_memory, AssemblyTextPane assembly_text_pane) {
+    public CPUMainPane(CPU cpu, AssemblyTextPane assembly_text_pane) {
         setBorder(BorderFactory.createTitledBorder("CPU"));
 
         JPanel reg_pane = new RegistersPanel(cpu.registers);
@@ -18,7 +18,6 @@ public class CPUMainPane extends JPanel {
         button_pane = new CPUButtonPane(cpu, this, assembly_text_pane);
         JPanel cycles_pane = new CyclesPane(cpu);
         JPanel num_instr_pane = new NumInstructionsPane(cpu);
-        JPanel instr_pane = new InstructionsPane(cpu, cpu_memory);
 
         JPanel box_pane = new JPanel();
         box_pane.setLayout(new BoxLayout(box_pane, BoxLayout.PAGE_AXIS));
@@ -31,8 +30,6 @@ public class CPUMainPane extends JPanel {
         box_pane.add(cycles_pane);
         box_pane.add(num_instr_pane);
         add(box_pane);
-
-        add(instr_pane);
     }
 
     // Called when we need to update the PPU panel

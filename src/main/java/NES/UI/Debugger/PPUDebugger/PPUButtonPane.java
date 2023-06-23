@@ -18,8 +18,9 @@ public class PPUButtonPane extends JPanel {
         JButton btn_tick = new JButton("Tick");
         JButton btn_run = new JButton("Run");
         JButton btn_stop = new JButton("Stop");
-        JSeparator separator = new JSeparator();
         JPanel box_pane = new JPanel();
+        JSeparator separator = new JSeparator();
+        JPanel box_pane2 = new JPanel();
         JPanel flow1_pane = new JPanel();
         JButton btn_run_custom = new JButton("Run custom ticks");
         JTextField txt_run_custom = new JTextField("50", 4);
@@ -30,21 +31,24 @@ public class PPUButtonPane extends JPanel {
 
         btn_stop.setEnabled(false);
         box_pane.setLayout(new BoxLayout(box_pane, BoxLayout.PAGE_AXIS));
+        box_pane.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+        box_pane2.setLayout(new BoxLayout(box_pane2, BoxLayout.PAGE_AXIS));
         btn_run_custom.setToolTipText("Run a custom number of ticks");
         btn_run_scanline_custom.setToolTipText("Run a custom number of scanlines");
 
-        add(btn_tick);
-        add(btn_run);
-        add(btn_stop);
+        box_pane.add(btn_tick);
+        box_pane.add(btn_run);
+        box_pane.add(btn_stop);
+        add(box_pane);
         add(separator);
         flow1_pane.add(btn_run_custom);
         flow1_pane.add(txt_run_custom);
         flow2_pane.add(btn_run_scanline_custom);
         flow2_pane.add(txt_run_scanline_custom);
-        box_pane.add(flow1_pane);
-        box_pane.add(flow2_pane);
-        box_pane.add(btn_run_until_vblank);
-        add(box_pane);
+        box_pane2.add(flow1_pane);
+        box_pane2.add(flow2_pane);
+        box_pane2.add(btn_run_until_vblank);
+        add(box_pane2);
 
         btn_tick.addActionListener(new AbstractAction() {
             @Override

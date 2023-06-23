@@ -9,8 +9,8 @@ import java.io.IOException;
 
 public class Main {
     public static void main(String[] args) throws IOException, ROMParser.ParsingException {
-        //String program = "6502_programs/nestest/nestest.nes";
-        String program = "6502_programs/greenscreen/greenscreen.nes";
+        String program = "6502_programs/nestest/nestest.nes";
+        //String program = "6502_programs/greenscreen/greenscreen.nes";
 
         ROMParser romParser = new ROMParser(program);
 
