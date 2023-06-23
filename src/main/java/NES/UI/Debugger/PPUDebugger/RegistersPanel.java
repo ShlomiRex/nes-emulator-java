@@ -22,8 +22,10 @@ public class RegistersPanel extends JPanel {
         this.ppuRegisters = ppuRegisters;
 
         setBorder(BorderFactory.createTitledBorder("Registers"));
+        setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 
-        setLayout(new GridLayout(2, 4));
+        JPanel flow_pane1 = new JPanel();
+        JPanel flow_pane2 = new JPanel();
 
         JLabel lbl_ppu_ctrl = new JLabel("PPUCTRL:");
         JLabel lbl_ppu_mask = new JLabel("PPUMASK:");
@@ -61,29 +63,42 @@ public class RegistersPanel extends JPanel {
         txt_ppu_addr.setEditable(false);
         txt_ppu_data.setEditable(false);
 
-        add(lbl_ppu_ctrl);
-        add(txt_ppu_ctrl);
+        txt_ppu_ctrl.setColumns(2);
+        txt_ppu_mask.setColumns(2);
+        txt_ppu_status.setColumns(2);
+        txt_oam_addr.setColumns(2);
+        txt_oam_data.setColumns(2);
+        txt_ppu_scroll.setColumns(2);
+        txt_ppu_addr.setColumns(2);
+        txt_ppu_data.setColumns(2);
 
-        add(lbl_ppu_mask);
-        add(txt_ppu_mask);
 
-        add(lbl_ppu_status);
-        add(txt_ppu_status);
+        flow_pane1.add(lbl_ppu_ctrl);
+        flow_pane1.add(txt_ppu_ctrl);
 
-        add(lbl_oam_addr);
-        add(txt_oam_addr);
+        flow_pane1.add(lbl_ppu_mask);
+        flow_pane1.add(txt_ppu_mask);
 
-        add(lbl_oam_data);
-        add(txt_oam_data);
+        flow_pane1.add(lbl_ppu_status);
+        flow_pane1.add(txt_ppu_status);
 
-        add(lbl_ppu_scroll);
-        add(txt_ppu_scroll);
+        flow_pane1.add(lbl_oam_addr);
+        flow_pane1.add(txt_oam_addr);
 
-        add(lbl_ppu_addr);
-        add(txt_ppu_addr);
+        flow_pane2.add(lbl_oam_data);
+        flow_pane2.add(txt_oam_data);
 
-        add(lbl_ppu_data);
-        add(txt_ppu_data);
+        flow_pane2.add(lbl_ppu_scroll);
+        flow_pane2.add(txt_ppu_scroll);
+
+        flow_pane2.add(lbl_ppu_addr);
+        flow_pane2.add(txt_ppu_addr);
+
+        flow_pane2.add(lbl_ppu_data);
+        flow_pane2.add(txt_ppu_data);
+
+        add(flow_pane1);
+        add(flow_pane2);
     }
 
     @Override

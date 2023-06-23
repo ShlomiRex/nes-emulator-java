@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -20,39 +21,53 @@ public class RegistersPanel extends JPanel implements PropertyChangeListener {
         this.registers = registers;
         this.registers.addChangeListener(this);
 
-        // A
-        add(new JLabel("A:"));
+        JPanel flow_pane1 = new JPanel();
+        JPanel flow_pane2 = new JPanel();
+        JPanel box_pane = new JPanel();
+
+        box_pane.setLayout(new BoxLayout(box_pane, BoxLayout.PAGE_AXIS));
+        box_pane.setBorder(BorderFactory.createTitledBorder("Registers"));
+
         a = new JTextField("00");
+        x = new JTextField("00");
+        y = new JTextField("00");
+        s = new JTextField("00");
+        pc = new JTextField("00");
+
+        flow_pane1.add(new JLabel("A:"));
+        flow_pane1.add(a);
+        flow_pane1.add(new JLabel("X:"));
+        flow_pane1.add(x);
+        flow_pane1.add(new JLabel("Y:"));
+        flow_pane1.add(y);
+        flow_pane2.add(new JLabel("S:"));
+        flow_pane2.add(s);
+        flow_pane2.add(new JLabel("PC:"));
+        flow_pane2.add(pc);
+
+        box_pane.add(flow_pane1);
+        box_pane.add(flow_pane2);
+        add(box_pane);
+
+        // A
         a.setEditable(false);
         a.setColumns(2);
-        add(a);
 
         // X
-        add(new JLabel("X:"));
-        x = new JTextField("00");
         x.setEditable(false);
         x.setColumns(2);
-        add(x);
 
         // Y
-        add(new JLabel("Y:"));
-        y = new JTextField("00");
         y.setEditable(false);
         y.setColumns(2);
-        add(y);
 
-        add(new JLabel("S:"));
-        s = new JTextField("00");
+        // S
         s.setEditable(false);
         s.setColumns(2);
-        add(s);
 
         // PC
-        add(new JLabel("PC:"));
-        pc = new JTextField("00");
         pc.setEditable(false);
         pc.setColumns(4);
-        add(pc);
 
         // P
         statusFlagsPanel = new StatusFlagsPanel(registers.getP());
