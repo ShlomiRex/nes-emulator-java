@@ -1,11 +1,14 @@
 package NES.UI.Game;
 
 import NES.PPU.PPU;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class GamePanel extends JPanel {
+    private static final Logger logger = LoggerFactory.getLogger(GamePanel.class);
 
     private static final int TILE_SIZE = 32;
     private static final int TILE_COLUMNS = 32;
@@ -22,7 +25,13 @@ public class GamePanel extends JPanel {
 
     @Override
     protected void paintComponent(Graphics g) {
+        logger.debug("Painting component");
         super.paintComponent(g);
+        g.setColor(Color.BLACK);
+        g.fillRect(0, 0, 10000, 100000);
+
+        if (frameBuffer != null)
+            return;
 
         int tileWidth = getWidth() / TILE_COLUMNS;
         int tileHeight = getHeight() / TILE_ROWS;

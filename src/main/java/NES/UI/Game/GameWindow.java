@@ -7,7 +7,9 @@ public class GameWindow extends JFrame {
         setSize(800, 600);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        add(panel);
         setVisible(true);
+        setTitle("NES Emulator - Written by: Shlomi Domnenko");
+
+        add(panel);
     }
 }

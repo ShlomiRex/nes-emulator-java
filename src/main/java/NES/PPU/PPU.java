@@ -8,6 +8,8 @@ import java.awt.*;
 import java.util.Arrays;
 
 public class PPU {
+    private static final int SCREEN_WIDTH = 256;
+    private static final int SCREEN_HEIGHT = 240;
 
     private final Logger logger = LoggerFactory.getLogger(PPU.class);
     public final PPURegisters registers;
@@ -20,8 +22,6 @@ public class PPU {
     public int scanline;
     public int frame;
 
-    private static final int SCREEN_WIDTH = 256;
-    private static final int SCREEN_HEIGHT = 240;
     private final byte[] frameBuffer;
     private Runnable redraw_runnable;
 
@@ -119,9 +119,8 @@ public class PPU {
         if (scanline == 241 && cycle == 1) {
             // VBlank start
             registers.setNmiEnabled(true);
-            // Clear screen
-            Arrays.fill(frameBuffer, (byte) 107); // gray
-            this.redraw_runnable.run();
+
+            draw_frame();
         }
 
         if (scanline == 261 && cycle == 1) {
@@ -145,5 +144,12 @@ public class PPU {
 
     public void set_redraw_runnable_trigger(Runnable runnable) {
         this.redraw_runnable = runnable;
+    }
+
+    private void draw_frame() {
+        logger.debug("Drawing frame");
+        // Clear screen
+        Arrays.fill(frameBuffer, (byte) 107); // gray
+        this.redraw_runnable.run();
     }
 }
