@@ -68,7 +68,7 @@ public class CPU {
 
         // Check NMI interrupt
         if (ppuRegisters != null && ppuRegisters.isNmiEnabled()) {
-            logger.debug("NMI interrupt called");
+            //logger.debug("NMI interrupt called");
             ppuRegisters.setNmiEnabled(false); // After reading the NMI flag ($2002) , it is cleared.
             nmi_interrupt();
         }
@@ -85,24 +85,29 @@ public class CPU {
         byte res;
 
         // TODO: Do something about PPU memory. I think the PPU should modify the CPU address space
-//        // Map certain addresses to PPU if needed
-//        switch (addr) {
-//            case 0x2002 -> {
-//                res = ppuRegisters.readStatus();
-//            }
-//            case 0x2000 -> {
-//                res = ppuRegisters.getCtrl();
-//            }
-//            default -> {
-//                // Note: 'addr' is short, which means in Java it can be negative. However we deal with unsigned numbers.
-//                // This is the best way to convert any signed number to unsigned, which allows accessing arrays.
-//                res = memory[addr & 0xFFFF];
-//            }
-//        }\
-        res = memory[addr & 0xFFFF];
-//        logger.debug("Reading memory: [" +
-//                (addr & 0xFFFF) + " (" + Common.shortToHex(addr, true) + ")] = " + (res & 0xFF) +" ("+
-//                Common.byteToHex(res, true) + ")");
+        // Map certain addresses to PPU if needed
+        switch (addr) {
+            case 0x4014 -> throw new RuntimeException("Can't read from OAMDMA");
+            case 0x2007 -> res = ppuRegisters.readData();
+            case 0x2006 -> throw new RuntimeException("Can't read from PPUADDR");
+            case 0x2005 -> throw new RuntimeException("Can't read from PPUSCROLL");
+            case 0x2004 -> res = ppuRegisters.readOAMData();
+            case 0x2003 -> throw new RuntimeException("Can't read from OAMADDR");
+            case 0x2002 -> res = ppuRegisters.readStatus();
+            case 0x2001 -> throw new RuntimeException("Can't read to PPUMASK");
+            case 0x2000 -> throw new RuntimeException("Can't read to PPUCTRL");
+            default -> {
+                // Note: 'addr' is short, which means in Java it can be negative. However we deal with unsigned numbers.
+                // This is the best way to convert any signed number to unsigned, which allows accessing arrays.
+                res = memory[addr & 0xFFFF];
+            }
+        }
+
+//        if (addr >= 0x2000 && addr <= 0x2007) {
+//            logger.debug("Reading PPU memory: [" +
+//                    (addr & 0xFFFF) + " (" + Common.shortToHex(addr, true) + ")] = " + (res & 0xFF) +" ("+
+//                    Common.byteToHex(res, true) + ")");
+//        }
         if (is_record_memory)
             recorded_memory.add(new MemoryAccessRecord(addr, res, true));
         cycles ++;
@@ -115,7 +120,7 @@ public class CPU {
         registers.reset();
 
         short new_pc = read_address_from_memory((short) 0xFFFC);
-        logger.debug("Jumping to interrupt address: " + Common.shortToHex(new_pc, true));
+        //logger.debug("Jumping to interrupt address: " + Common.shortToHex(new_pc, true));
 
         registers.setPC(new_pc);
         cycles = 7;
@@ -1101,6 +1106,18 @@ public class CPU {
     private void write_memory(short addr, byte value) {
 //        logger.debug("Writing memory: ["+addr + " (" + Common.shortToHex(addr, true)+")] = "
 //                +value + " ("+Common.byteToHex(value, true)+")");
+
+        switch(addr) {
+            case 0x2000 -> ppuRegisters.setCtrl(value);
+            case 0x2001 -> ppuRegisters.setMask(value);
+            case 0x2002 -> throw new RuntimeException("Can't write to PPUStatus");
+            case 0x2003 -> ppuRegisters.setOamAddr(value);
+            case 0x2004 -> ppuRegisters.setOamData(value);
+            case 0x2005 -> ppuRegisters.setScroll(value);
+            case 0x2006 -> ppuRegisters.setAddr(value);
+            case 0x2007 -> ppuRegisters.setData(value);
+        }
+
         memory[addr & 0xFFFF] = value;
         cycles ++;
         if (is_record_memory)
@@ -1164,7 +1181,7 @@ public class CPU {
     }
 
     private void nmi_interrupt() {
-        logger.debug("NMI interrupt called");
+        //logger.debug("NMI interrupt called");
         // Store current flags onto stack and when returning, restore them.
         push_pc((short) 0);
         byte p_flag = registers.getP().getAllFlags();
@@ -1176,7 +1193,7 @@ public class CPU {
         byte vector_lsb = read_memory((short) 0xFFFA);
         byte vector_msb = read_memory((short) 0xFFFB);
         short new_pc = Common.makeShort(vector_lsb, vector_msb);
-        logger.debug("Jumping to interrupt address: " + Common.shortToHex(new_pc, true));
+        //logger.debug("Jumping to interrupt address: " + Common.shortToHex(new_pc, true));
         registers.setPC(new_pc);
     }
 

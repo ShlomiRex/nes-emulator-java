@@ -147,7 +147,7 @@ public class PPU {
     }
 
     private void draw_frame() {
-        logger.debug("Drawing frame");
+        //logger.debug("Drawing frame, cycle: " + (scanline*340 + cycle));
         // Clear screen
         Arrays.fill(frameBuffer, (byte) 107); // gray
         this.redraw_runnable.run();

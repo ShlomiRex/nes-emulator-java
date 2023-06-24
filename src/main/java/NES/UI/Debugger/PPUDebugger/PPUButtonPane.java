@@ -212,6 +212,17 @@ public class PPUButtonPane extends JPanel {
                     protected void process(List<Void> chunks) {
                         debugger_pane.repaint();
                     }
+
+
+                    @Override
+                    protected void done() {
+                        is_running = false;
+                        btn_tick.setEnabled(true);
+                        btn_run.setEnabled(true);
+                        btn_stop.setEnabled(false);
+                        debugger_pane.repaint();
+                    }
+
                 };
                 worker.execute();
             }
