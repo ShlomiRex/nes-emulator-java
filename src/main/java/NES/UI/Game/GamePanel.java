@@ -21,17 +21,19 @@ public class GamePanel extends JPanel {
     private byte[] frameBuffer;
 
     public GamePanel() {
+        setBackground(Color.BLACK);
     }
 
     @Override
     protected void paintComponent(Graphics g) {
-        logger.debug("Painting component");
         super.paintComponent(g);
-        g.setColor(Color.BLACK);
-        g.fillRect(0, 0, 10000, 100000);
 
-        if (frameBuffer != null)
+        logger.debug("Painting component");
+
+        if (frameBuffer == null)
             return;
+
+        logger.debug("Frame buffer is null");
 
         int tileWidth = getWidth() / TILE_COLUMNS;
         int tileHeight = getHeight() / TILE_ROWS;
