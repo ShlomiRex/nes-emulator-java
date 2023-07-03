@@ -43,6 +43,9 @@ public class CPU {
         //logger.debug("Tick, cycle: " + this.cycles);
         //logger.debug(registers.toString());
 
+        // Log current PC
+        logger.debug("PC: " + Common.shortToHex(registers.getPC(), true));
+
         // Fetch
         byte opcode = read_memory(registers.getPC()); // Read at address of Program Counter (duh!)
         registers.incrementPC(); // Increment PC
@@ -82,30 +85,37 @@ public class CPU {
     private byte read_memory(short addr) {
         //TODO: Add mapping here. For now I only support mapper 0.
 
-        byte res;
+        byte res = 0;
 
-        // TODO: Do something about PPU memory. I think the PPU should modify the CPU address space
-//        // Map certain addresses to PPU if needed
-//        switch (addr) {
-//            case 0x2002 -> {
-//                res = ppuRegisters.readStatus();
-//            }
-//            case 0x2000 -> {
-//                res = ppuRegisters.getCtrl();
-//            }
-//            default -> {
-//                // Note: 'addr' is short, which means in Java it can be negative. However we deal with unsigned numbers.
-//                // This is the best way to convert any signed number to unsigned, which allows accessing arrays.
-//                res = memory[addr & 0xFFFF];
-//            }
-//        }\
-        res = memory[addr & 0xFFFF];
+        // Mirror PPU registers
+        // From NESDEV wiki: "they're mirrored in every 8 bytes from $2008 through $3FFF, so a write to $3456 is the same as a write to $2006."
+        if (addr >= 0x2000 && addr <= 0x3FFF) {
+            addr = (short) (0x2000 + (addr % 8));
+        }
+
+        // Check PPU address space
+        if (addr >= 0x2000 && addr <= 0x2007) {
+            switch (addr) {
+                case 0x2000 -> throw new RuntimeException("Can't read from write-only register: PPUCTRL");
+                case 0x2001 -> throw new RuntimeException("Can't read from write-only register: PPUMASK");
+                case 0x2002 -> res = ppuRegisters.readStatus();
+                case 0x2003 -> throw new RuntimeException("Can't read from write-only register: OAMADDR");
+                case 0x2004 -> res = ppuRegisters.readOamData();
+                case 0x2005 -> throw new RuntimeException("Can't read from write-only register: PPUSCROLL");
+                case 0x2006 -> throw new RuntimeException("Can't read from write-only register: PPUADDR");
+                case 0x2007 -> res = ppuRegisters.readData();
+            }
+        } else {
+            // Not PPU mapping, read from internal memory
+            res = memory[addr & 0xFFFF];
+        }
+
+        cycles ++;
+        if (is_record_memory)
+            recorded_memory.add(new MemoryAccessRecord(addr, res, true));
 //        logger.debug("Reading memory: [" +
 //                (addr & 0xFFFF) + " (" + Common.shortToHex(addr, true) + ")] = " + (res & 0xFF) +" ("+
 //                Common.byteToHex(res, true) + ")");
-        if (is_record_memory)
-            recorded_memory.add(new MemoryAccessRecord(addr, res, true));
-        cycles ++;
         return res;
     }
 

@@ -79,4 +79,12 @@ public class PPURegisters {
     public void setOamDma(byte value) {
         throw new RuntimeException("not implemented yet");
     }
+
+    public byte readOamData() {
+        throw new RuntimeException("not implemented yet");
+    }
+
+    public byte readData() {
+        throw new RuntimeException("not implemented yet");
+    }
 }
