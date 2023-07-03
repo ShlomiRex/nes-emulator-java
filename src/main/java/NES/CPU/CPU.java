@@ -68,7 +68,7 @@ public class CPU {
 
         // Check NMI interrupt
         if (ppuRegisters != null && ppuRegisters.isNmiEnabled()) {
-            logger.debug("NMI interrupt called");
+            //logger.debug("NMI interrupt called");
             ppuRegisters.setNmiEnabled(false); // After reading the NMI flag ($2002) , it is cleared.
             nmi_interrupt();
         }
@@ -115,7 +115,7 @@ public class CPU {
         registers.reset();
 
         short new_pc = read_address_from_memory((short) 0xFFFC);
-        logger.debug("Jumping to interrupt address: " + Common.shortToHex(new_pc, true));
+        //logger.debug("Jumping to interrupt address: " + Common.shortToHex(new_pc, true));
 
         registers.setPC(new_pc);
         cycles = 7;
@@ -1101,8 +1101,30 @@ public class CPU {
     private void write_memory(short addr, byte value) {
 //        logger.debug("Writing memory: ["+addr + " (" + Common.shortToHex(addr, true)+")] = "
 //                +value + " ("+Common.byteToHex(value, true)+")");
-        memory[addr & 0xFFFF] = value;
         cycles ++;
+        // Mirror PPU registers
+        // From NESDEV wiki: "they're mirrored in every 8 bytes from $2008 through $3FFF, so a write to $3456 is the same as a write to $2006."
+        if (addr >= 0x2000 && addr <= 0x3FFF) {
+            addr = (short) (0x2000 + (addr % 8));
+        }
+
+        // Check PPU writes. If so, write to PPU registers and return.
+        if ((addr >= 0x2000 && addr <= 0x2007) || addr == 0x4014) {
+            switch (addr) {
+                case 0x2000 -> ppuRegisters.setCtrl(value);
+                case 0x2001 -> ppuRegisters.setMask(value);
+                case 0x2002 -> {} // ignore - read only
+                case 0x2003 -> ppuRegisters.setOamAddr(value);
+                case 0x2004 -> ppuRegisters.setOamData(value);
+                case 0x2005 -> ppuRegisters.setScroll(value);
+                case 0x2006 -> ppuRegisters.setAddr(value);
+                case 0x2007 -> ppuRegisters.setData(value);
+                case 0x4014 -> ppuRegisters.setOamDma(value);
+            }
+        } else {
+            // Not PPU address, so write to internal memory.
+            memory[addr & 0xFFFF] = value;
+        }
         if (is_record_memory)
             recorded_memory.add(new MemoryAccessRecord(addr, value, false));
     }
@@ -1164,7 +1186,7 @@ public class CPU {
     }
 
     private void nmi_interrupt() {
-        logger.debug("NMI interrupt called");
+        //logger.debug("NMI interrupt called");
         // Store current flags onto stack and when returning, restore them.
         push_pc((short) 0);
         byte p_flag = registers.getP().getAllFlags();
@@ -1176,7 +1198,7 @@ public class CPU {
         byte vector_lsb = read_memory((short) 0xFFFA);
         byte vector_msb = read_memory((short) 0xFFFB);
         short new_pc = Common.makeShort(vector_lsb, vector_msb);
-        logger.debug("Jumping to interrupt address: " + Common.shortToHex(new_pc, true));
+        //logger.debug("Jumping to interrupt address: " + Common.shortToHex(new_pc, true));
         registers.setPC(new_pc);
     }
 

@@ -14,24 +14,49 @@ public class PPU {
     private final Logger logger = LoggerFactory.getLogger(PPU.class);
     public final PPURegisters registers;
 
-    // Memory
-    private final byte[] pattern_tables;
+    /**
+     * Contains 2 pattern tables, each is 4KB in size.
+     * This memory translates to sprites.
+     */
+    private final byte[] chr_rom;
 
-    // Renderer variables. I start counting from zero.
+    /**
+     * Contains 2 name tables, each is 1KB in size.
+     * This memory translates to background / layout.
+     */
+    private final byte[] vram;
+
+    /**
+     * Contains 32 bytes, each byte is a color index (0,1,2,3).
+     * This memory translates to colors.
+     */
+    private final byte[] palette_ram;
+
+    /**
+     * PPU cycles. Reset to zero after 341 cycles.
+     */
     public int cycle;
+    /**
+     * PPU scanlines. Reset to zero after 262 scanlines.
+     */
     public int scanline;
+    /**
+     * PPU frames. Reset to zero after 60 frames.
+     */
     public int frame;
 
     private final byte[] frameBuffer;
     private Runnable redraw_runnable;
 
-    public PPU(byte[] pattern_tables) {
-        this.registers = new PPURegisters();
-        this.pattern_tables = pattern_tables;
-        this.frameBuffer = new byte[SCREEN_WIDTH * SCREEN_HEIGHT];
+    public PPU(byte[] chr_rom) {
+        if (chr_rom.length != 1024 * 8)
+            throw new IllegalArgumentException("Unexpected pattern table length");
 
-        if (pattern_tables.length != 1024 * 8)
-            throw new RuntimeException("Unexpected pattern table length");
+        this.registers = new PPURegisters();
+        this.chr_rom = chr_rom;
+        this.vram = new byte[1024 * 2];
+        this.palette_ram = new byte[32];
+        this.frameBuffer = new byte[SCREEN_WIDTH * SCREEN_HEIGHT];
 
         reset();
     }
@@ -53,7 +78,7 @@ public class PPU {
         //TODO: This can cause regression problems. A lot of copying memory, each tile, for each frame?
         // For now I leave this as is
         byte[] tile = new byte[16];
-        System.arraycopy(pattern_tables, (i & 0xFFFF), tile, 0, 16);
+        System.arraycopy(chr_rom, (i & 0xFFFF), tile, 0, 16);
         return tile;
     }
 
@@ -147,7 +172,7 @@ public class PPU {
     }
 
     private void draw_frame() {
-        logger.debug("Drawing frame");
+        //logger.debug("Drawing frame");
         // Clear screen
         Arrays.fill(frameBuffer, (byte) 107); // gray
         this.redraw_runnable.run();

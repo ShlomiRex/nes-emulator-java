@@ -13,13 +13,14 @@ import java.io.IOException;
 public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
     public static void main(String[] args) throws IOException, ROMParser.ParsingException {
-        String program = "6502_programs/nestest/nestest.nes";
-        //String program = "6502_programs/greenscreen/greenscreen.nes";
+        //String program = "6502_programs/nestest/nestest.nes";
+        String program = "6502_programs/greenscreen/greenscreen.nes";
 
         ROMParser romParser = new ROMParser(program);
 
         NES nes = new NES(romParser);
 
+        //TODO: Change according to my needs.
         run_without_debugger(nes);
         //run_with_debugger(nes);
     }
@@ -40,7 +41,7 @@ public class Main {
         final boolean[] is_running = {true};
         // Set the runnable that will be called when the PPU is ready to be redrawn
         Runnable redrawRunnable = () -> {
-            is_running[0] = false; // TODO: Remove this. We only draw a single frame.
+            //is_running[0] = false; // TODO: Remove this. We only draw a single frame.
             gameWindow.repaint();
         };
         nes.ppu.set_redraw_runnable_trigger(redrawRunnable);

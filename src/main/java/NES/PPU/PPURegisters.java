@@ -47,4 +47,36 @@ public class PPURegisters {
 //            ctrl &= 0x7F;
 //        }
     }
+
+    public void setCtrl(byte value) {
+        ctrl = value;
+    }
+
+    public void setMask(byte value) {
+        mask = value;
+    }
+
+    public void setOamAddr(byte value) {
+        throw new RuntimeException("not implemented yet");
+    }
+
+    public void setOamData(byte value) {
+        throw new RuntimeException("not implemented yet");
+    }
+
+    public void setScroll(byte value) {
+        throw new RuntimeException("not implemented yet");
+    }
+
+    public void setAddr(byte value) {
+        throw new RuntimeException("not implemented yet");
+    }
+
+    public void setData(byte value) {
+        throw new RuntimeException("not implemented yet");
+    }
+
+    public void setOamDma(byte value) {
+        throw new RuntimeException("not implemented yet");
+    }
 }

@@ -33,11 +33,7 @@ public class NES {
             System.arraycopy(prg_rom, 0, this.cpu_memory, 0x8000, 1024*32);
         }
 
-        // PPU pattern tables
-        byte[] pattern_tables = new byte[1024 * 8];
-        System.arraycopy(chr_rom, 0, pattern_tables, 0, 1024 * 8);
-
-        ppu = new PPU(pattern_tables);
+        ppu = new PPU(chr_rom);
         cpu = new CPU(cpu_memory, ppu.registers);
         cpu.res_interrupt();
     }
