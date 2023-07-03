@@ -4,65 +4,45 @@ import NES.Common;
 
 public class PPURegisters {
 
-    /**
-     * $2000
+    /*
+     * PPU Registers:
+     * - $2000: PPUCTRL
+     * - $2001: PPUMASK
+     * - $2002: PPUSTATUS
+     * - $2003: OAMADDR
+     * - $2004: OAMDATA
+     * - $2005: PPUSCROLL
+     * - $2006: PPUADDR
+     * - $2007: PPUDATA
+     * - $4014: OAMDMA
      */
-    private byte PPUCTRL;
-    /**
-     * $2001
-     */
-    private byte PPUMASK;
-    /**
-     * $2002
-     */
-    private byte PPUSTATUS;
+
+
+    private byte PPUCTRL, PPUMASK, PPUSTATUS, OAMADDR, OAMDATA, PPUSCROLL, PPUDATA, OAMDMA;
+
+    private short PPUADDR;
 
     /**
-     * $2003
+     * This flipflop is used to determine whether to write to high byte or low byte of PPUADDR.
+     * Since to write to PPUADDR the CPU needs to write twice (once for high byte, once for low byte),
+     * we need to keep track of which byte we are writing to.
      */
-    private byte OAMADDR;
-
-    /**
-     * $2004
-     */
-    private byte OAMDATA;
-
-    /**
-     * $2005
-     */
-    private byte PPUSCROLL;
-
-    /**
-     * $2006
-     */
-    private byte PPUADDR;
-
-    /**
-     * $2007
-     */
-    private byte PPUDATA;
-
-    /**
-     * $4014
-     */
-    private byte OAMDMA;
+    private boolean PPUADDR_FLIPFLOP_WRITE_HIGH = true;
 
     public void reset() {
         PPUSTATUS = PPUCTRL = PPUMASK = 0;
     }
 
-    public byte readStatus() {
-        // TODO: Clear VBlank
-        return PPUSTATUS;
-    }
-
     /**
-     * Do not use in CPU. Only outside CPU.
-     * In CPU, use this instead: `readStatus()`
-     * @return
+     * Clears bit 7 of PPUSTATUS.
+     * Also sets the PPUADDR flipflop to write high byte next time.
+     * @return PPUSTATUS before clearing bit 7
      */
-    public byte getPPUSTATUS() {
-        return PPUSTATUS;
+    public byte readPPUSTATUS() {
+        byte before = PPUSTATUS;
+        PPUSTATUS = Common.Bits.setBit(PPUSTATUS, 7, false);
+        PPUADDR_FLIPFLOP_WRITE_HIGH = true;
+        return before;
     }
 
     public byte getPPUCTRL() {
@@ -104,14 +84,22 @@ public class PPURegisters {
     }
 
     public void setScroll(byte value) {
+        //TODO: Write twice
         PPUSCROLL = value;
     }
 
-    public void setAddr(byte value) {
-        PPUADDR = value;
+    public void writePPUADDR(byte value) {
+        if (PPUADDR_FLIPFLOP_WRITE_HIGH) {
+            // Write to high byte
+            PPUADDR = (short) ((PPUADDR & 0x00FF) | ((value & 0x00FF) << 8));
+        } else {
+            // Write to low byte
+            PPUADDR = (short) ((PPUADDR & 0xFF00) | (value & 0x00FF));
+        }
+        PPUADDR_FLIPFLOP_WRITE_HIGH = !PPUADDR_FLIPFLOP_WRITE_HIGH;
     }
 
-    public void setData(byte value) {
+    public void writePPUDATA(byte value) {
         PPUDATA = value;
     }
 
@@ -125,5 +113,19 @@ public class PPURegisters {
 
     public byte readData() {
         return PPUDATA;
+    }
+
+    /**
+     * Used only for testing, or debugging.
+     */
+    public short getPPUADDR() {
+        return PPUADDR;
+    }
+
+    /**
+     * Used only for testing, or debugging.
+     */
+    public byte getPPUSTATUS() {
+        return PPUSTATUS;
     }
 }

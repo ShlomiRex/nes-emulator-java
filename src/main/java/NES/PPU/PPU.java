@@ -50,7 +50,7 @@ public class PPU {
 
     public PPU(byte[] chr_rom) {
         if (chr_rom.length != 1024 * 8)
-            throw new IllegalArgumentException("Unexpected pattern table length");
+            throw new IllegalArgumentException("Unexpected CHR ROM / pattern table size");
 
         this.registers = new PPURegisters();
         this.chr_rom = chr_rom;

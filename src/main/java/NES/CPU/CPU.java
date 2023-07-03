@@ -98,7 +98,7 @@ public class CPU {
             switch (addr) {
                 case 0x2000 -> throw new RuntimeException("Can't read from write-only register: PPUCTRL");
                 case 0x2001 -> throw new RuntimeException("Can't read from write-only register: PPUMASK");
-                case 0x2002 -> res = ppuRegisters.readStatus();
+                case 0x2002 -> res = ppuRegisters.readPPUSTATUS();
                 case 0x2003 -> throw new RuntimeException("Can't read from write-only register: OAMADDR");
                 case 0x2004 -> res = ppuRegisters.readOamData();
                 case 0x2005 -> throw new RuntimeException("Can't read from write-only register: PPUSCROLL");
@@ -1127,8 +1127,8 @@ public class CPU {
                 case 0x2003 -> ppuRegisters.setOamAddr(value);
                 case 0x2004 -> ppuRegisters.setOamData(value);
                 case 0x2005 -> ppuRegisters.setScroll(value);
-                case 0x2006 -> ppuRegisters.setAddr(value);
-                case 0x2007 -> ppuRegisters.setData(value);
+                case 0x2006 -> ppuRegisters.writePPUADDR(value);
+                case 0x2007 -> ppuRegisters.writePPUDATA(value);
                 case 0x4014 -> ppuRegisters.setOamDma(value);
             }
         } else {

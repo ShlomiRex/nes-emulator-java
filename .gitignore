@@ -4,3 +4,4 @@ target/
 *.fdb
 test_resources/**
 .DS_Store
+*.log
