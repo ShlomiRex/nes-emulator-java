@@ -103,7 +103,7 @@ public class CPU {
                 case 0x2004 -> res = ppuRegisters.readOamData();
                 case 0x2005 -> throw new RuntimeException("Can't read from write-only register: PPUSCROLL");
                 case 0x2006 -> throw new RuntimeException("Can't read from write-only register: PPUADDR");
-                case 0x2007 -> res = ppuRegisters.readData();
+                case 0x2007 -> res = ppuRegisters.readPPUDATA();
             }
         } else {
             // Not PPU mapping, read from internal memory

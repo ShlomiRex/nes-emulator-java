@@ -1,3 +1,5 @@
+package CPU;
+
 import NES.CPU.CPU;
 import NES.CPU.Decoder;
 import NES.CPU.Registers.StatusFlags;

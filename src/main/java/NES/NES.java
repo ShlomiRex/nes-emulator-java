@@ -4,6 +4,7 @@ package NES;
 import NES.CPU.CPU;
 import NES.Cartridge.ROMParser;
 import NES.PPU.PPU;
+import NES.PPU.PaletteRAM;
 
 public class NES {
 
@@ -33,7 +34,9 @@ public class NES {
             System.arraycopy(prg_rom, 0, this.cpu_memory, 0x8000, 1024*32);
         }
 
-        ppu = new PPU(chr_rom);
+        PaletteRAM palette_ram = new PaletteRAM();
+
+        ppu = new PPU(chr_rom, palette_ram);
         cpu = new CPU(cpu_memory, ppu.registers);
         cpu.res_interrupt();
     }

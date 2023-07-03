@@ -1,4 +1,5 @@
-import NES.CPU.AddressingMode;
+package CPU;
+
 import NES.CPU.CPU;
 import NES.CPU.Decoder;
 import NES.Cartridge.ROMParser;

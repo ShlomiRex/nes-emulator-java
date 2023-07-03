@@ -1,5 +1,6 @@
 package NES.PPU;
 
+import NES.Cartridge.iNESHeader;
 import NES.Common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,20 +18,23 @@ public class PPU {
     /**
      * Contains 2 pattern tables, each is 4KB in size.
      * This memory translates to sprites.
+     * Address: 0x0000 - 0x1FFF
      */
     private final byte[] chr_rom;
 
     /**
      * Contains 2 name tables, each is 1KB in size.
      * This memory translates to background / layout.
+     * Address: 0x2000 - 0x2FFF
      */
-    private final byte[] vram;
+    private final VRAM vram;
 
     /**
      * Contains 32 bytes, each byte is a color index (0,1,2,3).
      * This memory translates to colors.
+     * Address: 0x3F00 - 0x3F1F
      */
-    private final byte[] palette_ram;
+    private final PaletteRAM palette_ram;
 
     /**
      * PPU cycles. Reset to zero after 341 cycles.
@@ -48,14 +52,14 @@ public class PPU {
     private final byte[] frameBuffer;
     private Runnable redraw_runnable;
 
-    public PPU(byte[] chr_rom) {
+    public PPU(byte[] chr_rom, PaletteRAM palette_ram) {
         if (chr_rom.length != 1024 * 8)
             throw new IllegalArgumentException("Unexpected CHR ROM / pattern table size");
 
-        this.registers = new PPURegisters();
+        this.vram = new VRAM();
+        this.registers = new PPURegisters(vram, palette_ram);
         this.chr_rom = chr_rom;
-        this.vram = new byte[1024 * 2];
-        this.palette_ram = new byte[32];
+        this.palette_ram = palette_ram;
         this.frameBuffer = new byte[SCREEN_WIDTH * SCREEN_HEIGHT];
 
         reset();

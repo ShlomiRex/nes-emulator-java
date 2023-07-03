@@ -1,3 +1,5 @@
+package CPU;
+
 import NES.CPU.Registers.CPURegisters;
 import NES.Common;
 import org.junit.Test;
