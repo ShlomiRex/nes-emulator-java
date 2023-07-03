@@ -4,17 +4,56 @@ import NES.Common;
 
 public class PPURegisters {
 
-    private byte status;
-    private byte ctrl;
-    private byte mask;
+    /**
+     * $2000
+     */
+    private byte PPUCTRL;
+    /**
+     * $2001
+     */
+    private byte PPUMASK;
+    /**
+     * $2002
+     */
+    private byte PPUSTATUS;
+
+    /**
+     * $2003
+     */
+    private byte OAMADDR;
+
+    /**
+     * $2004
+     */
+    private byte OAMDATA;
+
+    /**
+     * $2005
+     */
+    private byte PPUSCROLL;
+
+    /**
+     * $2006
+     */
+    private byte PPUADDR;
+
+    /**
+     * $2007
+     */
+    private byte PPUDATA;
+
+    /**
+     * $4014
+     */
+    private byte OAMDMA;
 
     public void reset() {
-        status = ctrl = mask = 0;
+        PPUSTATUS = PPUCTRL = PPUMASK = 0;
     }
 
     public byte readStatus() {
         // TODO: Clear VBlank
-        return status;
+        return PPUSTATUS;
     }
 
     /**
@@ -22,25 +61,25 @@ public class PPURegisters {
      * In CPU, use this instead: `readStatus()`
      * @return
      */
-    public byte getStatus() {
-        return status;
+    public byte getPPUSTATUS() {
+        return PPUSTATUS;
     }
 
-    public byte getCtrl() {
-        return ctrl;
+    public byte getPPUCTRL() {
+        return PPUCTRL;
     }
 
-    public byte getMask() {
-        return mask;
+    public byte getPPUMASK() {
+        return PPUMASK;
     }
 
     public boolean isNmiEnabled() {
         //return (ctrl & 0x80) != 0;
-        return Common.Bits.getBit(status, 7);
+        return Common.Bits.getBit(PPUSTATUS, 7);
     }
 
     public void setNmiEnabled(boolean enabled) {
-        status = Common.Bits.setBit(status, 7, enabled);
+        PPUSTATUS = Common.Bits.setBit(PPUSTATUS, 7, enabled);
 //        if (enabled) {
 //            ctrl |= 0x80;
 //        } else {
@@ -48,43 +87,43 @@ public class PPURegisters {
 //        }
     }
 
-    public void setCtrl(byte value) {
-        ctrl = value;
+    public void setPPUCTRL(byte value) {
+        PPUCTRL = value;
     }
 
-    public void setMask(byte value) {
-        mask = value;
+    public void setPPUMASK(byte value) {
+        PPUMASK = value;
     }
 
     public void setOamAddr(byte value) {
-        throw new RuntimeException("not implemented yet");
+        OAMADDR = value;
     }
 
     public void setOamData(byte value) {
-        throw new RuntimeException("not implemented yet");
+        OAMDATA = value;
     }
 
     public void setScroll(byte value) {
-        throw new RuntimeException("not implemented yet");
+        PPUSCROLL = value;
     }
 
     public void setAddr(byte value) {
-        throw new RuntimeException("not implemented yet");
+        PPUADDR = value;
     }
 
     public void setData(byte value) {
-        throw new RuntimeException("not implemented yet");
+        PPUDATA = value;
     }
 
     public void setOamDma(byte value) {
-        throw new RuntimeException("not implemented yet");
+        OAMDMA = value;
     }
 
     public byte readOamData() {
-        throw new RuntimeException("not implemented yet");
+        return OAMDATA;
     }
 
     public byte readData() {
-        throw new RuntimeException("not implemented yet");
+        return PPUDATA;
     }
 }

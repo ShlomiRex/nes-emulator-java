@@ -1121,8 +1121,8 @@ public class CPU {
         // Check PPU writes. If so, write to PPU registers and return.
         if ((addr >= 0x2000 && addr <= 0x2007) || addr == 0x4014) {
             switch (addr) {
-                case 0x2000 -> ppuRegisters.setCtrl(value);
-                case 0x2001 -> ppuRegisters.setMask(value);
+                case 0x2000 -> ppuRegisters.setPPUCTRL(value);
+                case 0x2001 -> ppuRegisters.setPPUMASK(value);
                 case 0x2002 -> {} // ignore - read only
                 case 0x2003 -> ppuRegisters.setOamAddr(value);
                 case 0x2004 -> ppuRegisters.setOamData(value);
