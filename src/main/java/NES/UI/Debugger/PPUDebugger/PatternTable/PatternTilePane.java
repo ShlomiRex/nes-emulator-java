@@ -54,7 +54,7 @@ public class PatternTilePane extends JPanel {
      * @param container_width
      * @param container_height
      */
-    private void paintTile(Graphics g, int container_width, int container_height) {
+    protected void paintTile(Graphics g, int container_width, int container_height) {
         byte[] tile = ppu.get_pattern_tile(tile_index, is_left_pattern_table);
         byte[][] pixels = ppu.convert_pattern_tile_to_pixel_pattern(tile);
 
@@ -83,31 +83,6 @@ public class PatternTilePane extends JPanel {
 
     @Override
     public JToolTip createToolTip() {
-        return new MyToolTip();
-    }
-
-    class MyToolTip extends JToolTip {
-        public MyToolTip() {
-            setUI(new LargeTileTooltipUI());
-        }
-    }
-
-    class LargeTileTooltipUI extends MetalToolTipUI {
-
-        private static final int WIDTH = 100;
-        private static final int HEIGHT = 100;
-
-        @Override
-        public void paint(Graphics g, JComponent c) {
-            g.setColor(Color.BLACK);
-            g.fillRect(0, 0, 100, 100);
-
-            paintTile(g, WIDTH, HEIGHT);
-        }
-
-        @Override
-        public Dimension getPreferredSize(JComponent c) {
-            return new Dimension(WIDTH, HEIGHT);
-        }
+        return new PatternTileTooltip(this);
     }
 }

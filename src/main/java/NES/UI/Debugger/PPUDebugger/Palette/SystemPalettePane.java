@@ -6,9 +6,9 @@ import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 
-public class PaletteTablePane extends JPanel {
+public class SystemPalettePane extends JPanel {
 
-    public PaletteTablePane() {
+    public SystemPalettePane() {
         Color[][] system_palette = SystemPallete.getSystemPallete();
 
         setBorder(new TitledBorder("System Palette"));
@@ -31,4 +31,6 @@ public class PaletteTablePane extends JPanel {
             }
         }
     }
+
+
 }

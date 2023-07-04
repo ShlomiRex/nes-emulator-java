@@ -1,7 +1,7 @@
 package NES.UI.Debugger.PPUDebugger;
 
 import NES.PPU.PPU;
-import NES.UI.Debugger.PPUDebugger.Palette.PaletteTablePane;
+import NES.UI.Debugger.PPUDebugger.Palette.SystemPalettePane;
 import NES.UI.Debugger.PPUDebugger.PatternTable.PatternTablesPane;
 import NES.UI.Debugger.PPUDebugger.StatusInfo.CyclesPane;
 import NES.UI.Debugger.PPUDebugger.StatusInfo.FramePane;
@@ -30,7 +30,7 @@ public class PPUMainPane extends JPanel {
         JPanel registers_pane = new RegistersPanel(ppu.registers);
         JPanel vblank_pane = new VBlankPane(ppu);
         JPanel pattern_tables_pane = new PatternTablesPane(ppu);
-        JPanel palette_table_pane = new PaletteTablePane();
+        JPanel palette_table_pane = new SystemPalettePane();
 
 
         status_info_pane.setLayout(new GridLayout(3, 1));
