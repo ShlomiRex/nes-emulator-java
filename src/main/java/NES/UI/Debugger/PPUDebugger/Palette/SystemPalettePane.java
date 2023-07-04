@@ -9,8 +9,6 @@ import java.awt.*;
 public class SystemPalettePane extends JPanel {
 
     public SystemPalettePane() {
-        Color[][] system_palette = SystemPallete.getSystemPallete();
-
         setBorder(new TitledBorder("System Palette"));
         setLayout(new GridLayout(4, 16));
 
@@ -25,7 +23,6 @@ public class SystemPalettePane extends JPanel {
 
         for (int row = 0; row < 4; row ++) {
             for (int col = 0; col < 16; col ++) {
-                Color color = system_palette[row][col]; // TODO: Remove
                 int tile_index = row*16 + col;
                 JPanel palette_tile = new PaletteTilePane(tile_index, tile_width, tile_height);
                 add(palette_tile);

@@ -22,32 +22,24 @@ public class PaletteTilePane extends JPanel {
         this.width = width;
         this.height = height;
 
-        String tooltip_text = ""+Common.byteToHex((byte) tile_index, true)+
-                " Color: ("+color.getRed()+", "+color.getGreen()+", "+color.getBlue()+")";
-        if (tile_index == 0x0D)
-            tooltip_text += " Note: blacker than black";
-
         setPreferredSize(new Dimension(width, height));
         setMinimumSize(new Dimension(width, height));
 
-        String finalTooltip_text = tooltip_text;
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
                 super.mouseEntered(e);
                 setBorder(BorderFactory.createLineBorder(Color.BLUE, 2));
-                //selected_tile_label.setText("Tile: $" + Common.byteToHexString(tile_index, false));
-                //setToolTipText(finalTooltip_text);
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
                 super.mouseExited(e);
                 setBorder(BorderFactory.createEmptyBorder());
-                //selected_tile_label.setText("Tile:");
             }
         });
 
+        // Call tooltip creation
         setToolTipText("");
     }
 
