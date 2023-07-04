@@ -1,6 +1,7 @@
 package NES.UI.Debugger.PPUDebugger;
 
 import NES.PPU.PPU;
+import NES.UI.Debugger.PPUDebugger.Palette.PaletteMemoryPane;
 import NES.UI.Debugger.PPUDebugger.Palette.SystemPalettePane;
 import NES.UI.Debugger.PPUDebugger.PatternTable.PatternTablesPane;
 import NES.UI.Debugger.PPUDebugger.StatusInfo.CyclesPane;
@@ -19,8 +20,14 @@ public class PPUMainPane extends JPanel {
         JPanel box_pane = new JPanel();
         JPanel top_flow_pane = new JPanel();
         JPanel bottom_flow_pane = new JPanel();
-        box_pane.setLayout(new BoxLayout(box_pane, BoxLayout.PAGE_AXIS));
         JPanel status_info_pane = new JPanel();
+        JPanel palette_pane = new JPanel();
+
+        // Init containers
+        box_pane.setLayout(new BoxLayout(box_pane, BoxLayout.PAGE_AXIS));
+        status_info_pane.setLayout(new GridLayout(3, 1));
+        status_info_pane.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        palette_pane.setLayout(new BoxLayout(palette_pane, BoxLayout.PAGE_AXIS));
 
         // Main panels
         JPanel button_pane = new PPUButtonPane(ppu, top_flow_pane); // We don't need to update unrelated panels
@@ -30,12 +37,10 @@ public class PPUMainPane extends JPanel {
         JPanel registers_pane = new RegistersPanel(ppu.registers);
         JPanel vblank_pane = new VBlankPane(ppu);
         JPanel pattern_tables_pane = new PatternTablesPane(ppu);
-        JPanel palette_table_pane = new SystemPalettePane();
+        JPanel system_palette_pane = new SystemPalettePane();
+        JPanel palette_memory_pane = new PaletteMemoryPane();
 
-
-        status_info_pane.setLayout(new GridLayout(3, 1));
-        status_info_pane.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-
+        // Add panels
         status_info_pane.add(cycles_pane);
         status_info_pane.add(scanline_pane);
         status_info_pane.add(frame_pane);
@@ -45,8 +50,11 @@ public class PPUMainPane extends JPanel {
         top_flow_pane.add(registers_pane);
         top_flow_pane.add(vblank_pane);
 
+        palette_pane.add(system_palette_pane);
+        palette_pane.add(palette_memory_pane);
+
         bottom_flow_pane.add(pattern_tables_pane);
-        bottom_flow_pane.add(palette_table_pane);
+        bottom_flow_pane.add(palette_pane);
 
         box_pane.add(top_flow_pane);
         box_pane.add(bottom_flow_pane);

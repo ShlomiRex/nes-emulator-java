@@ -6,8 +6,17 @@ import java.awt.*;
 
 public class PatternTileTooltip extends JToolTip {
 
-    private static final int WIDTH = 100;
-    private static final int HEIGHT = 100;
+
+    /*
+    Why 96x96 pixels and not 100x100?
+
+    Since a pattern tile is 8x8 pixels, we want to scale to 100x100 pixels, we need to scale to 96x96 pixels,
+    since 96/8 = whole number. If we do it 100x100 then we will see 4 pixels gap between the real size of the pattern
+    tile and the container border.
+     */
+
+    private static final int WIDTH = 96;
+    private static final int HEIGHT = 96;
     private final PatternTilePane pattern_tile_pane;
 
     public PatternTileTooltip(PatternTilePane pattern_tile_pane) {

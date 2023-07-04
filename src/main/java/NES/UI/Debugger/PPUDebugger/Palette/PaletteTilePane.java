@@ -1,6 +1,7 @@
 package NES.UI.Debugger.PPUDebugger.Palette;
 
 import NES.Common;
+import NES.PPU.SystemPallete;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,9 +14,11 @@ public class PaletteTilePane extends JPanel {
     private final Color color;
     private final int width, height;
 
-    public PaletteTilePane(int tile_index, Color color, int width, int height) {
+    public PaletteTilePane(int tile_index, int width, int height) {
         this.tile_index = tile_index;
-        this.color = color;
+        // Get color from system palette
+        Color[][] system_palette = SystemPallete.getSystemPallete();
+        this.color = system_palette[tile_index / 16][tile_index % 16];
         this.width = width;
         this.height = height;
 
@@ -25,6 +28,7 @@ public class PaletteTilePane extends JPanel {
             tooltip_text += " Note: blacker than black";
 
         setPreferredSize(new Dimension(width, height));
+        setMinimumSize(new Dimension(width, height));
 
         String finalTooltip_text = tooltip_text;
         addMouseListener(new MouseAdapter() {

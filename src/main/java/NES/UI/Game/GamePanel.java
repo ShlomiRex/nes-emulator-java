@@ -29,6 +29,9 @@ public class GamePanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
+        g.setColor(Color.BLACK);
+        g.fillRect(0, 0, getWidth(), getHeight());
+
         //logger.debug("Width: {}, Height: {}", getWidth(), getHeight());
 
         if (frameBuffer == null)
