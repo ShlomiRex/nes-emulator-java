@@ -151,7 +151,7 @@ public class PPURegisters {
     }
 
     /**
-     * Used only for testing, or debugging.
+     * Used only for testing, or debugging, or internal PPU use.
      */
     public byte getPPUMASK() {
         return PPUMASK;

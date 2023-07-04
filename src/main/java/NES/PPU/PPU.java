@@ -1,12 +1,10 @@
 package NES.PPU;
 
-import NES.Cartridge.iNESHeader;
 import NES.Common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
-import java.util.Arrays;
 
 public class PPU {
     private static final int SCREEN_WIDTH = 256;
@@ -23,7 +21,7 @@ public class PPU {
     private final byte[] chr_rom;
 
     /**
-     * Contains 2 name tables, each is 1KB in size.
+     * Contains 4 name tables, each is 1KB in size.
      * This memory translates to background / layout.
      * Address: 0x2000 - 0x2FFF
      */
@@ -49,8 +47,11 @@ public class PPU {
      */
     public int frame;
 
-    private final byte[] frameBuffer;
-    private Runnable redraw_runnable;
+    /**
+     * The frame buffer is a 2D array of pixels and color. So its easy to access and draw.
+     */
+    private final Common.Pair<Boolean, Color>[][] frame_buffer;
+    private Runnable trigger_game_canvas_repaint;
 
     public PPU(byte[] chr_rom, byte[] palette_ram) {
         if (chr_rom.length != 1024 * 8)
@@ -58,11 +59,11 @@ public class PPU {
         if (palette_ram.length != 32)
             throw new IllegalArgumentException("Unexpected palette RAM size");
 
+        this.frame_buffer = new Common.Pair[SCREEN_HEIGHT][SCREEN_WIDTH];
         this.vram = new byte[1024 * 2];
         this.registers = new PPURegisters(this);
         this.chr_rom = chr_rom;
         this.palette_ram = palette_ram;
-        this.frameBuffer = new byte[SCREEN_WIDTH * SCREEN_HEIGHT];
 
         reset();
     }
@@ -147,11 +148,17 @@ public class PPU {
             return;
         }
 
+        // TODO: Decide what to do
+//        if (scanline == 240 && cycle == 0) {
+//            // The PPU is idle during this cycle, but FCEUX emulator renders frame at this exact time.
+//            draw_frame();
+//        }
+
         if (scanline == 241 && cycle == 1) {
             // VBlank start
             registers.setNmiEnabled(true);
-
-            draw_frame();
+            if (trigger_game_canvas_repaint != null)
+                trigger_game_canvas_repaint.run();
         }
 
         if (scanline == 261 && cycle == 1) {
@@ -169,20 +176,69 @@ public class PPU {
         return (paletteIndex % 2 == 0) ? Color.WHITE : Color.GRAY;
     }
 
-    public byte[] getFrameBuffer() {
-        return frameBuffer;
+    /**
+     * Called from within JavaSwing GUI thread.
+     * @param g
+     * @param width The container width
+     * @param height The container height
+     */
+    public void draw_frame(Graphics g, int width, int height) {
+        boolean show_background = Common.Bits.getBit(registers.getPPUMASK(), 3);
+        boolean show_sprites = Common.Bits.getBit(registers.getPPUMASK(), 4);
+
+        // Get pattern tables
+        int left_pattern_table_index = 0x0000;
+        int right_pattern_table_index = 0x1000;
+
+        // Get nametables
+        // A nametable is a 1024 byte area of memory used by the PPU to lay out backgrounds.
+        // Each byte in the nametable controls one 8x8 pixel character cell
+        int first_nametable_index = 0x2000 - 0x2000;
+        int second_nametable_index = 0x2400 - 0x2000;
+        int third_nametable_index = 0x2800 - 0x2000;
+        int fourth_nametable_index = 0x2C00 - 0x2000;
+
+        // Get attribute table
+        // An attribute table is a 64-byte array at the end of each nametable that controls which palette is assigned to each part of the background.
+        int first_attribute_table_index = first_nametable_index + 0x3C0;
+        int second_attribute_table_index = second_nametable_index + 0x3C0;
+        int third_attribute_table_index = third_nametable_index + 0x3C0;
+        int fourth_attribute_table_index = fourth_nametable_index + 0x3C0;
+
+        int pixel_width = 8;
+        int pixel_height = 8;
+
+        // For each nametable byte (960 bytes) - the remaining 64 bytes are attribute table bytes (for total of 1024)
+        for (int row = 0; row < 30; row++) {
+            for (int col = 0; col < 32; col++) {
+                byte background_pattern_tile_index = vram[row * 32 + col];
+                short full_pattern_index = (short) (right_pattern_table_index + background_pattern_tile_index); // Get from right pattern table (backgrounds)
+
+                // Get the 8x8 pixel tile
+                for (int pixel_row = 0; pixel_row < 8; pixel_row ++) {
+                    for (int pixel_col = 0; pixel_col < 8; pixel_col++) {
+                        byte pixelValue = chr_rom[full_pattern_index + pixel_row * 8 + pixel_col];
+                        Color pixelColor = get_palette(pixelValue).getB();
+                        g.setColor(pixelColor);
+                        g.fillRect((col * 8 + pixel_col) * pixel_width, (row * 8 + pixel_row) * pixel_height, pixel_width, pixel_height);
+                    }
+                }
+            }
+        }
+
+//        // Draw first pattern tile
+//        for(int i = 0; i < 16; i++) {
+//            chr_rom[pattern_index + i];
+//            g.fillRect(i * pixel_width, 0, pixel_width, pixel_height);
+//            frameBuffer[i] =
+//        }
+
+        // Nametable 0: 0x2000
+        // Nametable 1: 0x2400
+        // Nametable 2: 0x2800
+        // Nametable 3: 0x2C00
     }
 
-    public void set_redraw_runnable_trigger(Runnable runnable) {
-        this.redraw_runnable = runnable;
-    }
-
-    private void draw_frame() {
-        //logger.debug("Drawing frame");
-        // Clear screen
-        Arrays.fill(frameBuffer, (byte) 107); // gray
-        this.redraw_runnable.run();
-    }
 
     /**
      * Write to PPU memory.
@@ -228,6 +284,11 @@ public class PPU {
         }
     }
 
+    /**
+     * Get palette color from palette RAM.
+     * @param palette_index A number between 0-32
+     * @return
+     */
     public Common.Pair<Integer, Color> get_palette(int palette_index) {
         if (palette_index < 0 || palette_index > 32) {
             throw new IllegalArgumentException("Invalid palette index: " + palette_index);
@@ -241,5 +302,20 @@ public class PPU {
         int col = color_index % 16;
 
         return new Common.Pair<>(color_index, system_palette[row][col]);
+    }
+
+    /**
+     * Get nametable (1,2,3 or 4).
+     * @param nametable_index A number between 1-4
+     */
+    public void get_nametable(int nametable_index) {
+        if (nametable_index < 1 || nametable_index > 4) {
+            throw new IllegalArgumentException("Invalid nametable index: " + nametable_index);
+        }
+
+    }
+
+    public void addGameCanvasRepaintRunnable(Runnable runnable) {
+        this.trigger_game_canvas_repaint = runnable;
     }
 }

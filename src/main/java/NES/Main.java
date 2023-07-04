@@ -15,6 +15,7 @@ public class Main {
     public static void main(String[] args) throws IOException, ROMParser.ParsingException {
         //String program = "6502_programs/nestest/nestest.nes";
         String program = "6502_programs/greenscreen/greenscreen.nes";
+        //String program = "6502_programs/single_sprite/hb1.nes";
 
         ROMParser romParser = new ROMParser(program);
 
@@ -26,25 +27,24 @@ public class Main {
     }
 
     private static void run_with_debugger(NES nes) {
-        GamePanel panel = new GamePanel();
+        GamePanel panel = new GamePanel(nes.ppu);
         GameWindow gameWindow = new GameWindow(panel);
         DebuggerWindow debuggerWindow = new DebuggerWindow(nes); // The debugger controls the NES program on the GUI thread
+
+        Runnable redrawRunnable = gameWindow::repaint;
+        nes.ppu.addGameCanvasRepaintRunnable(redrawRunnable);
     }
 
     private static void run_without_debugger(NES nes) {
-        GamePanel panel = new GamePanel();
+        GamePanel panel = new GamePanel(nes.ppu);
         GameWindow gameWindow = new GameWindow(panel);
 
-        byte[] ppuData = nes.ppu.getFrameBuffer(); // get reference
-        panel.setPPUFrameBuffer(ppuData);
 
         final boolean[] is_running = {true};
         // Set the runnable that will be called when the PPU is ready to be redrawn
-        Runnable redrawRunnable = () -> {
-            //is_running[0] = false; // TODO: Remove this. We only draw a single frame.
-            gameWindow.repaint();
-        };
-        nes.ppu.set_redraw_runnable_trigger(redrawRunnable);
+        //is_running[0] = false; // TODO: Remove this. We only draw a single frame.
+        Runnable redrawRunnable = gameWindow::repaint;
+        nes.ppu.addGameCanvasRepaintRunnable(redrawRunnable);
         while (is_running[0]) {
             nes.cpu.clock_tick();
             nes.ppu.clock_tick();
