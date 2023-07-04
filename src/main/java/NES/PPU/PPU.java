@@ -227,4 +227,19 @@ public class PPU {
             throw new RuntimeException("Invalid PPU memory address: " + addr);
         }
     }
+
+    public Common.Pair<Integer, Color> get_palette(int palette_index) {
+        if (palette_index < 0 || palette_index > 32) {
+            throw new IllegalArgumentException("Invalid palette index: " + palette_index);
+        }
+
+        Color[][] system_palette = SystemPallete.getSystemPallete();
+
+        int color_index = palette_ram[palette_index];
+
+        int row = color_index / 16;
+        int col = color_index % 16;
+
+        return new Common.Pair<>(color_index, system_palette[row][col]);
+    }
 }

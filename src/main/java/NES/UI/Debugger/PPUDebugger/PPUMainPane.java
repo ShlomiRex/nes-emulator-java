@@ -38,7 +38,7 @@ public class PPUMainPane extends JPanel {
         JPanel vblank_pane = new VBlankPane(ppu);
         JPanel pattern_tables_pane = new PatternTablesPane(ppu);
         JPanel system_palette_pane = new SystemPalettePane();
-        JPanel palette_memory_pane = new PaletteMemoryPane();
+        JPanel palette_memory_pane = new PaletteMemoryPane(ppu);
 
         // Add panels
         status_info_pane.add(cycles_pane);

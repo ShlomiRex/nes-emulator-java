@@ -199,6 +199,7 @@ public class PPUButtonPane extends JPanel {
                             ppu.clock_tick();
                             publish();
                         }
+                        //TODO: Don't know why the worker never reaches this code. It just calls 'done' and stops.
                         return null;
                     }
 

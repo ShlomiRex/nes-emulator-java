@@ -10,8 +10,8 @@ import java.awt.event.MouseEvent;
 
 public class PaletteTilePane extends JPanel {
 
-    private final int tile_index;
-    private final Color color;
+    private int tile_index;
+    private Color color;
     private final int width, height;
 
     public PaletteTilePane(int tile_index, int width, int height) {
@@ -103,5 +103,10 @@ public class PaletteTilePane extends JPanel {
     @Override
     public JToolTip createToolTip() {
         return new PaletteTileTooltip(this);
+    }
+
+    public void updateColor(int tile_index, Color c) {
+        this.tile_index = tile_index;
+        this.color = c;
     }
 }
