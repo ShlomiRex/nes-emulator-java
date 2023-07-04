@@ -257,7 +257,11 @@ public class Decoder {
         String str_operand1;
         String str_operand2;
 
-        if (info.bytes == 1) {
+        if (info == null) {
+            // Undefined
+            str_operand1 = "  ";
+            str_operand2 = "  ";
+        } else if (info.bytes == 1) {
             str_operand1 = "  ";
             str_operand2 = "  ";
         }
