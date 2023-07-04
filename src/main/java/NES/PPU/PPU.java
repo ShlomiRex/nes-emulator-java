@@ -1,5 +1,7 @@
 package NES.PPU;
 
+import NES.Cartridge.Mirroring;
+import NES.Cartridge.iNESHeader;
 import NES.Common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +37,12 @@ public class PPU {
     private final byte[] palette_ram;
 
     /**
+     * Object Attribute Memory
+     * Contains 256 bytes, each byte determines how sprites are rendered
+     */
+    private final byte[] oam;
+
+    /**
      * PPU cycles. Reset to zero after 341 cycles.
      */
     public int cycle;
@@ -47,25 +55,27 @@ public class PPU {
      */
     public int frame;
 
-    /**
-     * The frame buffer is a 2D array of pixels and color. So its easy to access and draw.
-     */
-    private final Common.Pair<Boolean, Color>[][] frame_buffer;
     private Runnable trigger_game_canvas_repaint;
 
-    public PPU(byte[] chr_rom, byte[] palette_ram) {
+    private final Mirroring mirroring;
+
+    public PPU(Mirroring mirroring, byte[] chr_rom) {
         if (chr_rom.length != 1024 * 8)
             throw new IllegalArgumentException("Unexpected CHR ROM / pattern table size");
-        if (palette_ram.length != 32)
-            throw new IllegalArgumentException("Unexpected palette RAM size");
 
-        this.frame_buffer = new Common.Pair[SCREEN_HEIGHT][SCREEN_WIDTH];
+        this.mirroring = mirroring;
+        this.chr_rom = chr_rom;
+
+        this.palette_ram = new byte[32];
+        this.oam = new byte[256];
         this.vram = new byte[1024 * 2];
         this.registers = new PPURegisters(this);
-        this.chr_rom = chr_rom;
-        this.palette_ram = palette_ram;
 
         reset();
+    }
+
+    public PPU(byte[] chr_rom) {
+        this(Mirroring.HORIZONTAL, chr_rom);
     }
 
     public void reset() {
@@ -218,6 +228,7 @@ public class PPU {
                 for (int pixel_row = 0; pixel_row < 8; pixel_row ++) {
                     for (int pixel_col = 0; pixel_col < 8; pixel_col++) {
                         byte pixelValue = chr_rom[full_pattern_index + pixel_row * 8 + pixel_col];
+                        // Read color from attribute table
                         Color pixelColor = get_palette(pixelValue).getB();
                         g.setColor(pixelColor);
                         g.fillRect((col * 8 + pixel_col) * pixel_width, (row * 8 + pixel_row) * pixel_height, pixel_width, pixel_height);
@@ -226,17 +237,8 @@ public class PPU {
             }
         }
 
-//        // Draw first pattern tile
-//        for(int i = 0; i < 16; i++) {
-//            chr_rom[pattern_index + i];
-//            g.fillRect(i * pixel_width, 0, pixel_width, pixel_height);
-//            frameBuffer[i] =
-//        }
+        // Draw sprites
 
-        // Nametable 0: 0x2000
-        // Nametable 1: 0x2400
-        // Nametable 2: 0x2800
-        // Nametable 3: 0x2C00
     }
 
 
@@ -251,7 +253,24 @@ public class PPU {
             throw new RuntimeException("Cannot write to CHR ROM");
         } else if (addr >= 0x2000 && addr <= 0x2FFF) {
             // Name table
-            vram[addr - 0x2000] = value;
+
+            int nametable_id = 0;
+            if (addr >= 0x2400 && addr <= 0x27FF)
+                nametable_id = 1;
+            else if (addr >= 0x2800 && addr <= 0x2BFF)
+                nametable_id = 2;
+            else if (addr >= 0x2C00)
+                nametable_id = 3;
+
+            if (mirroring == Mirroring.HORIZONTAL) {
+                if (nametable_id == 1 || nametable_id == 3)
+                    addr -= 0x400;
+            } else {
+                // Vertical
+                if (nametable_id == 2 || nametable_id == 3)
+                    addr -= 0x800;
+            }
+            vram[((addr - 0x2000) % 0x400)] = value;
         } else if (addr >= 0x3000 && addr <= 0x3EFF) {
             // Mirrors of 0x2000-0x2EFF
             vram[addr - 0x3000] = value;
@@ -302,17 +321,6 @@ public class PPU {
         int col = color_index % 16;
 
         return new Common.Pair<>(color_index, system_palette[row][col]);
-    }
-
-    /**
-     * Get nametable (1,2,3 or 4).
-     * @param nametable_index A number between 1-4
-     */
-    public void get_nametable(int nametable_index) {
-        if (nametable_index < 1 || nametable_index > 4) {
-            throw new IllegalArgumentException("Invalid nametable index: " + nametable_index);
-        }
-
     }
 
     public void addGameCanvasRepaintRunnable(Runnable runnable) {

@@ -20,6 +20,9 @@ Added assembly viewer, PPU registers viewer, and PPU debugger
 First time working palette from RAM:
 ![](README-resources/Screenshot%202023-07-04%20175232.png)
 
+First time rendering basic background (on the right - the game itself):
+![](README-resources/Screenshot%202023-07-04 234402.png)
+
 # Resources
 
 The most used resorces:

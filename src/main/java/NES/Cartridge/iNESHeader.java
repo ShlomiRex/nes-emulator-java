@@ -1,11 +1,8 @@
 package NES.Cartridge;
 
-public class iNESHeader {
-    public enum Mirroring {
-        VERTICAL,
-        HORIZONTAL
-    }
+import com.sun.jdi.Mirror;
 
+public class iNESHeader {
     public enum TVSystem {
         PAL,
         NTSC,
@@ -81,5 +78,9 @@ public class iNESHeader {
             sb.append("\tbus_conflicts: ").append(bus_conflicts).append("\n");
         sb.append("}");
         return sb.toString();
+    }
+
+    public Mirroring getMirrorType() {
+        return mirrorType;
     }
 }

@@ -3,6 +3,7 @@ package NES;
 
 import NES.CPU.CPU;
 import NES.Cartridge.ROMParser;
+import NES.Cartridge.iNESHeader;
 import NES.PPU.PPU;
 
 public class NES {
@@ -15,6 +16,7 @@ public class NES {
 
     // We want to deal with creating the memory here, so its more manageable, and each component can take modular memory.
     public NES(ROMParser romParser) {
+        iNESHeader header = romParser.getHeader();
         byte[] prg_rom = romParser.getPrg_rom();
         byte[] chr_rom = romParser.getChr_rom();
 
@@ -33,9 +35,7 @@ public class NES {
             System.arraycopy(prg_rom, 0, this.cpu_memory, 0x8000, 1024*32);
         }
 
-        byte[] palette_ram = new byte[32];
-
-        ppu = new PPU(chr_rom, palette_ram);
+        ppu = new PPU(header.getMirrorType(), chr_rom);
         cpu = new CPU(cpu_memory, ppu.registers);
         cpu.res_interrupt();
     }

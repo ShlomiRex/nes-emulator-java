@@ -53,9 +53,9 @@ public class ROMParser {
         // Flags 6 parsing
         // -----------------
         byte flags6 = header_bytes[6];
-        iNESHeader.Mirroring mirrorType = ((flags6 & 1) == 1) ?
-                (iNESHeader.Mirroring.VERTICAL) :
-                (iNESHeader.Mirroring.HORIZONTAL);
+        Mirroring mirrorType = ((flags6 & 1) == 1) ?
+                (Mirroring.VERTICAL) :
+                (Mirroring.HORIZONTAL);
         boolean battery_prg_ram = ((flags6 >> 1) & 1) == 1;
         boolean trainer = ((flags6 >> 2) & 1) == 1;
         boolean ignore_mirroring_control = ((flags6 >> 3) & 1) == 1;
