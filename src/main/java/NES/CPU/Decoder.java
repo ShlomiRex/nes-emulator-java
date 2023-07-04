@@ -304,6 +304,12 @@ public class Decoder {
             case ZEROPAGE_X -> {
                 return "$" + Common.byteToHex(operand1, false) + ",X";
             }
+            case INDIRECT_X -> {
+                return "($" + Common.byteToHex(operand1, false) + ",X)";
+            }
+            case INDIRECT_Y -> {
+                return "($" + Common.byteToHex(operand1, false) + "),Y";
+            }
             default -> throw new RuntimeException("Not implemented yet");
         }
     }
@@ -337,6 +343,14 @@ public class Decoder {
                     return knownSymbol;
                 } else {
                     return "($" + Common.shortToHex(addr, false) + ")";
+                }
+            case ABSOLUTE_Y:
+                addr = Common.makeShort(operand1, operand2); // switch order
+                knownSymbol = convert_addr_to_symbol(addr);
+                if (knownSymbol != null) {
+                    return knownSymbol;
+                } else {
+                    return "$" + Common.shortToHex(addr, false) + ",Y";
                 }
             default:
                 throw new RuntimeException("Not implemented yet");

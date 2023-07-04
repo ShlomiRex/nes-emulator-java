@@ -59,7 +59,7 @@ public class AssemnlyMainPane extends JPanel {
         short pc = (short) (cpuRegisters.getPC() & 0xFFFF);
 
         //TODO: Change assembly_line_num to something bigger... it should write all the assembly lines
-        for (int assembly_line_num = 0; assembly_line_num < 130; assembly_line_num++) {
+        for (int assembly_line_num = 0; assembly_line_num < 350; assembly_line_num++) {
             Decoder.AssemblyInfo info = decoder.decode_assembly_line(cpu_memory, pc);
 
             // Assembly line address
@@ -73,7 +73,7 @@ public class AssemnlyMainPane extends JPanel {
             if (info.instr_info != null)
                 append(info.instr_info.instr.toString()+" ", attr_blue);
             else
-                append("Undefined", attr_blue);
+                append("UNDEFINED", attr_blue);
 
             // Operands
             String operands = info.decoded_operand_or_symbol;

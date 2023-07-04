@@ -23,6 +23,9 @@ First time working palette from RAM:
 First time rendering basic background (on the right - the game itself):
 ![](README-resources/Screenshot%202023-07-04 234402.png)
 
+First time working complete palette initialization from NESTEST, code is just waiting for input interrupts:
+![](README-resources/Screenshot%202023-07-05 014713.png)
+
 # Resources
 
 The most used resorces:
