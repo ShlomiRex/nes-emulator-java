@@ -1,7 +1,6 @@
 package PPU;
 
 import NES.PPU.PPU;
-import NES.PPU.PaletteRAM;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -10,12 +9,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class TestPPURegisters {
 
     private PPU ppu;
-    private PaletteRAM palette_ram;
+    private byte[] palette_ram;
     private byte[] chr_rom = new byte[1024 * 8];
 
     @Before
     public void setUp() {
-        palette_ram = new PaletteRAM();
+        palette_ram = new byte[32];
         ppu = new PPU(chr_rom, palette_ram);
     }
 
@@ -53,6 +52,6 @@ public class TestPPURegisters {
         ppu.registers.writePPUADDR((byte) 0x00);
         ppu.registers.writePPUDATA((byte) 0x29);
 
-        assertEquals(palette_ram.read(0x3F00), 0x29);
+        assertEquals(ppu.read((short) 0x3F00), 0x29);
     }
 }

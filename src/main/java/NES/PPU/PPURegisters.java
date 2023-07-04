@@ -35,12 +35,10 @@ public class PPURegisters {
      */
     private byte PPUDATA_read_buffer;
 
-    private final VRAM vram;
-    private final PaletteRAM palette_ram;
+    private final PPU ppu;
 
-    public PPURegisters(VRAM vram, PaletteRAM palette_ram) {
-        this.vram = vram;
-        this.palette_ram = palette_ram;
+    public PPURegisters(PPU ppu) {
+        this.ppu = ppu;
     }
 
     public void reset() {
@@ -112,7 +110,8 @@ public class PPURegisters {
 
             // Mirror down to 14 bits (0x3FFF): https://www.nesdev.org/wiki/PPU_registers#Address_($2006)_%3E%3E_write_x2
             // TODO: Not sure if mirroring is done here or if it should be done in both high byte and low byte.
-            PPUADDR &= 0x3FFF;
+            // TODO: Do something about mirroring
+            //PPUADDR &= 0x3FFF;
         }
         // Flip the flipflop
         PPUADDR_flipflop_write_high = !PPUADDR_flipflop_write_high;
@@ -121,13 +120,7 @@ public class PPURegisters {
     public void writePPUDATA(byte value) {
         PPUDATA = value;
 
-        if (PPUADDR > 0x3EFF) {
-            // Palette RAM
-            palette_ram.write(PPUADDR, value);
-        } else {
-            // VRAM
-            vram.write(PPUADDR, value);
-        }
+        ppu.write(PPUADDR, value);
 
         // Bit 2 of PPUCTRL determines whether to increment PPUADDR by 1 or 32 after each write to PPUDATA.
         PPUADDR += (short) (Common.Bits.getBit(PPUCTRL, 2) ? 32 : 1);
@@ -140,7 +133,7 @@ public class PPURegisters {
 
     public byte readPPUDATA() {
         byte value = PPUDATA_read_buffer;
-        PPUDATA_read_buffer = vram.read(PPUADDR);
+        PPUDATA_read_buffer = ppu.read(PPUADDR);
         PPUADDR += (short) (Common.Bits.getBit(PPUCTRL, 2) ? 32 : 1);
 
         // Post fetch

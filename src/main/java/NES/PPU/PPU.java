@@ -27,14 +27,14 @@ public class PPU {
      * This memory translates to background / layout.
      * Address: 0x2000 - 0x2FFF
      */
-    private final VRAM vram;
+    private final byte[] vram;
 
     /**
      * Contains 32 bytes, each byte is a color index (0,1,2,3).
      * This memory translates to colors.
      * Address: 0x3F00 - 0x3F1F
      */
-    private final PaletteRAM palette_ram;
+    private final byte[] palette_ram;
 
     /**
      * PPU cycles. Reset to zero after 341 cycles.
@@ -52,12 +52,14 @@ public class PPU {
     private final byte[] frameBuffer;
     private Runnable redraw_runnable;
 
-    public PPU(byte[] chr_rom, PaletteRAM palette_ram) {
+    public PPU(byte[] chr_rom, byte[] palette_ram) {
         if (chr_rom.length != 1024 * 8)
             throw new IllegalArgumentException("Unexpected CHR ROM / pattern table size");
+        if (palette_ram.length != 32)
+            throw new IllegalArgumentException("Unexpected palette RAM size");
 
-        this.vram = new VRAM();
-        this.registers = new PPURegisters(vram, palette_ram);
+        this.vram = new byte[1024 * 2];
+        this.registers = new PPURegisters(this);
         this.chr_rom = chr_rom;
         this.palette_ram = palette_ram;
         this.frameBuffer = new byte[SCREEN_WIDTH * SCREEN_HEIGHT];
@@ -180,5 +182,49 @@ public class PPU {
         // Clear screen
         Arrays.fill(frameBuffer, (byte) 107); // gray
         this.redraw_runnable.run();
+    }
+
+    /**
+     * Write to PPU memory.
+     * @param addr
+     * @param value
+     */
+    public void write(short addr, byte value) {
+        if (addr >= 0x0000 && addr <= 0x1FFF) {
+            // CHR ROM / pattern table
+            throw new RuntimeException("Cannot write to CHR ROM");
+        } else if (addr >= 0x2000 && addr <= 0x2FFF) {
+            // Name table
+            vram[addr - 0x2000] = value;
+        } else if (addr >= 0x3000 && addr <= 0x3EFF) {
+            // Mirrors of 0x2000-0x2EFF
+            vram[addr - 0x3000] = value;
+        } else if (addr >= 0x3F00 && addr <= 0x3FFF) {
+            // Palette RAM
+            palette_ram[addr - 0x3F00] = value;
+        }
+    }
+
+    /**
+     * Read PPU memory.
+     * @param addr
+     * @return
+     */
+    public byte read(short addr) {
+        if (addr >= 0x0000 && addr <= 0x1FFF) {
+            // CHR ROM / pattern table
+            return chr_rom[addr];
+        } else if (addr >= 0x2000 && addr <= 0x2FFF) {
+            // Name table
+            return vram[addr - 0x2000];
+        } else if (addr >= 0x3000 && addr <= 0x3EFF) {
+            // Mirrors of 0x2000-0x2EFF
+            return vram[addr - 0x3000];
+        } else if (addr >= 0x3F00 && addr <= 0x3FFF) {
+            // Palette RAM
+            return palette_ram[addr - 0x3F00];
+        } else {
+            throw new RuntimeException("Invalid PPU memory address: " + addr);
+        }
     }
 }
