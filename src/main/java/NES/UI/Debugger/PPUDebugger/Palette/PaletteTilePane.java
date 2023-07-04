@@ -79,7 +79,7 @@ public class PaletteTilePane extends JPanel {
         g.setColor(no_0d_color);
         if (tooltip == false) {
             //int str_width = g.getFontMetrics().stringWidth("00");
-            g.drawString(Common.byteToHex((byte) tile_index, false), 0, container_height / 4);
+            g.drawString(Common.byteToHex((byte) tile_index, false), 0, container_height / 3);
         } else {
             // Tooltip draw as hex in the middle
             g.setFont(new Font("Serif", Font.PLAIN, 22));

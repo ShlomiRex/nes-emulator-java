@@ -55,7 +55,8 @@ public class PatternTilePane extends JPanel {
         byte[] tile = ppu.get_pattern_tile(tile_index, is_left_pattern_table);
         byte[][] pixels = ppu.convert_pattern_tile_to_pixel_pattern(tile);
 
-        g.setColor(Color.BLACK);
+        Color first_background_color = ppu.get_palette(0).getB();
+        g.setColor(first_background_color);
         g.fillRect(0, 0, container_width, container_height);
 
         int pixel_width = container_width / 8;

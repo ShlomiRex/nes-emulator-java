@@ -17,6 +17,9 @@ Added pattern tables, added system palette, added run/stop buttons
 Added assembly viewer, PPU registers viewer, and PPU debugger
 ![](README-resources/Screenshot2023-05-26%20173426.png)
 
+First time working palette from RAM:
+![](README-resources/Screenshot%202023-07-04%20175232.png)
+
 # Resources
 
 The most used resorces:
