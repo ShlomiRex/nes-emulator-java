@@ -57,14 +57,6 @@ public class PPURegisters {
         return before;
     }
 
-    public byte getPPUCTRL() {
-        return PPUCTRL;
-    }
-
-    public byte getPPUMASK() {
-        return PPUMASK;
-    }
-
     public boolean isNmiEnabled() {
         //return (ctrl & 0x80) != 0;
         return Common.Bits.getBit(PPUSTATUS, 7);
@@ -154,8 +146,15 @@ public class PPURegisters {
     /**
      * Used only for testing, or debugging.
      */
-    public short getPPUADDR() {
-        return PPUADDR;
+    public byte getPPUCTRL() {
+        return PPUCTRL;
+    }
+
+    /**
+     * Used only for testing, or debugging.
+     */
+    public byte getPPUMASK() {
+        return PPUMASK;
     }
 
     /**
@@ -163,5 +162,47 @@ public class PPURegisters {
      */
     public byte getPPUSTATUS() {
         return PPUSTATUS;
+    }
+
+    /**
+     * Used only for testing, or debugging.
+     */
+    public byte getOAMADDR() {
+        return OAMADDR;
+    }
+
+    /**
+     * Used only for testing, or debugging.
+     */
+    public byte getOAMDATA() {
+        return OAMDATA;
+    }
+
+    /**
+     * Used only for testing, or debugging.
+     */
+    public byte getPPUSCROLL() {
+        return PPUSCROLL;
+    }
+
+    /**
+     * Used only for testing, or debugging.
+     */
+    public short getPPUADDR() {
+        return PPUADDR;
+    }
+
+    /**
+     * Used only for testing, or debugging.
+     */
+    public byte getPPUDATA() {
+        return PPUDATA;
+    }
+
+    /**
+     * Used only for testing, or debugging.
+     */
+    public byte getOAMDMA() {
+        return OAMDMA;
     }
 }

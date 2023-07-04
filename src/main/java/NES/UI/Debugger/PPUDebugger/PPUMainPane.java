@@ -34,7 +34,7 @@ public class PPUMainPane extends JPanel {
         JPanel cycles_pane = new CyclesPane(ppu);
         JPanel scanline_pane = new ScanlinePane(ppu);
         JPanel frame_pane = new FramePane(ppu);
-        JPanel registers_pane = new RegistersPanel(ppu.registers);
+        JPanel registers_pane = new PPURegistersPan(ppu.registers);
         JPanel vblank_pane = new VBlankPane(ppu);
         JPanel pattern_tables_pane = new PatternTablesPane(ppu);
         JPanel system_palette_pane = new SystemPalettePane();
