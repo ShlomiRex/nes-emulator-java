@@ -33,7 +33,7 @@ public class PaletteTilePane extends JPanel {
                 super.mouseEntered(e);
                 setBorder(BorderFactory.createLineBorder(Color.BLUE, 2));
                 //selected_tile_label.setText("Tile: $" + Common.byteToHexString(tile_index, false));
-                setToolTipText(finalTooltip_text);
+                //setToolTipText(finalTooltip_text);
             }
 
             @Override
@@ -43,14 +43,20 @@ public class PaletteTilePane extends JPanel {
                 //selected_tile_label.setText("Tile:");
             }
         });
+
+        setToolTipText("");
     }
 
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-
+    /**
+     *
+     * @param g
+     * @param container_width
+     * @param container_height
+     * @param tooltip Only used for tooltip. It paints differently on tooltip.
+     */
+    protected void paintTile(Graphics g, int container_width, int container_height, boolean tooltip) {
         g.setColor(color);
-        g.fillRect(0, 0, width, height);
+        g.fillRect(0, 0, container_width, container_height);
 
         // Determine color, like here: https://www.nesdev.org/wiki/PPU_palettes#2C02_and_2C07
         if (tile_index < 0x1F) {
@@ -65,14 +71,41 @@ public class PaletteTilePane extends JPanel {
             g.setColor(Color.WHITE);
         }
 
-        //int str_width = g.getFontMetrics().stringWidth("00");
-        g.drawString(Common.byteToHex((byte) tile_index, false), 0, height / 4);
+        Color no_0d_color = g.getColor(); // use it for text drawing
 
         // Show the 0x0D color as big red X
         if (tile_index == 0x0D) {
             g.setColor(Color.RED);
-            g.drawLine(0, 0, width, height);
-            g.drawLine(width, 0, 0, height);
+            g.drawLine(0, 0, container_width, container_height);
+            g.drawLine(container_width, 0, 0, container_height);
         }
+
+        g.setColor(no_0d_color);
+        if (tooltip == false) {
+            //int str_width = g.getFontMetrics().stringWidth("00");
+            g.drawString(Common.byteToHex((byte) tile_index, false), 0, container_height / 4);
+        } else {
+            // Tooltip draw as hex in the middle
+            g.setFont(new Font("Serif", Font.PLAIN, 22));
+            g.drawString(Common.byteToHex((byte) tile_index, true), container_width / 4, container_height / 2);
+
+            g.setFont(new Font("Serif", Font.PLAIN, 16));
+
+            if (tile_index != 0x0D)
+                g.drawString("Color: ("+color.getRed()+", "+color.getGreen()+", "+color.getBlue()+")", 0, container_height / 4 * 3);
+            else
+                g.drawString("Blacker than black", 0, container_height / 4 * 3);
+        }
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        paintTile(g, width, height, false);
+    }
+
+    @Override
+    public JToolTip createToolTip() {
+        return new PaletteTileTooltip(this);
     }
 }

@@ -31,6 +31,4 @@ public class SystemPalettePane extends JPanel {
             }
         }
     }
-
-
 }

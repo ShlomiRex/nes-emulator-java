@@ -32,8 +32,6 @@ public class PatternTilePane extends JPanel {
                 super.mouseEntered(e);
                 setBorder(BorderFactory.createLineBorder(Color.BLUE, 2));
                 selected_tile_label.setText("Tile: $" + Common.byteToHex(tile_index, false));
-
-
             }
 
             @Override
@@ -45,7 +43,6 @@ public class PatternTilePane extends JPanel {
         });
 
         setToolTipText("");
-
     }
 
     /**
