@@ -1,5 +1,6 @@
 package NES.UI.Debugger.AssemblyDebugger;
 
+import NES.CPU.CPU;
 import NES.CPU.Registers.CPURegisters;
 import NES.Common;
 
@@ -15,8 +16,10 @@ public class AssemblyTextPane extends JTextPane {
     private final Highlighter.HighlightPainter highlightPainter;
     private String text;
 
-    public AssemblyTextPane(CPURegisters cpuRegisters) {
-        this.cpuRegisters = cpuRegisters;
+    public AssemblyTextPane(CPU cpu, byte[] cpu_memory) {
+        this.cpuRegisters = cpu.registers;
+
+        AssemblyDocument assemblyDocument = new AssemblyDocument(this, cpu, cpu_memory);
 
         highlightPainter = new DefaultHighlighter.DefaultHighlightPainter(Color.YELLOW);
 
@@ -41,7 +44,7 @@ public class AssemblyTextPane extends JTextPane {
 
             highlighter.addHighlight(i, i + line_length, highlightPainter);
         } catch (BadLocationException e) {
-            //throw new RuntimeException(e);
+            throw new RuntimeException(e);
         }
     }
 }

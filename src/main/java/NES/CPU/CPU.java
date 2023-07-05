@@ -1,5 +1,6 @@
 package NES.CPU;
 
+import NES.CPU.Decoder.Decoder;
 import NES.CPU.Registers.CPURegisters;
 import NES.Common;
 import NES.PPU.PPURegisters;
@@ -17,7 +18,6 @@ public class CPU {
     public long cycles;
     private final byte[] memory; // All addressable memory (64KB)
 
-    private final Decoder decoder;
 
     private final PPURegisters ppuRegisters;
     public long instructions = 0; // counter number of instructions executed
@@ -36,7 +36,6 @@ public class CPU {
         this.ppuRegisters = ppuRegisters;
 
         this.registers = new CPURegisters();
-        this.decoder = new Decoder();
     }
 
     public void clock_tick() {
@@ -51,7 +50,7 @@ public class CPU {
         registers.incrementPC(); // Increment PC
 
         // Decode
-        Decoder.InstructionInfo instr_info = decoder.decode_opcode(opcode);
+        Decoder.InstructionInfo instr_info = Decoder.decode_opcode(opcode);
         Instructions instr = instr_info.instr;
         AddressingMode addrmode = instr_info.addrmode;
         int bytes = instr_info.bytes;

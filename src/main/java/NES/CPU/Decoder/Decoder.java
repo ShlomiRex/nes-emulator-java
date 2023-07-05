@@ -1,5 +1,7 @@
-package NES.CPU;
+package NES.CPU.Decoder;
 
+import NES.CPU.AddressingMode;
+import NES.CPU.Instructions;
 import NES.Common;
 
 public class Decoder {
@@ -25,22 +27,9 @@ public class Decoder {
         }
     }
 
-    public class AssemblyInfo {
-        public final InstructionInfo instr_info;
-
-        public final String str_instr_bytes;
-
-        public final String decoded_operand_or_symbol;
-        public AssemblyInfo(InstructionInfo info, String str_instr_bytes, String decoded_operand_or_symbol) {
-            this.instr_info = info;
-            this.str_instr_bytes = str_instr_bytes;
-            this.decoded_operand_or_symbol = decoded_operand_or_symbol;
-        }
-    }
-
     public static final InstructionInfo[] instructions_table = init_instructions_table();
 
-    public static InstructionInfo[] init_instructions_table() {
+    private static InstructionInfo[] init_instructions_table() {
         if (instructions_table != null)
             return instructions_table;
 
@@ -241,11 +230,11 @@ public class Decoder {
         return abc;
     }
 
-    public InstructionInfo decode_opcode(byte opcode) {
+    public static InstructionInfo decode_opcode(byte opcode) {
         return instructions_table[opcode & 0xFF];
     }
 
-    public AssemblyInfo decode_assembly_line(byte[] cpu_memory, short pc) {
+    public static AssemblyInfo decode_assembly_line(byte[] cpu_memory, short pc) {
         // Read opcode
         byte opcode = cpu_memory[pc & 0xFFFF];
         String str_opcode = Common.byteToHex(opcode, false);
@@ -286,7 +275,7 @@ public class Decoder {
         return new AssemblyInfo(info, str_instr_bytes, decoded_operand_or_symbol);
     }
 
-    private String convert_1_operands_to_human_readable_text(AddressingMode addrmode, byte operand1, short pc) {
+    private static String convert_1_operands_to_human_readable_text(AddressingMode addrmode, byte operand1, short pc) {
         switch (addrmode) {
             case IMMEDIATE -> {
                 return "#$" + Common.byteToHex(operand1, false);
@@ -314,7 +303,7 @@ public class Decoder {
         }
     }
 
-    private String convert_2_operands_to_human_readable_text(AddressingMode addrmode, byte operand1, byte operand2) {
+    private static String convert_2_operands_to_human_readable_text(AddressingMode addrmode, byte operand1, byte operand2) {
         short addr;
         String knownSymbol;
         switch (addrmode) {
@@ -357,10 +346,13 @@ public class Decoder {
         }
     }
 
-    private String convert_addr_to_symbol(short addr) {
+    public static String convert_addr_to_symbol(short addr) {
         switch (addr) {
             case 0x2000 -> {
                 return "PPU_CTRL";
+            }
+            case 0x2001 -> {
+                return "PPU_MASK";
             }
             case 0x2002 -> {
                 return "PPU_STATUS";
@@ -379,6 +371,9 @@ public class Decoder {
             }
             case 0x2007 -> {
                 return "PPU_DATA";
+            }
+            case 0x4014 -> {
+                return "OAM_DMA";
             }
             default -> {
                 return null;

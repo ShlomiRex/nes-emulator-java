@@ -1,7 +1,7 @@
 package CPU;
 
 import NES.CPU.CPU;
-import NES.CPU.Decoder;
+import NES.CPU.Decoder.Decoder;
 import NES.CPU.Registers.StatusFlags;
 import NES.Common;
 import org.json.JSONArray;

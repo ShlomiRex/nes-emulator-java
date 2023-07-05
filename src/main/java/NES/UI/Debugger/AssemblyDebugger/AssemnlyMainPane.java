@@ -1,6 +1,8 @@
 package NES.UI.Debugger.AssemblyDebugger;
 
-import NES.CPU.Decoder;
+import NES.CPU.CPU;
+import NES.CPU.Decoder.AssemblyInfo;
+import NES.CPU.Decoder.Decoder;
 import NES.CPU.Registers.CPURegisters;
 import NES.Common;
 
@@ -11,20 +13,18 @@ import java.awt.*;
 public class AssemnlyMainPane extends JPanel {
 
     public final AssemblyTextPane assembly_text_area;
-    private final Decoder decoder;
     private final byte[] cpu_memory;
     private final CPURegisters cpuRegisters;
 
     private final SimpleAttributeSet attr_black, attr_blue, attr_gray, attr_green;
 
-    public AssemnlyMainPane(CPURegisters cpuRegisters, byte[] cpu_memory) {
+    public AssemnlyMainPane(CPU cpu, byte[] cpu_memory) {
         this.cpu_memory = cpu_memory;
-        this.cpuRegisters = cpuRegisters;
-        this.decoder = new Decoder();
+        this.cpuRegisters = cpu.registers;
 
         setBorder(BorderFactory.createLoweredBevelBorder());
 
-        assembly_text_area = new AssemblyTextPane(cpuRegisters);
+        assembly_text_area = new AssemblyTextPane(cpu, cpu_memory);
 
         try {
             attr_black = new SimpleAttributeSet();
@@ -60,7 +60,7 @@ public class AssemnlyMainPane extends JPanel {
 
         //TODO: Change assembly_line_num to something bigger... it should write all the assembly lines
         for (int assembly_line_num = 0; assembly_line_num < 350; assembly_line_num++) {
-            Decoder.AssemblyInfo info = decoder.decode_assembly_line(cpu_memory, pc);
+            AssemblyInfo info = Decoder.decode_assembly_line(cpu_memory, pc);
 
             // Assembly line address
             String str_addr = Common.shortToHex(pc, true);

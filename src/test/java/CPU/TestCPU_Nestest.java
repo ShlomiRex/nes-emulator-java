@@ -1,7 +1,7 @@
 package CPU;
 
 import NES.CPU.CPU;
-import NES.CPU.Decoder;
+import NES.CPU.Decoder.Decoder;
 import NES.Cartridge.ROMParser;
 import NES.NES;
 import org.junit.BeforeClass;
@@ -23,8 +23,6 @@ public class TestCPU_Nestest {
 
     @BeforeClass
     public static void setUp() throws IOException, ROMParser.ParsingException {
-        decoder = new Decoder();
-
         String test_log_path = "6502_programs/nestest/nestest.log";
         File file = new File(test_log_path);
         reader = new BufferedReader(new FileReader(file));
