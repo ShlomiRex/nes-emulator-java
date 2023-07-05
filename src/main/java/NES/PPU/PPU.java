@@ -238,7 +238,15 @@ public class PPU {
         }
 
         // Draw sprites
+        if (show_sprites) {
+            for (int i = 0; i < 64; i++) {
+                byte sprite_y =             oam[i * 4];
+                byte sprite_tile_index =    oam[i * 4 + 1];
+                byte sprite_attributes =    oam[i * 4 + 2];
+                byte sprite_x =             oam[i * 4 + 3];
 
+            }
+        }
     }
 
 
@@ -305,8 +313,8 @@ public class PPU {
 
     /**
      * Get palette color from palette RAM.
-     * @param palette_index A number between 0-32
-     * @return
+     * @param palette_index Palette index (0-32)
+     * @return The color index and the color
      */
     public Common.Pair<Integer, Color> get_palette(int palette_index) {
         if (palette_index < 0 || palette_index > 32) {

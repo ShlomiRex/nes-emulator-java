@@ -18,9 +18,9 @@ public class PPURegisters {
      */
 
 
-    private byte PPUCTRL, PPUMASK, PPUSTATUS, OAMADDR, OAMDATA, PPUSCROLL, PPUDATA, OAMDMA;
+    private byte PPUCTRL, PPUMASK, PPUSTATUS, OAMADDR, OAMDATA, PPUDATA, OAMDMA;
 
-    private short PPUADDR;
+    private short PPUADDR, PPUSCROLL;
 
     /**
      * This flipflop is used to determine whether to write to high byte or low byte of PPUADDR.
@@ -28,6 +28,12 @@ public class PPURegisters {
      * we need to keep track of which byte we are writing to.
      */
     private boolean PPUADDR_flipflop_write_high = true;
+
+    /**
+     * This flipflop is used to determine whether to write to high byte (horizontal scroll offset)
+     * or low byte (vertical scroll offset) of PPUSCROLL.
+     */
+    private boolean PPUSCROLL_flipflop_write_high = true;
 
     /**
      * This buffer is used to store the value of PPUDATA read from the PPU.
@@ -47,13 +53,15 @@ public class PPURegisters {
 
     /**
      * Clears bit 7 of PPUSTATUS.
-     * Also sets the PPUADDR flipflop to write high byte next time.
+     * Sets the PPUADDR flipflop to write high byte next time.
+     * Sets the PPUSCROLL flipflop to write high byte next time.
      * @return PPUSTATUS before clearing bit 7
      */
     public byte readPPUSTATUS() {
         byte before = PPUSTATUS;
         PPUSTATUS = Common.Bits.setBit(PPUSTATUS, 7, false);
         PPUADDR_flipflop_write_high = true;
+        PPUSCROLL_flipflop_write_high = true;
         return before;
     }
 
@@ -71,25 +79,34 @@ public class PPURegisters {
 //        }
     }
 
-    public void setPPUCTRL(byte value) {
+    public void writePPUCTRL(byte value) {
         PPUCTRL = value;
     }
 
-    public void setPPUMASK(byte value) {
+    public void writePPUMASK(byte value) {
         PPUMASK = value;
     }
 
-    public void setOamAddr(byte value) {
+    public void writeOAMADDR(byte value) {
         OAMADDR = value;
     }
 
-    public void setOamData(byte value) {
+    public void writeOAMDATA(byte value) {
         OAMDATA = value;
+        OAMADDR++;
     }
 
-    public void setScroll(byte value) {
-        //TODO: Write twice
-        PPUSCROLL = value;
+    public void writePPUSCROLL(byte value) {
+        // TODO: Test this in FCEUX
+        if (PPUSCROLL_flipflop_write_high) {
+            // Write to high byte
+            PPUSCROLL = (short) ((PPUSCROLL & 0x00FF) | ((value & 0x00FF) << 8));
+        } else {
+            // Write to low byte
+            PPUSCROLL = (short) ((PPUSCROLL & 0xFF00) | (value & 0x00FF));
+        }
+
+        PPUSCROLL_flipflop_write_high = !PPUSCROLL_flipflop_write_high;
     }
 
     public void writePPUADDR(byte value) {
@@ -135,7 +152,7 @@ public class PPURegisters {
         return value;
     }
 
-    public void setOamDma(byte value) {
+    public void writeOAMDMA(byte value) {
         OAMDMA = value;
     }
 
@@ -181,7 +198,7 @@ public class PPURegisters {
     /**
      * Used only for testing, or debugging.
      */
-    public byte getPPUSCROLL() {
+    public short getPPUSCROLL() {
         return PPUSCROLL;
     }
 

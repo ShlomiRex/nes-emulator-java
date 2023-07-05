@@ -66,7 +66,7 @@ public class PPURegistersPan extends JPanel {
         txt_ppu_status.setColumns(2);
         txt_oam_addr.setColumns(2);
         txt_oam_data.setColumns(2);
-        txt_ppu_scroll.setColumns(2);
+        txt_ppu_scroll.setColumns(4);
         txt_ppu_addr.setColumns(4);
         txt_ppu_data.setColumns(2);
         txt_oam_dma.setColumns(2);
@@ -109,7 +109,7 @@ public class PPURegistersPan extends JPanel {
         txt_ppu_status.setText(Common.byteToHex(ppuRegisters.getPPUSTATUS(), false));
         txt_oam_addr.setText(Common.byteToHex(ppuRegisters.getOAMADDR(), false));
         txt_oam_data.setText(Common.byteToHex(ppuRegisters.getOAMDATA(), false));
-        txt_ppu_scroll.setText(Common.byteToHex(ppuRegisters.getPPUSCROLL(), false));
+        txt_ppu_scroll.setText(Common.shortToHex(ppuRegisters.getPPUSCROLL(), false));
         txt_ppu_addr.setText(Common.shortToHex(ppuRegisters.getPPUADDR(), false));
         txt_ppu_data.setText(Common.byteToHex(ppuRegisters.getPPUDATA(), false));
         txt_oam_dma.setText(Common.byteToHex(ppuRegisters.getOAMDMA(), false));

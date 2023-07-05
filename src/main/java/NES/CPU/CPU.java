@@ -44,7 +44,7 @@ public class CPU {
         //logger.debug(registers.toString());
 
         // Log current PC
-        //logger.debug("PC: " + Common.shortToHex(registers.getPC(), true));
+        logger.debug("PC: " + Common.shortToHex(registers.getPC(), true));
 
         // Fetch
         byte opcode = read_memory(registers.getPC()); // Read at address of Program Counter (duh!)
@@ -1121,15 +1121,15 @@ public class CPU {
         // Check PPU writes. If so, write to PPU registers and return.
         if ((addr >= 0x2000 && addr <= 0x2007) || addr == 0x4014) {
             switch (addr) {
-                case 0x2000 -> ppuRegisters.setPPUCTRL(value);
-                case 0x2001 -> ppuRegisters.setPPUMASK(value);
+                case 0x2000 -> ppuRegisters.writePPUCTRL(value);
+                case 0x2001 -> ppuRegisters.writePPUMASK(value);
                 case 0x2002 -> {} // ignore - read only
-                case 0x2003 -> ppuRegisters.setOamAddr(value);
-                case 0x2004 -> ppuRegisters.setOamData(value);
-                case 0x2005 -> ppuRegisters.setScroll(value);
+                case 0x2003 -> ppuRegisters.writeOAMADDR(value);
+                case 0x2004 -> ppuRegisters.writeOAMDATA(value);
+                case 0x2005 -> ppuRegisters.writePPUSCROLL(value);
                 case 0x2006 -> ppuRegisters.writePPUADDR(value);
                 case 0x2007 -> ppuRegisters.writePPUDATA(value);
-                case 0x4014 -> ppuRegisters.setOamDma(value);
+                case 0x4014 -> ppuRegisters.writeOAMDMA(value);
             }
         } else {
             // Not PPU address, so write to internal memory.

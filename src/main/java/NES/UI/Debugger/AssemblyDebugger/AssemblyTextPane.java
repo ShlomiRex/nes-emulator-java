@@ -41,7 +41,7 @@ public class AssemblyTextPane extends JTextPane {
 
             highlighter.addHighlight(i, i + line_length, highlightPainter);
         } catch (BadLocationException e) {
-            throw new RuntimeException(e);
+            //throw new RuntimeException(e);
         }
     }
 }
