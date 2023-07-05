@@ -1,5 +1,9 @@
 package NES.UI.Debugger.AssemblyDebugger;
 
+import NES.CPU.CPU;
+import NES.CPU.Decoder.AssemblyInfo;
+import NES.CPU.Decoder.Decoder;
+
 import java.util.HashMap;
 
 /**
@@ -9,7 +13,13 @@ import java.util.HashMap;
 public class AssemblyTextStructure {
 
     private final HashMap<Short, Object> pcToAssembly;
-    public AssemblyTextStructure() {
+    public AssemblyTextStructure(CPU cpu, byte[] cpu_memory) {
         pcToAssembly = new HashMap<>();
+
+        // Starting PC
+        short pc = (short) (cpu.registers.getPC() & 0xFFFF);
+
+        AssemblyLineRecord assemblyLineRecord = Decoder.decode_assembly_line2(pc, cpu_memory);
+        pcToAssembly.put(pc, assemblyLineRecord);
     }
 }

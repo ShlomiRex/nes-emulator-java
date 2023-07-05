@@ -3,6 +3,7 @@ package NES.CPU.Decoder;
 import NES.CPU.AddressingMode;
 import NES.CPU.Instructions;
 import NES.Common;
+import NES.UI.Debugger.AssemblyDebugger.AssemblyLineRecord;
 
 public class Decoder {
 
@@ -10,21 +11,6 @@ public class Decoder {
         NONE,
         PageBoundaryCrossed,
         BranchOccursOn
-    }
-
-    public static class InstructionInfo {
-        public final Instructions instr;
-        public final AddressingMode addrmode;
-        public final int bytes, cycles;
-        public final OopsCycle oopsCycle;
-
-        public InstructionInfo(Instructions instr, AddressingMode addrmode, int bytes, int cycles, OopsCycle oopsCycle) {
-            this.instr = instr;
-            this.addrmode = addrmode;
-            this.bytes = bytes;
-            this.cycles = cycles;
-            this.oopsCycle = oopsCycle;
-        }
     }
 
     public static final InstructionInfo[] instructions_table = init_instructions_table();
@@ -234,6 +220,14 @@ public class Decoder {
         return instructions_table[opcode & 0xFF];
     }
 
+    public static AssemblyLineRecord decode_assembly_line2(short addr, byte[] cpu_memory) {
+        byte opcode = cpu_memory[addr & 0xFFFF];
+        InstructionInfo info = decode_opcode(opcode);
+
+        return new AssemblyLineRecord(addr, 1, opcode, null, null, info.instr.toString());
+    }
+
+    //TODO: Remove this function in favor of AssemblyLineRecord result
     public static AssemblyInfo decode_assembly_line(byte[] cpu_memory, short pc) {
         // Read opcode
         byte opcode = cpu_memory[pc & 0xFFFF];

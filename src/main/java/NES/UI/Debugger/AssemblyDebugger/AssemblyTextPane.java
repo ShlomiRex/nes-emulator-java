@@ -19,7 +19,7 @@ public class AssemblyTextPane extends JTextPane {
     public AssemblyTextPane(CPU cpu, byte[] cpu_memory) {
         this.cpuRegisters = cpu.registers;
 
-        AssemblyDocument assemblyDocument = new AssemblyDocument(this, cpu, cpu_memory);
+        AssemblyStyledDocument assemblyDocument = new AssemblyStyledDocument(this, cpu, cpu_memory);
 
         highlightPainter = new DefaultHighlighter.DefaultHighlightPainter(Color.YELLOW);
 

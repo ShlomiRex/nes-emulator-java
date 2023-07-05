@@ -1,4 +1,4 @@
-19:45:29.290 [main] DEBUG NES.Cartridge.ROMParser -- NES.Cartridge.iNESHeader {
+20:15:35.179 [main] DEBUG NES.Cartridge.ROMParser -- NES.Cartridge.iNESHeader {
 	prg_rom_size: 1,
 	chr_rom_size: 1,
 	mapper: 0,
@@ -15,8 +15,8 @@
 	prg_ram_not_present: false,
 	bus_conflicts: false
 }
-19:45:29.294 [main] INFO NES.Cartridge.ROMParser -- PRG ROM size: 16KB
-19:45:29.296 [main] INFO NES.Cartridge.ROMParser -- First 16 bytes of PRG ROM: [4C, F5, C5, 60, 78, D8, A2, FF, 9A, AD, 02, 20, 10, FB, AD, 02]
-19:45:29.296 [main] INFO NES.Cartridge.ROMParser -- Last 16 bytes of PRG ROM: [00, 00, 00, 00, 00, 00, 00, 00, 00, 00, AF, C5, 04, C0, F4, C5]
-19:45:29.296 [main] DEBUG NES.Cartridge.ROMParser -- CHR ROM size: 8KB
-19:45:29.298 [main] DEBUG NES.CPU.CPU -- Reset interrupt called
+20:15:35.183 [main] INFO NES.Cartridge.ROMParser -- PRG ROM size: 16KB
+20:15:35.184 [main] INFO NES.Cartridge.ROMParser -- First 16 bytes of PRG ROM: [4C, F5, C5, 60, 78, D8, A2, FF, 9A, AD, 02, 20, 10, FB, AD, 02]
+20:15:35.184 [main] INFO NES.Cartridge.ROMParser -- Last 16 bytes of PRG ROM: [00, 00, 00, 00, 00, 00, 00, 00, 00, 00, AF, C5, 04, C0, F4, C5]
+20:15:35.184 [main] DEBUG NES.Cartridge.ROMParser -- CHR ROM size: 8KB
+20:15:35.185 [main] DEBUG NES.CPU.CPU -- Reset interrupt called

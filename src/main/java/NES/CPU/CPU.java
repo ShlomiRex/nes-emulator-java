@@ -1,6 +1,7 @@
 package NES.CPU;
 
 import NES.CPU.Decoder.Decoder;
+import NES.CPU.Decoder.InstructionInfo;
 import NES.CPU.Registers.CPURegisters;
 import NES.Common;
 import NES.PPU.PPURegisters;
@@ -50,7 +51,7 @@ public class CPU {
         registers.incrementPC(); // Increment PC
 
         // Decode
-        Decoder.InstructionInfo instr_info = Decoder.decode_opcode(opcode);
+        InstructionInfo instr_info = Decoder.decode_opcode(opcode);
         Instructions instr = instr_info.instr;
         AddressingMode addrmode = instr_info.addrmode;
         int bytes = instr_info.bytes;
