@@ -2,6 +2,7 @@ package CPU;
 
 import NES.CPU.CPU;
 import NES.CPU.Decoder.Decoder;
+import NES.CPU.Decoder.InstructionInfo;
 import NES.CPU.Registers.StatusFlags;
 import NES.Common;
 import org.json.JSONArray;
@@ -292,7 +293,7 @@ public class TestCPU {
         HashMap<String, List<Byte>> instr_by_type = new HashMap<>();
 
         for(int opcode = 0; opcode < 255; opcode++) {
-            Decoder.InstructionInfo instr_info = Decoder.instructions_table[opcode & 0xFF];
+            InstructionInfo instr_info = Decoder.instructions_table[opcode & 0xFF];
             if (instr_info == null)
                 continue;
             if (instr_by_type.get(instr_info.instr.toString()) == null) {

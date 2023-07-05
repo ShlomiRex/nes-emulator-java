@@ -223,8 +223,17 @@ public class Decoder {
     public static AssemblyLineRecord decode_assembly_line2(short addr, byte[] cpu_memory) {
         byte opcode = cpu_memory[addr & 0xFFFF];
         InstructionInfo info = decode_opcode(opcode);
+        int bytes = info.bytes;
 
-        return new AssemblyLineRecord(addr, 1, opcode, null, null, info.instr.toString());
+        Byte operand1 = null;
+        Byte operand2 = null;
+
+        if (bytes > 1)
+            operand1 = cpu_memory[(addr + 1) & 0xFFFF];
+        if (bytes > 2)
+            operand2 = cpu_memory[(addr + 2) & 0xFFFF];
+
+        return new AssemblyLineRecord(addr, bytes, opcode, operand1, operand2, info.instr.toString());
     }
 
     //TODO: Remove this function in favor of AssemblyLineRecord result

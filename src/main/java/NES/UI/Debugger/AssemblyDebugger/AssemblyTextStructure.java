@@ -12,14 +12,21 @@ import java.util.HashMap;
  */
 public class AssemblyTextStructure {
 
-    private final HashMap<Short, Object> pcToAssembly;
+    private final HashMap<Short, AssemblyLineRecord> pcToAssembly;
     public AssemblyTextStructure(CPU cpu, byte[] cpu_memory) {
         pcToAssembly = new HashMap<>();
 
-        // Starting PC
+        // Starting PC, we can start from 0 if we want to disassemble all the ROM
         short pc = (short) (cpu.registers.getPC() & 0xFFFF);
 
-        AssemblyLineRecord assemblyLineRecord = Decoder.decode_assembly_line2(pc, cpu_memory);
-        pcToAssembly.put(pc, assemblyLineRecord);
+        for (int i = 0; i < 10; i++) {
+            AssemblyLineRecord assemblyLineRecord = Decoder.decode_assembly_line2(pc, cpu_memory);
+            pcToAssembly.put(pc, assemblyLineRecord);
+            pc += assemblyLineRecord.bytes();
+        }
+    }
+
+    public AssemblyLineRecord getAssemblyLineRecord(short pc) {
+        return pcToAssembly.get(pc);
     }
 }
