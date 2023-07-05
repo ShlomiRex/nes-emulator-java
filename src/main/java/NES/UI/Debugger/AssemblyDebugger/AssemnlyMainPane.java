@@ -13,12 +13,9 @@ import java.awt.*;
 public class AssemnlyMainPane extends JPanel {
 
     public final AssemblyTextPane assembly_text_area;
-    private final byte[] cpu_memory;
-    private final CPURegisters cpuRegisters;
 
     public AssemnlyMainPane(CPU cpu, byte[] cpu_memory) {
-        this.cpu_memory = cpu_memory;
-        this.cpuRegisters = cpu.registers;
+        CPURegisters cpuRegisters = cpu.registers;
 
         setBorder(BorderFactory.createLoweredBevelBorder());
 

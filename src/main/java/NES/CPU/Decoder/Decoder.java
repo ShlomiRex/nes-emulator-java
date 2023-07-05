@@ -223,7 +223,10 @@ public class Decoder {
     public static AssemblyLineRecord decode_assembly_line2(short addr, byte[] cpu_memory) {
         byte opcode = cpu_memory[addr & 0xFFFF];
         InstructionInfo info = decode_opcode(opcode);
-        int bytes = info.bytes;
+
+        int bytes = 1;
+        if (info != null)
+            bytes = info.bytes;
 
         Byte operand1 = null;
         Byte operand2 = null;

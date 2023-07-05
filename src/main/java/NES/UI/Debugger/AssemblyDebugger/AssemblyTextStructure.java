@@ -5,28 +5,32 @@ import NES.CPU.Decoder.AssemblyInfo;
 import NES.CPU.Decoder.Decoder;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Stores the assembly text and the corresponding program counter.
  * This is complex structure meant for fast search and retrieval of assembly text.
  */
 public class AssemblyTextStructure {
-
-    private final HashMap<Short, AssemblyLineRecord> pcToAssembly;
-    public AssemblyTextStructure(CPU cpu, byte[] cpu_memory) {
+    private final HashMap<Short, AssemblyLineTextStructure> pcToAssembly;
+    public AssemblyTextStructure() {
         pcToAssembly = new HashMap<>();
-
-        // Starting PC, we can start from 0 if we want to disassemble all the ROM
-        short pc = (short) (cpu.registers.getPC() & 0xFFFF);
-
-        for (int i = 0; i < 10; i++) {
-            AssemblyLineRecord assemblyLineRecord = Decoder.decode_assembly_line2(pc, cpu_memory);
-            pcToAssembly.put(pc, assemblyLineRecord);
-            pc += assemblyLineRecord.bytes();
-        }
     }
 
-    public AssemblyLineRecord getAssemblyLineRecord(short pc) {
+    /**
+     *
+     * @param asm_line_num The line number in the assembly text pane
+     * @param addr The address location of the instruction
+     * @param document_offset The offset in the document that points to the start of the assembly line
+     */
+    public void add_assembly_line(int asm_line_num, short addr, int document_offset, int line_length) {
+        pcToAssembly.put(addr, new AssemblyLineTextStructure(asm_line_num, document_offset, line_length));
+    }
+
+    public AssemblyLineTextStructure get_assembly_line(short pc) {
         return pcToAssembly.get(pc);
+    }
+
+    public record AssemblyLineTextStructure(int asm_line_num, int document_offset, int line_length) {
     }
 }
