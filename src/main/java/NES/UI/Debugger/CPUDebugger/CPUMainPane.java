@@ -14,7 +14,7 @@ public class CPUMainPane extends JPanel {
         setBorder(BorderFactory.createTitledBorder("CPU"));
 
         JPanel reg_pane = new RegistersPanel(cpu.registers);
-        JPanel stack_pane = new StackPanel();
+        JPanel stack_pane = new StackPanel(cpu);
         button_pane = new CPUButtonPane(cpu, this, assembly_text_pane);
         JPanel cycles_pane = new CyclesPane(cpu);
         JPanel num_instr_pane = new NumInstructionsPane(cpu);

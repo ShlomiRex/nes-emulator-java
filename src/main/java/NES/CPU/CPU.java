@@ -82,6 +82,16 @@ public class CPU {
 //        logger.debug("End of tick");
     }
 
+    /**
+     * Used only in debugging or testing or GUI.
+     * Do not use in any other case.
+     * @param addr
+     * @return
+     */
+    public byte get_memory(short addr) {
+        return memory[addr & 0xFFFF];
+    }
+
     private byte read_memory(short addr) {
         //TODO: Add mapping here. For now I only support mapper 0.
 
