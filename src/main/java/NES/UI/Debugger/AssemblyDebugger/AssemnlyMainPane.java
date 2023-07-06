@@ -21,15 +21,17 @@ public class AssemnlyMainPane extends JPanel {
         short starting_addr = (short) 0xC004;
 
         // Init assembly text area (left)
+        int width = 300;
+        int height = 320;
         asm_text_pane = new AssemblyTextPane(starting_addr, cpu_memory, 20);
 
         JPanel noWrapPanel = new JPanel( new BorderLayout() );
         noWrapPanel.add( asm_text_pane );
 
         JScrollPane scroll_pane = new JScrollPane(noWrapPanel);
-        scroll_pane.setMinimumSize(new Dimension(200, 200));
-        scroll_pane.setPreferredSize(new Dimension(200, 200));
-        scroll_pane.setMaximumSize(new Dimension(200, 200));
+        scroll_pane.setMinimumSize(new Dimension(width, height));
+        scroll_pane.setPreferredSize(new Dimension(width, height));
+        scroll_pane.setMaximumSize(new Dimension(width, height));
 
         // Initialize scroll bar (right)
         JScrollBar scrollbar = new JScrollBar(JScrollBar.VERTICAL);
@@ -39,6 +41,7 @@ public class AssemnlyMainPane extends JPanel {
         scrollbar.setUnitIncrement(1); // When clicking the arrows
         scrollbar.setBlockIncrement(0xF); // When clicking the bar / track
         scrollbar.setValue(starting_addr & 0xFFFF);
+        scrollbar.setPreferredSize(new Dimension(20, height));
 
         scrollbar.addAdjustmentListener(e -> {
             logger.info("Scrollbar value:" + Common.shortToHex((short) e.getValue(), true));
