@@ -18,7 +18,7 @@ public class AssemblyStyledDocument extends DefaultStyledDocument {
 
     private final AssemblyTextStructure assemblyTextStructure;
 
-    private SimpleAttributeSet attr_black, attr_blue, attr_gray, attr_green, attr_magenta;
+    private static SimpleAttributeSet attr_black, attr_blue, attr_gray, attr_green, attr_magenta;
 
     /**
      * Internal counter for keeping track of PC when adding assembly lines.
@@ -34,6 +34,11 @@ public class AssemblyStyledDocument extends DefaultStyledDocument {
 
     private boolean use_symbols;
 
+    // Initialize style once. For each new document, we use the same style over and over again.
+    static {
+        initialize_style();
+    }
+
     /**
      *
      * @param starting_addr The starting address of the assembly text.
@@ -44,13 +49,11 @@ public class AssemblyStyledDocument extends DefaultStyledDocument {
         this.cpu_memory = cpu_memory;
         this.use_symbols = use_symbols;
 
-        initialize_style();
-
         // Initialized assembly text structure
         assemblyTextStructure = new AssemblyTextStructure();
 
         pc = starting_addr;
-        for (int asm_line_num = 0; asm_line_num < lines_to_display; asm_line_num++) {
+        for (int asm_line_num = 0; asm_line_num < lines_to_display && (pc & 0xFFFF) < 0xFFFF; asm_line_num++) {
             short old_pc = pc;
             int old_offset = offset;
 
@@ -69,7 +72,9 @@ public class AssemblyStyledDocument extends DefaultStyledDocument {
         }
     }
 
-    private void initialize_style() {
+    private static void initialize_style() {
+        if (attr_black != null)
+            return;
         attr_black = new SimpleAttributeSet();
         attr_gray = new SimpleAttributeSet();
         attr_blue = new SimpleAttributeSet();
