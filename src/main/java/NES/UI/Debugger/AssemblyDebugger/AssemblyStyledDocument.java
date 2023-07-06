@@ -49,14 +49,10 @@ public class AssemblyStyledDocument extends DefaultStyledDocument {
         // Initialized assembly text structure
         assemblyTextStructure = new AssemblyTextStructure();
 
-        // Starting PC - we can start from 0 if we want
-        //pc = (short) (cpu.registers.getPC() & 0xFFFF);
         pc = starting_addr;
-        int asm_line_num = 0;
-        do {
+        for (int asm_line_num = 0; asm_line_num < lines_to_display; asm_line_num++) {
             short old_pc = pc;
             int old_offset = offset;
-            asm_line_num += 1;
 
             // This will increment pc and offset
             try {
@@ -70,9 +66,7 @@ public class AssemblyStyledDocument extends DefaultStyledDocument {
 
             // Add document related information to the assembly text structure
             assemblyTextStructure.add_assembly_line(asm_line_num, old_pc, old_offset, line_length);
-        } while (asm_line_num < lines_to_display);
-
-        logger.info("Assembly lines: " + asm_line_num);
+        }
     }
 
     private void initialize_style() {

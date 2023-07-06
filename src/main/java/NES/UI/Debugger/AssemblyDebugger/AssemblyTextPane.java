@@ -17,19 +17,26 @@ public class AssemblyTextPane extends JTextPane {
     private final Highlighter highlighter;
     private AssemblyStyledDocument assemblyDocument;
     private final byte[] cpu_memory;
+    private final int lines_to_display;
 
-    public AssemblyTextPane(byte[] cpu_memory) {
+    public AssemblyTextPane(short starting_addr, byte[] cpu_memory, int lines_to_display) {
         this.cpu_memory = cpu_memory;
+        this.lines_to_display = lines_to_display;
+
         this.highlighter = getHighlighter();
         this.highlightPainter = new DefaultHighlighter.DefaultHighlightPainter(Color.YELLOW);
 
-        generate_new_document((short) 0, 30);
+        generate_new_document(starting_addr);
 
         setEditable(false);
         setFont(new Font("monospaced", Font.PLAIN, 12));
     }
 
-    private void generate_new_document(short starting_addr, int lines_to_display) {
+    public AssemblyTextPane(byte[] cpu_memory, int lines_to_display) {
+        this((short) 0, cpu_memory, lines_to_display);
+    }
+
+    public void generate_new_document(short starting_addr) {
         this.assemblyDocument = new AssemblyStyledDocument(starting_addr, lines_to_display, cpu_memory, true);
         setDocument(assemblyDocument);
     }
@@ -54,14 +61,5 @@ public class AssemblyTextPane extends JTextPane {
 //        }
 
 
-    }
-
-    /**
-     * Called when the scrollbar is moved.
-     * Will set the assembly text to the address specified by the scrollbar.
-     * @param addr
-     */
-    public void jump_to_view(short addr) {
-        generate_new_document(addr, 10);
     }
 }

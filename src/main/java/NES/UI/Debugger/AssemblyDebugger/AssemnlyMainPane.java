@@ -1,6 +1,7 @@
 package NES.UI.Debugger.AssemblyDebugger;
 
 import NES.CPU.CPU;
+import NES.Common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,19 +13,44 @@ public class AssemnlyMainPane extends JPanel {
 
 
     private final Logger logger = LoggerFactory.getLogger(AssemnlyMainPane.class);
-    public final AssemblyTextPane assembly_text_area;
+    public final AssemblyTextPane asm_text_pane;
 
-    public AssemnlyMainPane(CPU cpu, byte[] cpu_memory) {
+    public AssemnlyMainPane(byte[] cpu_memory) {
         setBorder(BorderFactory.createLoweredBevelBorder());
-        assembly_text_area = new AssemblyTextPane(cpu_memory);
 
+        short starting_addr = (short) 0xC004;
 
-        AssemblyScrollPane scrollPane = new AssemblyScrollPane(assembly_text_area);
+        // Init assembly text area (left)
+        asm_text_pane = new AssemblyTextPane(starting_addr, cpu_memory, 20);
 
-        add(scrollPane);
+        JPanel noWrapPanel = new JPanel( new BorderLayout() );
+        noWrapPanel.add( asm_text_pane );
+
+        JScrollPane scroll_pane = new JScrollPane(noWrapPanel);
+        scroll_pane.setMinimumSize(new Dimension(200, 200));
+        scroll_pane.setPreferredSize(new Dimension(200, 200));
+        scroll_pane.setMaximumSize(new Dimension(200, 200));
+
+        // Initialize scroll bar (right)
+        JScrollBar scrollbar = new JScrollBar(JScrollBar.VERTICAL);
+        // Can select address 0x0000 - 0xFFFF
+        scrollbar.setMinimum(0);
+        scrollbar.setMaximum(0xFFFF);
+        scrollbar.setUnitIncrement(1); // When clicking the arrows
+        scrollbar.setBlockIncrement(0xF); // When clicking the bar / track
+        scrollbar.setValue(starting_addr & 0xFFFF);
+
+        scrollbar.addAdjustmentListener(e -> {
+            logger.info("Scrollbar value:" + Common.shortToHex((short) e.getValue(), true));
+            short addr = (short) e.getValue();
+            asm_text_pane.generate_new_document(addr);
+        });
+
+        add(scroll_pane, BorderLayout.CENTER);
+        add(scrollbar, BorderLayout.LINE_END);
 
         // Highlight first instruction
-        assembly_text_area.ready_next_instruction();
+        asm_text_pane.ready_next_instruction();
     }
 
 //    private void initializeAssemblyText() throws BadLocationException {
@@ -72,13 +98,13 @@ public class AssemnlyMainPane extends JPanel {
 //    }
 
     private void append(String str, SimpleAttributeSet set) throws BadLocationException {
-        Document doc = assembly_text_area.getStyledDocument();
+        Document doc = asm_text_pane.getStyledDocument();
         doc.insertString(doc.getLength(), str, set);
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        assembly_text_area.ready_next_instruction();
+        asm_text_pane.ready_next_instruction();
     }
 }
