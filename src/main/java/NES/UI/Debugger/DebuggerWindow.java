@@ -11,7 +11,6 @@ import java.awt.*;
 public class DebuggerWindow extends JFrame {
 
     public DebuggerWindow(NES nes) {
-
         setTitle("Java NES Emulator - Debugger");
         setSize(1600, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

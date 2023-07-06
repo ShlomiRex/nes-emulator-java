@@ -49,11 +49,13 @@ public class AssemblyStyledDocument {
 
         // Starting PC - we can start from 0 if we want
         //pc = (short) (cpu.registers.getPC() & 0xFFFF);
-        pc = (short) 0xC004;
-
-        for (int asm_line_num = 0; asm_line_num < 350; asm_line_num++) {
+        short starting_pc = (short) 0x8000;
+        pc = starting_pc;
+        int asm_line_num = 0;
+        do {
             short old_pc = pc;
             int old_offset = offset;
+            asm_line_num += 1;
 
             // This will increment pc and offset
             try {
@@ -67,7 +69,7 @@ public class AssemblyStyledDocument {
 
             // Add document related information to the assembly text structure
             assemblyTextStructure.add_assembly_line(asm_line_num, old_pc, old_offset, line_length);
-        }
+        } while ((pc & 0xFFFF) < 0xC000);
     }
 
     private void initialize_style() {
@@ -212,6 +214,8 @@ public class AssemblyStyledDocument {
 
         switch(addrmode) {
             case IMPLIED:
+            case ACCUMULATOR:
+                // do nothing
                 break;
             case IMMEDIATE:
                 insert_string("#", attr_blue);
@@ -222,90 +226,51 @@ public class AssemblyStyledDocument {
                 }
                 break;
             case ABSOLUTE:
-                if (bytes == 3) {
-                    if (use_symbols && op1_and_op2_addr_symbol != null) {
-                        insert_string(op1_and_op2_addr_symbol, attr_blue);
-                    } else {
-                        insert_string("$" + op1_and_op2_addr_str, attr_green);
-                    }
+                if (use_symbols && op1_and_op2_addr_symbol != null) {
+                    insert_string(op1_and_op2_addr_symbol, attr_blue);
                 } else {
-                    throw new RuntimeException("Absolute requires 3 bytes");
+                    insert_string("$" + op1_and_op2_addr_str, attr_green);
                 }
                 break;
             case RELATIVE:
-                if (bytes == 2) {
-                    // Calculate relative address: PC + signed op1
-                    short relative_addr = (short) (instr_addr + op1 + 2); // Last +2 is because of instruction 2 bytes
-                    // TODO: Not using symbols here since its branch operation, should not be an address to registers
-                    insert_string("$" + Common.shortToHex(relative_addr, false), attr_green);
-                } else {
-                    throw new RuntimeException("Relative requires 2 bytes");
-                }
+                // Calculate relative address: PC + signed op1
+                short relative_addr = (short) (instr_addr + op1 + 2); // Last +2 is because of instruction 2 bytes
+                // TODO: Not using symbols here since its branch operation, should not be an address to registers
+                insert_string("$" + Common.shortToHex(relative_addr, false), attr_green);
                 break;
             case ABSOLUTE_X:
-                if (bytes == 3) {
-                    insert_string("$"+op1_and_op2_addr_str, attr_green);
-                    insert_string(",X", attr_blue);
-                } else {
-                    throw new RuntimeException("Absolute X requires 3 bytes");
-                }
+                insert_string("$"+op1_and_op2_addr_str, attr_green);
+                insert_string(",X", attr_blue);
                 break;
             case ZEROPAGE:
-                if (bytes == 2) {
-                    insert_string("$"+operand1_str, attr_green);
-                } else {
-                    throw new RuntimeException("Zeropage requires 2 bytes");
-                }
-                break;
-            case ACCUMULATOR:
-                if (bytes == 1) {
-                    // do nothing
-                } else {
-                    throw new RuntimeException("Accumulator requires 1 byte");
-                }
+                insert_string("$"+operand1_str, attr_green);
                 break;
             case ABSOLUTE_INDIRECT:
-                if (bytes == 3) {
-                    insert_string("(", attr_blue);
-                    insert_string("$"+op1_and_op2_addr_str, attr_green);
-                    insert_string(")", attr_blue);
-                } else {
-                    throw new RuntimeException("Absolute indirect requires 3 bytes");
-                }
+                insert_string("(", attr_blue);
+                insert_string("$"+op1_and_op2_addr_str, attr_green);
+                insert_string(")", attr_blue);
                 break;
             case INDIRECT_Y:
-                if (bytes == 2) {
-                    insert_string("(", attr_blue);
-                    insert_string("$"+operand1_str, attr_green);
-                    insert_string("),Y", attr_blue);
-                } else {
-                    throw new RuntimeException("Indirect Y requires 2 bytes");
-                }
+                insert_string("(", attr_blue);
+                insert_string("$"+operand1_str, attr_green);
+                insert_string("),Y", attr_blue);
                 break;
             case INDIRECT_X:
-                if (bytes == 2) {
-                    insert_string("(", attr_blue);
-                    insert_string("$"+operand1_str, attr_green);
-                    insert_string(",X)", attr_blue);
-                } else {
-                    throw new RuntimeException("Indirect X requires 2 bytes");
-                }
+                insert_string("(", attr_blue);
+                insert_string("$"+operand1_str, attr_green);
+                insert_string(",X)", attr_blue);
                 break;
             case ZEROPAGE_X:
-                if (bytes == 2) {
-                    insert_string("$"+operand1_str, attr_green);
-                    insert_string(",X", attr_blue);
-                } else {
-                    throw new RuntimeException("Zeropage X requires 2 bytes");
-                }
+                insert_string("$"+operand1_str, attr_green);
+                insert_string(",X", attr_blue);
                 break;
             case ABSOLUTE_Y:
-                if (bytes == 3) {
-                    insert_string("$"+op1_and_op2_addr_str, attr_green);
-                    insert_string(",Y", attr_blue);
-                } else {
-                    throw new RuntimeException("Absolute Y requires 3 bytes");
-                }
+                insert_string("$"+op1_and_op2_addr_str, attr_green);
+                insert_string(",Y", attr_blue);
+                break;
+            case ZEROPAGE_Y:
+                insert_string("$"+operand1_str, attr_green);
+                insert_string(",Y", attr_blue);
                 break;
             default:
                 throw new RuntimeException("Not implemented yet");

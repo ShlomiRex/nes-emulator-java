@@ -32,19 +32,22 @@ public class AssemblyTextPane extends JTextPane {
     // Call when CPU finishes executing instruction and is ready for next instruction.
     // Here we move the highlighter to the next instruction.
     public void ready_next_instruction() {
-        highlighter.removeAllHighlights();
+        //TODO: Uncomment
+//        highlighter.removeAllHighlights();
+//
+//        // Convert address to assembly line, and get starting offset of that line and end offset.
+//        short pc = cpuRegisters.getPC();
+//        AssemblyTextStructure.AssemblyLineTextStructure structure
+//                = assemblyDocument.get_assembly_line(pc);
+//        int start_offset = structure.document_offset();
+//        int end_offset = start_offset + structure.line_length();
+//
+//        try {
+//            highlighter.addHighlight(start_offset, end_offset, highlightPainter);
+//        } catch (BadLocationException e) {
+//            throw new RuntimeException(e);
+//        }
 
-        // Convert address to assembly line, and get starting offset of that line and end offset.
-        short pc = cpuRegisters.getPC();
-        AssemblyTextStructure.AssemblyLineTextStructure structure
-                = assemblyDocument.get_assembly_line(pc);
-        int start_offset = structure.document_offset();
-        int end_offset = start_offset + structure.line_length();
 
-        try {
-            highlighter.addHighlight(start_offset, end_offset, highlightPainter);
-        } catch (BadLocationException e) {
-            throw new RuntimeException(e);
-        }
     }
 }
