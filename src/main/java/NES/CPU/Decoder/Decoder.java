@@ -194,6 +194,7 @@ public class Decoder {
         abc[0xE4] = new InstructionInfo(Instructions.CPX, AddressingMode.ZEROPAGE, 2, 3, OopsCycle.NONE);
         abc[0xE5] = new InstructionInfo(Instructions.SBC, AddressingMode.ZEROPAGE, 2, 3, OopsCycle.NONE);
         abc[0xE6] = new InstructionInfo(Instructions.INC, AddressingMode.ZEROPAGE, 2, 5, OopsCycle.NONE);
+        abc[0xE7] = new InstructionInfo(Instructions.ISC, AddressingMode.ZEROPAGE, 2, 5, OopsCycle.NONE, true); // illegal
         abc[0xE8] = new InstructionInfo(Instructions.INX, AddressingMode.IMPLIED, 1, 2, OopsCycle.NONE);
         abc[0xE9] = new InstructionInfo(Instructions.SBC, AddressingMode.IMMEDIATE, 2, 2, OopsCycle.NONE);
         abc[0xEA] = new InstructionInfo(Instructions.NOP, AddressingMode.IMPLIED, 1, 2, OopsCycle.NONE);

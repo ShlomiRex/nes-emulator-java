@@ -2,17 +2,19 @@ package NES.UI.Debugger.AssemblyDebugger;
 
 import NES.CPU.AddressingMode;
 import NES.CPU.Decoder.Decoder;
+import NES.CPU.Decoder.DecoderException;
 import NES.CPU.Decoder.InstructionInfo;
 import NES.Common;
 
 public class AssemblyDecoder {
-    public static AssemblyLineRecord decode_assembly_line2(short addr, byte[] cpu_memory) {
+    public static AssemblyLineRecord decode_assembly_line2(short addr, byte[] cpu_memory) throws DecoderException {
         byte opcode = cpu_memory[addr & 0xFFFF];
         InstructionInfo info = Decoder.decode_opcode(opcode);
 
-        int bytes = 1;
-        if (info != null)
-            bytes = info.bytes;
+        if (info == null)
+            throw new DecoderException(opcode);
+
+        int bytes = info.bytes;
 
         Byte operand1 = null;
         Byte operand2 = null;

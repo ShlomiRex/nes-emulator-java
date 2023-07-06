@@ -3,6 +3,7 @@ package NES.UI.Debugger.AssemblyDebugger;
 import NES.CPU.AddressingMode;
 import NES.CPU.Decoder.AssemblyInfo;
 import NES.CPU.Decoder.Decoder;
+import NES.CPU.Decoder.DecoderException;
 import NES.Common;
 
 import javax.swing.*;
@@ -50,7 +51,7 @@ public class AssemblyStyledDocument {
         //pc = (short) (cpu.registers.getPC() & 0xFFFF);
         pc = (short) 0xC004;
 
-        for (int asm_line_num = 0; asm_line_num < 150; asm_line_num++) {
+        for (int asm_line_num = 0; asm_line_num < 350; asm_line_num++) {
             short old_pc = pc;
             int old_offset = offset;
 
@@ -94,11 +95,20 @@ public class AssemblyStyledDocument {
      * @return - new offset in the text pane
      */
     private void append_assembly_line() throws BadLocationException {
-        AssemblyLineRecord record = AssemblyDecoder.decode_assembly_line2(pc, cpu_memory);
-        if (!record.is_instr_illegal()) {
-            insert_addr(record);
+        boolean is_instr_illegal;
+        AssemblyLineRecord record = null;
+        try {
+            record = AssemblyDecoder.decode_assembly_line2(pc, cpu_memory);
+            is_instr_illegal = record.is_instr_illegal();
+        } catch (DecoderException e) {
+            is_instr_illegal = true;
+        }
+
+        if (!is_instr_illegal) {
+            // Legal instruction
+            insert_addr();
             insert_string("\t");
-            insert_instr_bytes(record);
+            insert_instr_bytes(record.bytes(), record.opcode(), record.operand1(), record.operand2());
             insert_string("\t");
             insert_instr(record);
             insert_string(" ");
@@ -106,42 +116,40 @@ public class AssemblyStyledDocument {
 
             pc += record.bytes();
         } else {
-            // Illegal instruction
-            insert_addr(record);
+            // If illegal instruction or we could not find the instruction in the table.
+            // I don't cover all of the instructions. Those who I don't cover are 100% illegal.
+            insert_addr();
             insert_string("\t");
-            insert_instr_bytes(record);
+            insert_instr_bytes(1, cpu_memory[pc & 0xFFFF], null, null);
             insert_string("\t");
             insert_string("UNDEFINED", attr_blue);
 
             pc += 1;
         }
+
+
+
         insert_string("\n");
-
-
     }
 
-    private void insert_addr(AssemblyLineRecord record) throws BadLocationException {
-        styledDocument.insertString(offset, Common.shortToHex(record.addr(), true), attr_black);
+    private void insert_addr() throws BadLocationException {
+        styledDocument.insertString(offset, Common.shortToHex(pc, true), attr_black);
         offset += 6; // '0xFFFF' = 6 characters
     }
 
-    private void insert_instr_bytes(AssemblyLineRecord record) throws BadLocationException {
-        styledDocument.insertString(offset, Common.byteToHex(record.opcode(), false), attr_gray);
+    private void insert_instr_bytes(int bytes, byte opcode, Byte oper1, Byte oper2) throws BadLocationException {
+        styledDocument.insertString(offset, Common.byteToHex(opcode, false), attr_gray);
         offset += 2;
 
-        if (!record.is_instr_illegal()) {
-            if (record.bytes() > 1) {
-                insert_string(" ");
-                styledDocument.insertString(offset, Common.byteToHex(record.operand1(), false), attr_gray);
-                offset += 2;
-            }
-            if (record.bytes() > 2) {
-                insert_string(" ");
-                styledDocument.insertString(offset, Common.byteToHex(record.operand2(), false), attr_gray);
-                offset += 2;
-            }
-        } else {
-            // Illegal instruction - do nothing
+        if (bytes > 1) {
+            insert_string(" ");
+            styledDocument.insertString(offset, Common.byteToHex(oper1, false), attr_gray);
+            offset += 2;
+        }
+        if (bytes > 2) {
+            insert_string(" ");
+            styledDocument.insertString(offset, Common.byteToHex(oper2, false), attr_gray);
+            offset += 2;
         }
     }
 
@@ -152,8 +160,7 @@ public class AssemblyStyledDocument {
 
         // If RTS
         if (record.opcode() == 0x60) {
-            styledDocument.insertString(offset, " -------", attr_magenta);
-            offset += 8;
+            insert_string(" -------------", attr_magenta);
         }
     }
 
@@ -200,7 +207,7 @@ public class AssemblyStyledDocument {
         boolean is_illegal = record.is_instr_illegal();
 
         if (is_illegal) {
-            throw new RuntimeException("TODO");
+            throw new RuntimeException("Did not expect illegal instruction here");
         }
 
         switch(addrmode) {
@@ -282,6 +289,22 @@ public class AssemblyStyledDocument {
                     insert_string(",X)", attr_blue);
                 } else {
                     throw new RuntimeException("Indirect X requires 2 bytes");
+                }
+                break;
+            case ZEROPAGE_X:
+                if (bytes == 2) {
+                    insert_string("$"+operand1_str, attr_green);
+                    insert_string(",X", attr_blue);
+                } else {
+                    throw new RuntimeException("Zeropage X requires 2 bytes");
+                }
+                break;
+            case ABSOLUTE_Y:
+                if (bytes == 3) {
+                    insert_string("$"+op1_and_op2_addr_str, attr_green);
+                    insert_string(",Y", attr_blue);
+                } else {
+                    throw new RuntimeException("Absolute Y requires 3 bytes");
                 }
                 break;
             default:
