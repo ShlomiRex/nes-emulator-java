@@ -44,7 +44,6 @@ public class AssemnlyMainPane extends JPanel {
         scrollbar.setPreferredSize(new Dimension(20, height - 20));
 
         scrollbar.addAdjustmentListener(e -> {
-            logger.info("Scrollbar value:" + Common.shortToHex((short) e.getValue(), true));
             short addr = (short) e.getValue();
             asm_text_pane.generate_new_document(addr);
         });

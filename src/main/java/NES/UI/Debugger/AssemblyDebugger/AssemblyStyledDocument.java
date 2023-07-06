@@ -53,7 +53,9 @@ public class AssemblyStyledDocument extends DefaultStyledDocument {
         assemblyTextStructure = new AssemblyTextStructure();
 
         pc = starting_addr;
-        for (int asm_line_num = 0; asm_line_num < lines_to_display && (pc & 0xFFFF) < 0xFFFF; asm_line_num++) {
+        for (int asm_line_num = 0;
+             (asm_line_num < lines_to_display) && (pc & 0xFFFF) < 0xFFFF;
+             asm_line_num++) {
             short old_pc = pc;
             int old_offset = offset;
 
@@ -70,6 +72,9 @@ public class AssemblyStyledDocument extends DefaultStyledDocument {
             // Add document related information to the assembly text structure
             assemblyTextStructure.add_assembly_line(asm_line_num, old_pc, old_offset, line_length);
         }
+    }
+
+    private void generate_document() {
     }
 
     private static void initialize_style() {
@@ -178,14 +183,12 @@ public class AssemblyStyledDocument extends DefaultStyledDocument {
     private void insert_operands(AssemblyLineRecord record) throws BadLocationException {
         AddressingMode addrmode = record.addressingMode();
         int bytes = record.bytes();
-
         Byte op1 = record.operand1();
         Byte op2 = record.operand2();
-
         short instr_addr = record.addr();
+        boolean is_illegal = record.is_instr_illegal();
 
         String operand1_str = "";
-        String operand2_str = "";
 
         // If and only if both operand 1 and operand 2 are not null this variable is initialized
         short op1_and_op2_addr = -1;
@@ -195,18 +198,15 @@ public class AssemblyStyledDocument extends DefaultStyledDocument {
         String op1_and_op2_addr_str = "";
 
         if (bytes > 1) {
-            operand1_str = Common.byteToHex(record.operand1(), false);
+            operand1_str = Common.byteToHex(op1, false);
         }
         if (bytes > 2) {
-            operand2_str = Common.byteToHex(record.operand2(), false);
-            op1_and_op2_addr = Common.makeShort(record.operand1(), record.operand2());
+            op1_and_op2_addr = Common.makeShort(op1, op2);
             op1_and_op2_addr_str = Common.shortToHex(op1_and_op2_addr, false);
 
             if (use_symbols)
                 op1_and_op2_addr_symbol = AssemblyDecoder.convert_addr_to_symbol(op1_and_op2_addr);
         }
-
-        boolean is_illegal = record.is_instr_illegal();
 
         if (is_illegal) {
             throw new RuntimeException("Did not expect illegal instruction here");
@@ -277,7 +277,11 @@ public class AssemblyStyledDocument extends DefaultStyledDocument {
         }
     }
 
-    public AssemblyTextStructure.AssemblyLineTextStructure get_assembly_line(short pc) {
-        return assemblyTextStructure.get_assembly_line(pc);
+    public void scroll(boolean scroll_down) {
+        if (scroll_down) {
+
+        } else {
+
+        }
     }
 }

@@ -2,6 +2,9 @@ package NES.UI.Debugger.AssemblyDebugger;
 
 import NES.CPU.CPU;
 import NES.CPU.Registers.CPURegisters;
+import NES.Common;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
@@ -12,6 +15,7 @@ import java.awt.*;
 
 public class AssemblyTextPane extends JTextPane {
 
+    private final Logger logger = LoggerFactory.getLogger(AssemblyTextPane.class);
     private final Highlighter.HighlightPainter highlightPainter;
 
     private final Highlighter highlighter;
@@ -30,10 +34,14 @@ public class AssemblyTextPane extends JTextPane {
 
         setEditable(false);
         setFont(new Font("monospaced", Font.PLAIN, 12));
-    }
 
-    public AssemblyTextPane(byte[] cpu_memory, int lines_to_display) {
-        this((short) 0, cpu_memory, lines_to_display);
+        addMouseWheelListener(e -> {
+            int notches = e.getWheelRotation();
+            int scrollAmount = e.getScrollAmount();
+            // notches negative = Scroll down - go up!
+            // notches positive = Scroll up - go down!
+            assemblyDocument.scroll(notches < 0);
+        });
     }
 
     public void generate_new_document(short starting_addr) {
