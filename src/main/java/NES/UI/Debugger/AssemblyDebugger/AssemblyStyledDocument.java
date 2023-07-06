@@ -5,14 +5,17 @@ import NES.CPU.Decoder.AssemblyInfo;
 import NES.CPU.Decoder.Decoder;
 import NES.CPU.Decoder.DecoderException;
 import NES.Common;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;
 
-public class AssemblyStyledDocument {
+public class AssemblyStyledDocument extends DefaultStyledDocument {
 
-    private final StyledDocument styledDocument;
+    private final Logger logger = LoggerFactory.getLogger(AssemblyStyledDocument.class);
+
     private final AssemblyTextStructure assemblyTextStructure;
 
     private SimpleAttributeSet attr_black, attr_blue, attr_gray, attr_green, attr_magenta;
@@ -33,13 +36,13 @@ public class AssemblyStyledDocument {
 
     /**
      *
-     * @param assembly_text_pane
      * @param cpu_memory
      * @param use_symbols If true, then the assembly text will use symbols instead of addresses.
      */
-    public AssemblyStyledDocument(JTextPane assembly_text_pane, byte[] cpu_memory, boolean use_symbols) {
+    public AssemblyStyledDocument(byte[] cpu_memory, boolean use_symbols) {
+        // TODO: Don't get styleDocument from the text pane, but create a new one, and textPane should use our styleDocument
+
         this.cpu_memory = cpu_memory;
-        this.styledDocument = assembly_text_pane.getStyledDocument();
         this.use_symbols = use_symbols;
 
         initialize_style();
@@ -69,7 +72,9 @@ public class AssemblyStyledDocument {
 
             // Add document related information to the assembly text structure
             assemblyTextStructure.add_assembly_line(asm_line_num, old_pc, old_offset, line_length);
-        } while ((pc & 0xFFFF) < 0xC000);
+        } while ((pc & 0xFFFF) < 0x9000);
+
+        logger.info("Assembly lines: " + asm_line_num);
     }
 
     private void initialize_style() {
@@ -135,29 +140,29 @@ public class AssemblyStyledDocument {
     }
 
     private void insert_addr() throws BadLocationException {
-        styledDocument.insertString(offset, Common.shortToHex(pc, true), attr_black);
+        insertString(offset, Common.shortToHex(pc, true), attr_black);
         offset += 6; // '0xFFFF' = 6 characters
     }
 
     private void insert_instr_bytes(int bytes, byte opcode, Byte oper1, Byte oper2) throws BadLocationException {
-        styledDocument.insertString(offset, Common.byteToHex(opcode, false), attr_gray);
+        insertString(offset, Common.byteToHex(opcode, false), attr_gray);
         offset += 2;
 
         if (bytes > 1) {
             insert_string(" ");
-            styledDocument.insertString(offset, Common.byteToHex(oper1, false), attr_gray);
+            insertString(offset, Common.byteToHex(oper1, false), attr_gray);
             offset += 2;
         }
         if (bytes > 2) {
             insert_string(" ");
-            styledDocument.insertString(offset, Common.byteToHex(oper2, false), attr_gray);
+            insertString(offset, Common.byteToHex(oper2, false), attr_gray);
             offset += 2;
         }
     }
 
     private void insert_instr(AssemblyLineRecord record) throws BadLocationException {
         String str = record.instr_name();
-        styledDocument.insertString(offset, str, attr_blue);
+        insertString(offset, str, attr_blue);
         offset += str.length();
 
         // If RTS
@@ -171,7 +176,7 @@ public class AssemblyStyledDocument {
     }
 
     private void insert_string(String str, AttributeSet attr) throws BadLocationException {
-        styledDocument.insertString(offset, str, attr);
+        insertString(offset, str, attr);
         offset += str.length();
     }
 
