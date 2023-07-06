@@ -25,7 +25,7 @@ public class AssemblyDecoder {
             operand2 = cpu_memory[(addr + 2) & 0xFFFF];
         }
 
-        return new AssemblyLineRecord(addr, bytes, opcode, operand1, operand2, info.instr.toString(), info.addrmode);
+        return new AssemblyLineRecord(addr, bytes, opcode, operand1, operand2, info.instr.toString(), info.addrmode, info.is_illegal);
     }
 
     public static String convert_addrmode_and_operands_to_text(AddressingMode addrmode, byte operand1, short pc, boolean use_symbols) {

@@ -10,6 +10,8 @@ import NES.CPU.AddressingMode;
  * @param operand1 Optional (nullable): The first operand of the instruction.
  * @param operand2 Optional (nullable): The second operand of the instruction.
  * @param instr_name Must (Not nullable): The name of the instruction (SEI, LDA, etc.)
+ * @param addressingMode The addressing mode of the instruction.
+ * @param is_instr_illegal Whether the instruction is illegal or not.
  */
 public record AssemblyLineRecord(short addr,
                                  int bytes,
@@ -17,5 +19,6 @@ public record AssemblyLineRecord(short addr,
                                  Byte operand1,
                                  Byte operand2,
                                  String instr_name,
-                                 AddressingMode addressingMode) {
+                                 AddressingMode addressingMode,
+                                 boolean is_instr_illegal) {
 }

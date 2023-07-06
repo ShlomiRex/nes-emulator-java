@@ -50,12 +50,16 @@ public class AssemblyStyledDocument {
         //pc = (short) (cpu.registers.getPC() & 0xFFFF);
         pc = (short) 0xC004;
 
-        for (int asm_line_num = 0; asm_line_num < 70; asm_line_num++) {
+        for (int asm_line_num = 0; asm_line_num < 128; asm_line_num++) {
             short old_pc = pc;
             int old_offset = offset;
 
             // This will increment pc and offset
-            append_assembly_line();
+            try {
+                append_assembly_line();
+            } catch (BadLocationException e) {
+                throw new RuntimeException(e);
+            }
 
             // Calculate line length by subtracting the old offset from the new offset
             int line_length = offset - old_offset;
@@ -63,8 +67,6 @@ public class AssemblyStyledDocument {
             // Add document related information to the assembly text structure
             assemblyTextStructure.add_assembly_line(asm_line_num, old_pc, old_offset, line_length);
         }
-        int a = 0;
-
     }
 
     private void initialize_style() {
@@ -91,9 +93,9 @@ public class AssemblyStyledDocument {
      * Appends the assembly line to the text pane.
      * @return - new offset in the text pane
      */
-    private void append_assembly_line() {
+    private void append_assembly_line() throws BadLocationException {
         AssemblyLineRecord record = AssemblyDecoder.decode_assembly_line2(pc, cpu_memory);
-        try {
+        if (!record.is_instr_illegal()) {
             insert_addr(record);
             insert_string("\t");
             insert_instr_bytes(record);
@@ -101,12 +103,21 @@ public class AssemblyStyledDocument {
             insert_instr(record);
             insert_string(" ");
             insert_operands(record);
-            insert_string("\n");
-        } catch (BadLocationException e) {
-            e.printStackTrace();
-        }
 
-        pc += record.bytes();
+            pc += record.bytes();
+        } else {
+            // Illegal instruction
+            insert_addr(record);
+            insert_string("\t");
+            insert_instr_bytes(record);
+            insert_string("\t");
+            insert_string("UNDEFINED", attr_blue);
+
+            pc += 1;
+        }
+        insert_string("\n");
+
+
     }
 
     private void insert_addr(AssemblyLineRecord record) throws BadLocationException {
@@ -118,15 +129,19 @@ public class AssemblyStyledDocument {
         styledDocument.insertString(offset, Common.byteToHex(record.opcode(), false), attr_gray);
         offset += 2;
 
-        if (record.bytes() > 1) {
-            insert_string(" ");
-            styledDocument.insertString(offset, Common.byteToHex(record.operand1(), false), attr_gray);
-            offset += 2;
-        }
-        if (record.bytes() > 2) {
-            insert_string(" ");
-            styledDocument.insertString(offset, Common.byteToHex(record.operand2(), false), attr_gray);
-            offset += 2;
+        if (!record.is_instr_illegal()) {
+            if (record.bytes() > 1) {
+                insert_string(" ");
+                styledDocument.insertString(offset, Common.byteToHex(record.operand1(), false), attr_gray);
+                offset += 2;
+            }
+            if (record.bytes() > 2) {
+                insert_string(" ");
+                styledDocument.insertString(offset, Common.byteToHex(record.operand2(), false), attr_gray);
+                offset += 2;
+            }
+        } else {
+            // Illegal instruction - do nothing
         }
     }
 
@@ -182,6 +197,12 @@ public class AssemblyStyledDocument {
                 op1_and_op2_addr_symbol = AssemblyDecoder.convert_addr_to_symbol(op1_and_op2_addr);
         }
 
+        boolean is_illegal = record.is_instr_illegal();
+
+        if (is_illegal) {
+            throw new RuntimeException("TODO");
+        }
+
         switch(addrmode) {
             case IMPLIED:
                 break;
@@ -234,6 +255,15 @@ public class AssemblyStyledDocument {
                     // do nothing
                 } else {
                     throw new RuntimeException("Accumulator requires 1 byte");
+                }
+                break;
+            case ABSOLUTE_INDIRECT:
+                if (bytes == 3) {
+                    insert_string("(", attr_blue);
+                    insert_string("$"+op1_and_op2_addr_str, attr_green);
+                    insert_string(")", attr_blue);
+                } else {
+                    throw new RuntimeException("Absolute indirect requires 3 bytes");
                 }
                 break;
             default:
