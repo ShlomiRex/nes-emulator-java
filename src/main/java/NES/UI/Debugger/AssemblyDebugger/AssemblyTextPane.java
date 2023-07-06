@@ -6,28 +6,32 @@ import NES.CPU.Registers.CPURegisters;
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
+import javax.swing.text.Document;
 import javax.swing.text.Highlighter;
 import java.awt.*;
 
 public class AssemblyTextPane extends JTextPane {
 
-    private final CPURegisters cpuRegisters;
     private final Highlighter.HighlightPainter highlightPainter;
-    private String text;
 
     private final Highlighter highlighter;
-    private final AssemblyStyledDocument assemblyDocument;
+    private AssemblyStyledDocument assemblyDocument;
+    private final byte[] cpu_memory;
 
-    public AssemblyTextPane(CPU cpu, byte[] cpu_memory) {
-        this.cpuRegisters = cpu.registers;
-
+    public AssemblyTextPane(byte[] cpu_memory) {
+        this.cpu_memory = cpu_memory;
         this.highlighter = getHighlighter();
         this.highlightPainter = new DefaultHighlighter.DefaultHighlightPainter(Color.YELLOW);
-        this.assemblyDocument = new AssemblyStyledDocument(cpu_memory, true);
 
-        setDocument(assemblyDocument);
+        generate_new_document((short) 0, 30);
+
         setEditable(false);
         setFont(new Font("monospaced", Font.PLAIN, 12));
+    }
+
+    private void generate_new_document(short starting_addr, int lines_to_display) {
+        this.assemblyDocument = new AssemblyStyledDocument(starting_addr, lines_to_display, cpu_memory, true);
+        setDocument(assemblyDocument);
     }
 
     // Call when CPU finishes executing instruction and is ready for next instruction.
@@ -50,5 +54,14 @@ public class AssemblyTextPane extends JTextPane {
 //        }
 
 
+    }
+
+    /**
+     * Called when the scrollbar is moved.
+     * Will set the assembly text to the address specified by the scrollbar.
+     * @param addr
+     */
+    public void jump_to_view(short addr) {
+        generate_new_document(addr, 10);
     }
 }

@@ -36,12 +36,11 @@ public class AssemblyStyledDocument extends DefaultStyledDocument {
 
     /**
      *
-     * @param cpu_memory
+     * @param starting_addr The starting address of the assembly text.
+     * @param lines_to_display The number of lines to display.
      * @param use_symbols If true, then the assembly text will use symbols instead of addresses.
      */
-    public AssemblyStyledDocument(byte[] cpu_memory, boolean use_symbols) {
-        // TODO: Don't get styleDocument from the text pane, but create a new one, and textPane should use our styleDocument
-
+    public AssemblyStyledDocument(short starting_addr, int lines_to_display, byte[] cpu_memory, boolean use_symbols) {
         this.cpu_memory = cpu_memory;
         this.use_symbols = use_symbols;
 
@@ -52,8 +51,7 @@ public class AssemblyStyledDocument extends DefaultStyledDocument {
 
         // Starting PC - we can start from 0 if we want
         //pc = (short) (cpu.registers.getPC() & 0xFFFF);
-        short starting_pc = (short) 0x8000;
-        pc = starting_pc;
+        pc = starting_addr;
         int asm_line_num = 0;
         do {
             short old_pc = pc;
@@ -72,7 +70,7 @@ public class AssemblyStyledDocument extends DefaultStyledDocument {
 
             // Add document related information to the assembly text structure
             assemblyTextStructure.add_assembly_line(asm_line_num, old_pc, old_offset, line_length);
-        } while ((pc & 0xFFFF) < 0x9000);
+        } while (asm_line_num < lines_to_display);
 
         logger.info("Assembly lines: " + asm_line_num);
     }
@@ -133,8 +131,6 @@ public class AssemblyStyledDocument extends DefaultStyledDocument {
 
             pc += 1;
         }
-
-
 
         insert_string("\n");
     }

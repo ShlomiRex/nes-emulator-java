@@ -1,10 +1,8 @@
 package NES.UI.Debugger.AssemblyDebugger;
 
 import NES.CPU.CPU;
-import NES.CPU.Decoder.AssemblyInfo;
-import NES.CPU.Decoder.Decoder;
-import NES.CPU.Registers.CPURegisters;
-import NES.Common;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.text.*;
@@ -12,21 +10,21 @@ import java.awt.*;
 
 public class AssemnlyMainPane extends JPanel {
 
+
+    private final Logger logger = LoggerFactory.getLogger(AssemnlyMainPane.class);
     public final AssemblyTextPane assembly_text_area;
 
     public AssemnlyMainPane(CPU cpu, byte[] cpu_memory) {
-        CPURegisters cpuRegisters = cpu.registers;
-
         setBorder(BorderFactory.createLoweredBevelBorder());
+        assembly_text_area = new AssemblyTextPane(cpu_memory);
 
-        assembly_text_area = new AssemblyTextPane(cpu, cpu_memory);
+
+        AssemblyScrollPane scrollPane = new AssemblyScrollPane(assembly_text_area);
+
+        add(scrollPane);
 
         // Highlight first instruction
         assembly_text_area.ready_next_instruction();
-
-        JScrollPane scrollPane = new JScrollPane(assembly_text_area);
-        scrollPane.setPreferredSize(new Dimension(300, 600));
-        add(scrollPane);
     }
 
 //    private void initializeAssemblyText() throws BadLocationException {
