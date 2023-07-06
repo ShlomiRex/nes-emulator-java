@@ -46,23 +46,5 @@ public class AssemblyTextPane extends JTextPane {
         } catch (BadLocationException e) {
             throw new RuntimeException(e);
         }
-        return;
-//        Highlighter highlighter = getHighlighter();
-//        highlighter.removeAllHighlights();
-//        try {
-//            short pc = cpuRegisters.getPC();
-//            String search = Common.shortToHex(pc, true);
-//
-//            if (text == null)
-//                text = getDocument().getText(0, getDocument().getLength());
-//
-//            int i = text.indexOf(search);
-//            int first_new_line = text.indexOf('\n', i);
-//            int line_length = first_new_line - i;
-//
-//            highlighter.addHighlight(i, i + line_length, highlightPainter);
-//        } catch (BadLocationException e) {
-//            throw new RuntimeException(e);
-//        }
     }
 }

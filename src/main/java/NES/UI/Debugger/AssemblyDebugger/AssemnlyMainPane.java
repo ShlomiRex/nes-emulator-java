@@ -25,7 +25,7 @@ public class AssemnlyMainPane extends JPanel {
         assembly_text_area.ready_next_instruction();
 
         JScrollPane scrollPane = new JScrollPane(assembly_text_area);
-        scrollPane.setPreferredSize(new Dimension(250, 600));
+        scrollPane.setPreferredSize(new Dimension(300, 600));
         add(scrollPane);
     }
 

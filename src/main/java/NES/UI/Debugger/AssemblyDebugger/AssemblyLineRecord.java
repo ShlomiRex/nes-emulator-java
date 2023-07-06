@@ -1,5 +1,7 @@
 package NES.UI.Debugger.AssemblyDebugger;
 
+import NES.CPU.AddressingMode;
+
 /**
  * Assembly line record that describes the assembly line.
  * @param addr Adress of the assembly line.
@@ -14,5 +16,6 @@ public record AssemblyLineRecord(short addr,
                                  byte opcode,
                                  Byte operand1,
                                  Byte operand2,
-                                 String instr_name) {
+                                 String instr_name,
+                                 AddressingMode addressingMode) {
 }

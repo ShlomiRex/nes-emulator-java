@@ -197,8 +197,8 @@ public class PPUButtonPane extends JPanel {
 
                         while (is_running && !ppu.registers.isNmiEnabled()) {
                             ppu.clock_tick();
-                            publish();
                         }
+                        publish();
                         //TODO: Don't know why the worker never reaches this code. It just calls 'done' and stops.
                         return null;
                     }
