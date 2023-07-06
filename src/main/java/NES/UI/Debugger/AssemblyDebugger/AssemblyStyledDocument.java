@@ -50,7 +50,7 @@ public class AssemblyStyledDocument {
         //pc = (short) (cpu.registers.getPC() & 0xFFFF);
         pc = (short) 0xC004;
 
-        for (int asm_line_num = 0; asm_line_num < 128; asm_line_num++) {
+        for (int asm_line_num = 0; asm_line_num < 150; asm_line_num++) {
             short old_pc = pc;
             int old_offset = offset;
 
@@ -264,6 +264,24 @@ public class AssemblyStyledDocument {
                     insert_string(")", attr_blue);
                 } else {
                     throw new RuntimeException("Absolute indirect requires 3 bytes");
+                }
+                break;
+            case INDIRECT_Y:
+                if (bytes == 2) {
+                    insert_string("(", attr_blue);
+                    insert_string("$"+operand1_str, attr_green);
+                    insert_string("),Y", attr_blue);
+                } else {
+                    throw new RuntimeException("Indirect Y requires 2 bytes");
+                }
+                break;
+            case INDIRECT_X:
+                if (bytes == 2) {
+                    insert_string("(", attr_blue);
+                    insert_string("$"+operand1_str, attr_green);
+                    insert_string(",X)", attr_blue);
+                } else {
+                    throw new RuntimeException("Indirect X requires 2 bytes");
                 }
                 break;
             default:

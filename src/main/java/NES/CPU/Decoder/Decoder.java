@@ -190,27 +190,27 @@ public class Decoder {
         abc[0xDE] = new InstructionInfo(Instructions.DEC, AddressingMode.ABSOLUTE_X, 3, 7, OopsCycle.NONE);
         abc[0xDF] = new InstructionInfo(Instructions.DCP, AddressingMode.ABSOLUTE_X, 3, 7, OopsCycle.NONE, true); // illegal
         abc[0xE0] = new InstructionInfo(Instructions.CPX, AddressingMode.IMMEDIATE, 2, 2, OopsCycle.NONE);
-        abc[0xE1] = new InstructionInfo(Instructions.SBC, AddressingMode.INDIRECT_X, 2, 6, OopsCycle.NONE, true); // illegal
+        abc[0xE1] = new InstructionInfo(Instructions.SBC, AddressingMode.INDIRECT_X, 2, 6, OopsCycle.NONE);
         abc[0xE4] = new InstructionInfo(Instructions.CPX, AddressingMode.ZEROPAGE, 2, 3, OopsCycle.NONE);
-        abc[0xE5] = new InstructionInfo(Instructions.SBC, AddressingMode.ZEROPAGE, 2, 3, OopsCycle.NONE, true); // illegal
+        abc[0xE5] = new InstructionInfo(Instructions.SBC, AddressingMode.ZEROPAGE, 2, 3, OopsCycle.NONE);
         abc[0xE6] = new InstructionInfo(Instructions.INC, AddressingMode.ZEROPAGE, 2, 5, OopsCycle.NONE);
         abc[0xE8] = new InstructionInfo(Instructions.INX, AddressingMode.IMPLIED, 1, 2, OopsCycle.NONE);
-        abc[0xE9] = new InstructionInfo(Instructions.SBC, AddressingMode.IMMEDIATE, 2, 2, OopsCycle.NONE, true); // illegal
+        abc[0xE9] = new InstructionInfo(Instructions.SBC, AddressingMode.IMMEDIATE, 2, 2, OopsCycle.NONE);
         abc[0xEA] = new InstructionInfo(Instructions.NOP, AddressingMode.IMPLIED, 1, 2, OopsCycle.NONE);
         abc[0xEB] = new InstructionInfo(Instructions.SBC, AddressingMode.IMMEDIATE, 2, 2, OopsCycle.NONE, true); // illegal
         abc[0xEC] = new InstructionInfo(Instructions.CPX, AddressingMode.ABSOLUTE, 3, 4, OopsCycle.NONE);
-        abc[0xED] = new InstructionInfo(Instructions.SBC, AddressingMode.ABSOLUTE, 3, 4, OopsCycle.NONE, true); // illegal
+        abc[0xED] = new InstructionInfo(Instructions.SBC, AddressingMode.ABSOLUTE, 3, 4, OopsCycle.NONE);
         abc[0xEE] = new InstructionInfo(Instructions.INC, AddressingMode.ABSOLUTE, 3, 6, OopsCycle.NONE);
         abc[0xF0] = new InstructionInfo(Instructions.BEQ, AddressingMode.RELATIVE, 2, 2, OopsCycle.BranchOccursOn);
-        abc[0xF1] = new InstructionInfo(Instructions.SBC, AddressingMode.INDIRECT_Y, 2, 5, OopsCycle.PageBoundaryCrossed, true); // illegal
+        abc[0xF1] = new InstructionInfo(Instructions.SBC, AddressingMode.INDIRECT_Y, 2, 5, OopsCycle.PageBoundaryCrossed);
         abc[0xF4] = new InstructionInfo(Instructions.NOP, AddressingMode.ZEROPAGE_X, 2, 4, OopsCycle.NONE, true); // illegal
-        abc[0xF5] = new InstructionInfo(Instructions.SBC, AddressingMode.ZEROPAGE_X, 2, 4, OopsCycle.NONE, true); // illegal
+        abc[0xF5] = new InstructionInfo(Instructions.SBC, AddressingMode.ZEROPAGE_X, 2, 4, OopsCycle.NONE);
         abc[0xF6] = new InstructionInfo(Instructions.INC, AddressingMode.ZEROPAGE_X, 2, 6, OopsCycle.NONE);
         abc[0xF8] = new InstructionInfo(Instructions.SED, AddressingMode.IMPLIED, 1, 2, OopsCycle.NONE);
-        abc[0xF9] = new InstructionInfo(Instructions.SBC, AddressingMode.ABSOLUTE_Y, 3, 4, OopsCycle.PageBoundaryCrossed, true); // illegal
+        abc[0xF9] = new InstructionInfo(Instructions.SBC, AddressingMode.ABSOLUTE_Y, 3, 4, OopsCycle.PageBoundaryCrossed);
         abc[0xFA] = new InstructionInfo(Instructions.NOP, AddressingMode.IMPLIED, 1, 2, OopsCycle.NONE); // illegal
         abc[0xFC] = new InstructionInfo(Instructions.NOP, AddressingMode.ABSOLUTE_X, 3, 4, OopsCycle.PageBoundaryCrossed, true); // illegal
-        abc[0xFD] = new InstructionInfo(Instructions.SBC, AddressingMode.ABSOLUTE_X, 3, 4, OopsCycle.PageBoundaryCrossed, true); // illegal
+        abc[0xFD] = new InstructionInfo(Instructions.SBC, AddressingMode.ABSOLUTE_X, 3, 4, OopsCycle.PageBoundaryCrossed);
         abc[0xFE] = new InstructionInfo(Instructions.INC, AddressingMode.ABSOLUTE_X, 3, 7, OopsCycle.NONE);
 
         return abc;
