@@ -23,7 +23,8 @@ public class AssemblyTextPane extends JTextPane {
 
         this.highlighter = getHighlighter();
         this.highlightPainter = new DefaultHighlighter.DefaultHighlightPainter(Color.YELLOW);
-        this.assemblyDocument = new AssemblyStyledDocument(this, cpu_memory, true);
+        this.assemblyDocument = new AssemblyStyledDocument(
+                this, cpu_memory, true, 1024);
 
         setEditable(false);
         setFont(new Font("monospaced", Font.PLAIN, 12));
@@ -32,21 +33,24 @@ public class AssemblyTextPane extends JTextPane {
     // Call when CPU finishes executing instruction and is ready for next instruction.
     // Here we move the highlighter to the next instruction.
     public void ready_next_instruction() {
-        //TODO: Uncomment
-//        highlighter.removeAllHighlights();
-//
-//        // Convert address to assembly line, and get starting offset of that line and end offset.
-//        short pc = cpuRegisters.getPC();
-//        AssemblyTextStructure.AssemblyLineTextStructure structure
-//                = assemblyDocument.get_assembly_line(pc);
-//        int start_offset = structure.document_offset();
-//        int end_offset = start_offset + structure.line_length();
-//
-//        try {
-//            highlighter.addHighlight(start_offset, end_offset, highlightPainter);
-//        } catch (BadLocationException e) {
-//            throw new RuntimeException(e);
-//        }
+        highlighter.removeAllHighlights();
+
+        // Convert address to assembly line, and get starting offset of that line and end offset.
+        short pc = cpuRegisters.getPC();
+        AssemblyTextStructure.AssemblyLineTextStructure structure
+                = assemblyDocument.get_assembly_line(pc);
+        if (structure == null) {
+            // do not throw exception, the assembly line to highlight is not loaded.
+            return;
+        }
+        int start_offset = structure.document_offset();
+        int end_offset = start_offset + structure.line_length();
+
+        try {
+            highlighter.addHighlight(start_offset, end_offset, highlightPainter);
+        } catch (BadLocationException e) {
+            throw new RuntimeException(e);
+        }
 
 
     }

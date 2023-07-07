@@ -45,7 +45,7 @@ public class CPU {
         //logger.debug(registers.toString());
 
         // Log current PC
-        logger.debug("PC: " + Common.shortToHex(registers.getPC(), true));
+        //logger.debug("PC: " + Common.shortToHex(registers.getPC(), true));
 
         // Fetch
         byte opcode = read_memory(registers.getPC()); // Read at address of Program Counter (duh!)

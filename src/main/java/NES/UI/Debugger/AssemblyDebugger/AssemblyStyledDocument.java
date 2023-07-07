@@ -37,7 +37,7 @@ public class AssemblyStyledDocument {
      * @param cpu_memory
      * @param use_symbols If true, then the assembly text will use symbols instead of addresses.
      */
-    public AssemblyStyledDocument(JTextPane assembly_text_pane, byte[] cpu_memory, boolean use_symbols) {
+    public AssemblyStyledDocument(JTextPane assembly_text_pane, byte[] cpu_memory, boolean use_symbols, int lines_to_display) {
         this.cpu_memory = cpu_memory;
         this.styledDocument = assembly_text_pane.getStyledDocument();
         this.use_symbols = use_symbols;
@@ -49,10 +49,10 @@ public class AssemblyStyledDocument {
 
         // Starting PC - we can start from 0 if we want
         //pc = (short) (cpu.registers.getPC() & 0xFFFF);
-        short starting_pc = (short) 0x8000;
+        short starting_pc = (short) 0xC004;
         pc = starting_pc;
-        int asm_line_num = 0;
-        do {
+
+        for (int asm_line_num = 0; asm_line_num < lines_to_display; asm_line_num++) {
             short old_pc = pc;
             int old_offset = offset;
             asm_line_num += 1;
@@ -69,7 +69,7 @@ public class AssemblyStyledDocument {
 
             // Add document related information to the assembly text structure
             assemblyTextStructure.add_assembly_line(asm_line_num, old_pc, old_offset, line_length);
-        } while ((pc & 0xFFFF) < 0xC000);
+        }
     }
 
     private void initialize_style() {
