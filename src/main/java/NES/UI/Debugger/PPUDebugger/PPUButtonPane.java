@@ -1,5 +1,6 @@
 package NES.UI.Debugger.PPUDebugger;
 
+import NES.Common;
 import NES.PPU.PPU;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -195,7 +196,8 @@ public class PPUButtonPane extends JPanel {
                         btn_run.setEnabled(false);
                         btn_stop.setEnabled(true);
 
-                        while (is_running && !ppu.registers.isNmiEnabled()) {
+                        boolean nmi = Common.Bits.getBit(ppu.registers.getPPUSTATUS(), 7);
+                        while (is_running && !nmi) {
                             ppu.clock_tick();
                         }
                         publish();

@@ -1,5 +1,6 @@
 package NES.UI.Debugger.PPUDebugger.StatusInfo;
 
+import NES.Common;
 import NES.PPU.PPU;
 
 import javax.swing.*;
@@ -16,11 +17,14 @@ public class VBlankPane extends JPanel {
 
         ppu_vblank.setEnabled(false);
         add(ppu_vblank);
+
+        ppu_vblank.setToolTipText("PPUSTATUS Bit 7 - VBlank flag");
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        ppu_vblank.setSelected(ppu.registers.isNmiEnabled());
+        boolean nmi = Common.Bits.getBit(ppu.registers.getPPUSTATUS(), 7);
+        ppu_vblank.setSelected(nmi);
     }
 }

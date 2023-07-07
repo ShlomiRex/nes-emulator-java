@@ -59,6 +59,8 @@ public class PPU {
 
     private final Mirroring mirroring;
 
+    private Runnable cpu_nmi_callback;
+
     public PPU(Mirroring mirroring, byte[] chr_rom) {
         if (chr_rom.length != 1024 * 8)
             throw new IllegalArgumentException("Unexpected CHR ROM / pattern table size");
@@ -74,8 +76,8 @@ public class PPU {
         reset();
     }
 
-    public PPU(byte[] chr_rom) {
-        this(Mirroring.HORIZONTAL, chr_rom);
+    public void set_cpu_nmi_callback(Runnable callback) {
+        this.cpu_nmi_callback = callback;
     }
 
     public void reset() {
@@ -166,24 +168,28 @@ public class PPU {
 
         if (scanline == 241 && cycle == 1) {
             // VBlank start
-            registers.setNmiEnabled(true);
+            registers.writePPUSTATUS((byte) (registers.readPPUSTATUS() | 0x80)); // Set bit 7
+
+            if (cpu_nmi_callback != null)
+                cpu_nmi_callback.run();
+
             if (trigger_game_canvas_repaint != null)
                 trigger_game_canvas_repaint.run();
         }
 
         if (scanline == 261 && cycle == 1) {
             // VBlank end
-            registers.setNmiEnabled(false);
+            registers.writePPUSTATUS((byte) (registers.readPPUSTATUS() & 0x7F)); // Clear bit 7
         }
 
         cycle ++;
     }
 
-    public static Color getColorFromPalette(byte paletteIndex) {
-        // Return the appropriate color based on the palette index
+    /**
+     * The CPU will stop and execute the NMI interrupt.
+     */
+    private void send_nmi_to_cpu() {
 
-        // For example, a simple implementation that alternates between two colors:
-        return (paletteIndex % 2 == 0) ? Color.WHITE : Color.GRAY;
     }
 
     /**

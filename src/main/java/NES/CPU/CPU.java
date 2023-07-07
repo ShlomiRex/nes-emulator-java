@@ -71,13 +71,6 @@ public class CPU {
 
         //TODO: Check OOPS cycle.
 
-        // Check NMI interrupt
-        if (ppuRegisters != null && ppuRegisters.isNmiEnabled()) {
-            //logger.debug("NMI interrupt called");
-            ppuRegisters.setNmiEnabled(false); // After reading the NMI flag ($2002) , it is cleared.
-            nmi_interrupt();
-        }
-
         instructions ++;
 
 //        logger.debug(registers.toString());

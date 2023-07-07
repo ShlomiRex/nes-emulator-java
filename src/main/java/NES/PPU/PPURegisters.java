@@ -1,8 +1,12 @@
 package NES.PPU;
 
 import NES.Common;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PPURegisters {
+
+    private final Logger logger = LoggerFactory.getLogger(PPURegisters.class);
 
     /*
      * PPU Registers:
@@ -65,26 +69,26 @@ public class PPURegisters {
         return before;
     }
 
-    public boolean isNmiEnabled() {
-        //return (ctrl & 0x80) != 0;
-        return Common.Bits.getBit(PPUSTATUS, 7);
-    }
-
-    public void setNmiEnabled(boolean enabled) {
-        PPUSTATUS = Common.Bits.setBit(PPUSTATUS, 7, enabled);
-//        if (enabled) {
-//            ctrl |= 0x80;
-//        } else {
-//            ctrl &= 0x7F;
-//        }
-    }
-
     public void writePPUCTRL(byte value) {
+        byte old_value = PPUCTRL;
+        boolean old_nmi = Common.Bits.getBit(old_value, 7);
+        boolean new_nmi = Common.Bits.getBit(value, 7);
+
+        if (old_nmi && !new_nmi) {
+            logger.info("Disabling 'Generate NMI' in PPUCTRL");
+        } else {
+            logger.info("Enabling 'Generate NMI' in PPUCTRL");
+        }
+
         PPUCTRL = value;
     }
 
     public void writePPUMASK(byte value) {
         PPUMASK = value;
+    }
+
+    public void writePPUSTATUS(byte b) {
+        PPUSTATUS = b;
     }
 
     public void writeOAMADDR(byte value) {
