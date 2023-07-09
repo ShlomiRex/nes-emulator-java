@@ -1,5 +1,6 @@
 package PPU;
 
+import NES.Cartridge.Mirroring;
 import NES.PPU.PPU;
 import org.junit.Before;
 import org.junit.Test;
@@ -9,13 +10,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class TestPPURegisters {
 
     private PPU ppu;
-    private byte[] palette_ram;
-    private byte[] chr_rom = new byte[1024 * 8];
+    private final byte[] chr_rom = new byte[1024 * 8];
 
     @Before
     public void setUp() {
-        palette_ram = new byte[32];
-        ppu = new PPU(chr_rom, palette_ram);
+        ppu = new PPU(Mirroring.HORIZONTAL, chr_rom);
     }
 
     @Test

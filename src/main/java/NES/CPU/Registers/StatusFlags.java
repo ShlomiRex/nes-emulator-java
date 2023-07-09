@@ -18,24 +18,8 @@ public class StatusFlags {
         p = 0b0010_0000; // Set 'UNUSED' flag to 1
     }
 
-    public void setCarry(boolean value) {
-        p = Common.Bits.setBit(p, 0, value);
-    }
-
     public void setZero(boolean value) {
         p = Common.Bits.setBit(p, 1, value);
-    }
-
-    public void setInterruptDisable(boolean value) {
-        p = Common.Bits.setBit(p, 2, value);
-    }
-
-    public void setDecimal(boolean value) {
-        p = Common.Bits.setBit(p, 3, value);
-    }
-
-    public void setOverflow(boolean value) {
-        p = Common.Bits.setBit(p, 6, value);
     }
 
     public void setNegative(boolean value) {

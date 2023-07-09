@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
+import static NES.CPU.Registers.Flags.*;
+
 public class CPU {
 
     private final Logger logger = LoggerFactory.getLogger(CPU.class);
@@ -124,7 +126,7 @@ public class CPU {
         return res;
     }
 
-    public void res_interrupt() {
+    public void reset() {
         logger.debug("Reset interrupt called");
 
         registers.reset();
@@ -133,7 +135,7 @@ public class CPU {
         //logger.debug("Jumping to interrupt address: " + Common.shortToHex(new_pc, true));
 
         registers.setPC(new_pc);
-        cycles = 7;
+        cycles = 7; // TODO: Is it 7 or 8 cycles?
     }
 
     private short read_address_from_memory(short addr) {
@@ -172,7 +174,7 @@ public class CPU {
                 registers.setPC(Common.makeShort(pcl, pch));
 
                 // Set interrupt disable flag (bit 2 of status register)
-                registers.getP().setInterruptDisable(true);
+                registers.setFlag(INTERRUPT, true);
 
                 break;
             case RTI:
@@ -192,8 +194,8 @@ public class CPU {
 
                 registers.setPC(Common.makeShort(pcl2, pch2));
 
-                p |= 0b00100000; // Set bits 5
                 p &= 0b11101111; // Clear bits 4
+                p |= 0b00100000; // Set bits 5
                 registers.getP().setAllFlags(p);
 
                 break;
@@ -246,13 +248,13 @@ public class CPU {
 
                 if (instr == Instructions.PLA) {
                     registers.setA(reg);
-                    registers.getP().setNegative(Common.Bits.getBit(registers.getA(), 7));
-                    registers.getP().setZero(registers.getA() == 0);
+                    registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.getA(), 7));
+                    registers.setFlag(ZERO, registers.getA() == 0);
                 }
                 else {
                     registers.getP().setAllFlags(reg);
-                    registers.getP().setBreakBit5(true);
-                    registers.getP().setBreakBit4(false);
+                    registers.setFlag(BREAK, false);
+                    registers.setFlag(UNUSED, true);
                 }
 
                 break;
@@ -337,7 +339,7 @@ public class CPU {
                 exec_adc();
                 break;
             case CLI:
-                registers.getP().setInterruptDisable(false);
+                registers.setFlag(INTERRUPT, false);
                 break;
             case STA:
                 write_memory(fetched_addr, registers.getA());
@@ -349,7 +351,7 @@ public class CPU {
                 exec_cmp(addrmode, registers.getX());
                 break;
             case CLV:
-                registers.getP().setOverflow(false);
+                registers.setFlag(OVERFLOW, false);
                 break;
             case TAY:
                 exec_tay();
@@ -385,16 +387,16 @@ public class CPU {
                 exec_rol_or_ror(addrmode == AddressingMode.ACCUMULATOR, true);
                 break;
             case SEC:
-                registers.getP().setCarry(true);
+                registers.setFlag(CARRY, true);
                 break;
             case SED:
-                registers.getP().setDecimal(true);
+                registers.setFlag(DECIMAL, true);
                 break;
             case ROR:
                 exec_rol_or_ror(addrmode == AddressingMode.ACCUMULATOR, false);
                 break;
             case SEI:
-                registers.getP().setInterruptDisable(true);
+                registers.setFlag(INTERRUPT, true);
                 break;
             case AND:
                 exec_and();
@@ -415,13 +417,13 @@ public class CPU {
                 exec_ldx();
                 break;
             case CLC:
-                registers.getP().setCarry(false);
+                registers.setFlag(CARRY, false);
                 break;
             case BIT:
                 exec_bit();
                 break;
             case CLD:
-                registers.getP().setDecimal(false);
+                registers.setFlag(DECIMAL, false);
                 break;
             case EOR:
                 exec_eor();
@@ -1196,9 +1198,9 @@ public class CPU {
             new_c = true;
         }
 
-        registers.getP().setNegative(new_n);
-        registers.getP().setZero(new_z);
-        registers.getP().setCarry(new_c); // TODO: Expected true
+        registers.setFlag(NEGATIVE, new_n);
+        registers.setFlag(ZERO, new_z);
+        registers.setFlag(CARRY, new_c);
     }
 
     public void nmi_interrupt() {
@@ -1206,9 +1208,9 @@ public class CPU {
         // Store current flags onto stack and when returning, restore them.
         push_pc();
 
-        setFlag(Flags.BREAK, false);
-        setFlag(Flags.UNUSED, true);
-        setFlag(Flags.INTERRUPT, true);
+        setFlag(BREAK, false);
+        setFlag(UNUSED, true);
+        setFlag(INTERRUPT, true);
 
         push_stack(registers.getP().getAllFlags());
 
@@ -1226,9 +1228,9 @@ public class CPU {
             push_pc();
 
             byte p_flag = registers.getP().getAllFlags();
-            setFlag(Flags.BREAK, false );
-            setFlag(Flags.UNUSED, true );
-            setFlag(Flags.INTERRUPT, true );
+            setFlag(BREAK, false );
+            setFlag(UNUSED, true );
+            setFlag(INTERRUPT, true );
             push_stack(p_flag);
 
             byte vector_lsb = read_memory((short) 0xFFFE);
@@ -1268,8 +1270,8 @@ public class CPU {
 
     private void exec_lda() {
         registers.setA(fetched_data);
-        registers.getP().setNegative(Common.Bits.getBit(fetched_data, 7));
-        registers.getP().setZero(fetched_data == 0);
+        registers.setFlag(NEGATIVE, Common.Bits.getBit(fetched_data, 7));
+        registers.setFlag(ZERO, fetched_data == 0);
     }
 
     private void exec_adc() {
@@ -1282,21 +1284,21 @@ public class CPU {
 
         registers.getP().modify_n(result);
         registers.getP().modify_z(result);
-        registers.getP().setCarry(is_carry || is_carry2);
-        registers.getP().setOverflow(negative_flag_set);
+        registers.setFlag(CARRY, is_carry || is_carry2);
+        registers.setFlag(OVERFLOW, negative_flag_set);
         registers.setA(result);
     }
 
     private void exec_tax() {
         registers.setX(registers.getA());
-        registers.getP().setZero(registers.getX() == 0);
-        registers.getP().setNegative(Common.Bits.getBit(registers.getX(), 7));
+        registers.setFlag(ZERO, registers.getX() == 0);
+        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.getX(), 7));
     }
 
     private void exec_tay() {
         registers.setY(registers.getA());
-        registers.getP().setZero(registers.getY() == 0);
-        registers.getP().setNegative(Common.Bits.getBit(registers.getY(), 7));
+        registers.setFlag(ZERO, registers.getY() == 0);
+        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.getY(), 7));
     }
 
     private void exec_lsr(boolean is_accumulator) {
@@ -1309,9 +1311,9 @@ public class CPU {
 
         boolean is_carry = Common.Bits.getBit(fetched_data, 0);
         byte result = (byte) ((fetched_data & 0xFF) >> 1);
-        registers.getP().setCarry(is_carry);
-        registers.getP().setZero(result == 0);
-        registers.getP().setNegative(Common.Bits.getBit(result, 7));
+        registers.setFlag(CARRY, is_carry);
+        registers.setFlag(ZERO, result == 0);
+        registers.setFlag(NEGATIVE, Common.Bits.getBit(result, 7));
 
         if (is_accumulator)
             registers.setA(result);
@@ -1341,9 +1343,9 @@ public class CPU {
             result = Common.Bits.setBit(result, 7, in_carry);
         }
 
-        registers.getP().setCarry(out_carry);
-        registers.getP().setZero(result == 0);
-        registers.getP().setNegative(Common.Bits.getBit(result, 7));
+        registers.setFlag(CARRY, out_carry);
+        registers.setFlag(ZERO, result == 0);
+        registers.setFlag(NEGATIVE, Common.Bits.getBit(result, 7));
 
         if (is_accumulator)
             registers.setA(result);
@@ -1353,57 +1355,57 @@ public class CPU {
 
     private void exec_and() {
         registers.setA((byte) (registers.getA() & fetched_data));
-        registers.getP().setNegative(Common.Bits.getBit(registers.getA(), 7));
-        registers.getP().setZero(registers.getA() == 0);
+        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.getA(), 7));
+        registers.setFlag(ZERO, registers.getA() == 0);
     }
 
     private void exec_tsx() {
         registers.setX(registers.getS());
-        registers.getP().setNegative(Common.Bits.getBit(registers.getX(), 7));
-        registers.getP().setZero(registers.getX() == 0);
+        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.getX(), 7));
+        registers.setFlag(ZERO, registers.getX() == 0);
     }
 
     private void exec_txa() {
         registers.setA(registers.getX());
-        registers.getP().setNegative(Common.Bits.getBit(registers.getA(), 7));
-        registers.getP().setZero(registers.getA() == 0);
+        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.getA(), 7));
+        registers.setFlag(ZERO, registers.getA() == 0);
     }
 
     private void exec_ora() {
         registers.setA((byte) (registers.getA() | fetched_data));
-        registers.getP().setNegative(Common.Bits.getBit(registers.getA(), 7));
-        registers.getP().setZero(registers.getA() == 0);
+        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.getA(), 7));
+        registers.setFlag(ZERO, registers.getA() == 0);
     }
 
     private void exec_inc_or_dec(boolean is_inc) {
         byte result = (byte) (fetched_data + (is_inc ? 1 : -1));
-        registers.getP().setNegative(Common.Bits.getBit(result, 7));
-        registers.getP().setZero(result == 0);
+        registers.setFlag(NEGATIVE, Common.Bits.getBit(result, 7));
+        registers.setFlag(ZERO, result == 0);
         write_memory(fetched_addr, result);
     }
 
     private void exec_ldx() {
         registers.setX(fetched_data);
-        registers.getP().setNegative(Common.Bits.getBit(registers.getX(), 7));
-        registers.getP().setZero(registers.getX() == 0);
+        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.getX(), 7));
+        registers.setFlag(ZERO, registers.getX() == 0);
     }
 
     private void exec_bit() {
-        registers.getP().setNegative(Common.Bits.getBit(fetched_data, 7));
-        registers.getP().setOverflow(Common.Bits.getBit(fetched_data, 6));
-        registers.getP().setZero((registers.getA() & fetched_data) == 0);
+        registers.setFlag(NEGATIVE, Common.Bits.getBit(fetched_data, 7));
+        registers.setFlag(OVERFLOW, Common.Bits.getBit(fetched_data, 6));
+        registers.setFlag(ZERO, (registers.getA() & fetched_data) == 0);
     }
 
     private void exec_eor() {
         registers.setA((byte) (registers.getA() ^ fetched_data));
-        registers.getP().setNegative(Common.Bits.getBit(registers.getA(), 7));
-        registers.getP().setZero(registers.getA() == 0);
+        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.getA(), 7));
+        registers.setFlag(ZERO, registers.getA() == 0);
     }
 
     private void exec_ldy() {
         registers.setY(fetched_data);
-        registers.getP().setNegative(Common.Bits.getBit(registers.getY(), 7));
-        registers.getP().setZero(registers.getY() == 0);
+        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.getY(), 7));
+        registers.setFlag(ZERO, registers.getY() == 0);
     }
 
     private void exec_sbc() {
@@ -1419,39 +1421,39 @@ public class CPU {
 
         registers.getP().modify_n(result);
         registers.getP().modify_z(result);
-        registers.getP().setCarry(is_carry || is_carry2);
-        registers.getP().setOverflow(negative_flag_set);
+        registers.setFlag(CARRY, is_carry || is_carry2);
+        registers.setFlag(OVERFLOW, negative_flag_set);
         registers.setA(result);
     }
 
     private void exec_iny() {
         registers.setY((byte) (registers.getY() + 1));
-        registers.getP().setNegative(Common.Bits.getBit(registers.getY(), 7));
-        registers.getP().setZero(registers.getY() == 0);
+        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.getY(), 7));
+        registers.setFlag(ZERO, registers.getY() == 0);
     }
 
     private void exec_inx() {
         registers.setX((byte) (registers.getX() + 1));
-        registers.getP().setNegative(Common.Bits.getBit(registers.getX(), 7));
-        registers.getP().setZero(registers.getX() == 0);
+        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.getX(), 7));
+        registers.setFlag(ZERO, registers.getX() == 0);
     }
 
     private void exec_dey() {
         registers.setY((byte) (registers.getY() - 1));
-        registers.getP().setNegative(Common.Bits.getBit(registers.getY(), 7));
-        registers.getP().setZero(registers.getY() == 0);
+        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.getY(), 7));
+        registers.setFlag(ZERO, registers.getY() == 0);
     }
 
     private void exec_dex() {
         registers.setX((byte) (registers.getX() - 1));
-        registers.getP().setNegative(Common.Bits.getBit(registers.getX(), 7));
-        registers.getP().setZero(registers.getX() == 0);
+        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.getX(), 7));
+        registers.setFlag(ZERO, registers.getX() == 0);
     }
 
     private void exec_tya() {
         registers.setA(registers.getY());
-        registers.getP().setNegative(Common.Bits.getBit(registers.getA(), 7));
-        registers.getP().setZero(registers.getA() == 0);
+        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.getA(), 7));
+        registers.setFlag(ZERO, registers.getA() == 0);
     }
 
     private void exec_asl(boolean is_accumulator) {
@@ -1464,9 +1466,9 @@ public class CPU {
 
         boolean carry_out = Common.Bits.getBit(fetched_data, 7);
         byte result = (byte) ((fetched_data & 0xFF) << 1);
-        registers.getP().setCarry(carry_out);
-        registers.getP().setZero(result == 0);
-        registers.getP().setNegative(Common.Bits.getBit(result, 7));
+        registers.setFlag(CARRY, carry_out);
+        registers.setFlag(ZERO, result == 0);
+        registers.setFlag(NEGATIVE, Common.Bits.getBit(result, 7));
 
         if (is_accumulator)
             registers.setA(result);
@@ -1477,8 +1479,8 @@ public class CPU {
     private void exec_lax() {
         registers.setA(fetched_data);
         registers.setX(fetched_data);
-        registers.getP().setNegative(Common.Bits.getBit(registers.getA(), 7));
-        registers.getP().setZero(registers.getA() == 0);
+        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.getA(), 7));
+        registers.setFlag(ZERO, registers.getA() == 0);
     }
 
     private void exec_sax() {
@@ -1501,7 +1503,7 @@ public class CPU {
         // Set the processor flags accordingly
         registers.getP().modify_n((byte) result);
         registers.getP().modify_z((byte) result);
-        registers.getP().setCarry(carry);
+        registers.setFlag(CARRY, carry);
     }
 
     private void setFlag(Flags flag, boolean value) {

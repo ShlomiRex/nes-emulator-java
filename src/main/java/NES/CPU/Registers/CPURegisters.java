@@ -36,7 +36,7 @@ public class CPURegisters {
     public void reset() {
         A = X = Y = 0;
         P.reset();
-        S = (byte) 0xFF;
+        S = (byte) 0xFD;
         PC = 0;
     }
 

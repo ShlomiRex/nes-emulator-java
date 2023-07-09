@@ -2,6 +2,7 @@ package CPU;
 
 import NES.CPU.CPU;
 import NES.CPU.Decoder.Decoder;
+import NES.CPU.Registers.Flags;
 import NES.Cartridge.ROMParser;
 import NES.NES;
 import org.junit.BeforeClass;
@@ -18,7 +19,6 @@ public class TestCPU_Nestest {
     private static final Logger logger = LoggerFactory.getLogger(TestCPU_Nestest.class);
 
     private static BufferedReader reader;
-    private static Decoder decoder;
     private static NES nes;
 
     @BeforeClass
@@ -33,7 +33,7 @@ public class TestCPU_Nestest {
 
         // We have special mode of operation, we ignore RESET vector. Only for this test.
         nes.cpu.registers.setPC((short) 0xC000);
-        nes.cpu.registers.getP().setInterruptDisable(true); // Only for the first instruction to pass test.
+        nes.cpu.registers.setFlag(Flags.INTERRUPT, true); // Only for the first instruction to pass test.
         nes.cpu.registers.setS((byte) 0xFD); // Only for the first instruction to pass test.
     }
 

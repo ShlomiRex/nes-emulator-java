@@ -1,0 +1,2 @@
+Replace StatusFlags - remove the class and use 'setFlag' function inside the CPU class.
+

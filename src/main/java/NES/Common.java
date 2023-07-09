@@ -74,6 +74,7 @@ public class Common {
 
     public class Bits {
         public static boolean getBit(byte variable, int bitIndex) {
+            // TODO: After testing and everything is working we can remove this check.
             if (bitIndex < 0 || bitIndex > 7)
                 throw new IllegalArgumentException("Bit index must be between 0 and 7");
             return ((variable >> bitIndex) & 1) == 1;

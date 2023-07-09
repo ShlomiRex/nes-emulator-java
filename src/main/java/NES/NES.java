@@ -40,7 +40,7 @@ public class NES {
 
         ppu.set_cpu_nmi_callback(cpu::nmi_interrupt);
 
-        cpu.res_interrupt();
+        cpu.reset();
     }
 
     public void run() {
