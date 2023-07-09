@@ -12,8 +12,6 @@ public class CPURegisters {
 
     private StatusFlags P;
 
-    private RegistersPanel listener;
-
     public CPURegisters() {
         P = new StatusFlags();
         reset();
@@ -70,43 +68,27 @@ public class CPURegisters {
     }
 
     public void setA(byte A) {
-        if (listener != null)
-            listener.propertyChange(new PropertyChangeEvent(this, "A", this.A, A));
         this.A = A;
     }
 
     public void setX(byte X) {
-        if (listener != null)
-            listener.propertyChange(new PropertyChangeEvent(this, "X", this.X, X));
         this.X = X;
     }
 
     public void setY(byte Y) {
-        if (listener != null)
-            listener.propertyChange(new PropertyChangeEvent(this, "Y", this.Y, Y));
         this.Y = Y;
     }
 
     public void setP(StatusFlags P) {
-        if (listener != null)
-            listener.propertyChange(new PropertyChangeEvent(this, "P", this.P, P));
         this.P = P;
     }
 
     public void setPC(short PC) {
-        if (listener != null)
-            listener.propertyChange(new PropertyChangeEvent(this, "PC", this.PC, PC));
         this.PC = PC;
     }
 
     public void setS(byte s) {
-        if (listener != null)
-            listener.propertyChange(new PropertyChangeEvent(this, "S", this.S, s));
         this.S = s;
-    }
-
-    public void addChangeListener(RegistersPanel listener) {
-        this.listener = listener;
     }
 
     public void incrementPC() {

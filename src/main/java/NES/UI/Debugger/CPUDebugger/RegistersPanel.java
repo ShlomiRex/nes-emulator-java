@@ -10,16 +10,12 @@ import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-public class RegistersPanel extends JPanel implements PropertyChangeListener {
-
-    private final Logger logger = LoggerFactory.getLogger(RegistersPanel.class);
+public class RegistersPanel extends JPanel {
     private final CPURegisters registers;
     private final JTextField a,x,y,s,pc;
-    private final JPanel statusFlagsPanel;
 
     public RegistersPanel(CPURegisters registers) {
         this.registers = registers;
-        this.registers.addChangeListener(this);
 
         JPanel flow_pane1 = new JPanel();
         JPanel flow_pane2 = new JPanel();
@@ -70,7 +66,7 @@ public class RegistersPanel extends JPanel implements PropertyChangeListener {
         pc.setColumns(4);
 
         // P
-        statusFlagsPanel = new StatusFlagsPanel(registers.getP());
+        JPanel statusFlagsPanel = new StatusFlagsPanel(registers.getP());
         add(statusFlagsPanel);
 
         // Start with initial values
@@ -82,23 +78,13 @@ public class RegistersPanel extends JPanel implements PropertyChangeListener {
     }
 
     @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        logger.debug("Property change: " + evt.getPropertyName());
-        if (evt.getPropertyName().equals("A")) {
-            a.setText(Common.byteToHex((byte) evt.getNewValue(), false));
-        } else if (evt.getPropertyName().equals("X")) {
-            x.setText(Common.byteToHex((byte) evt.getNewValue(), false));
-        } else if (evt.getPropertyName().equals("Y")) {
-            y.setText(Common.byteToHex((byte) evt.getNewValue(), false));
-        } else if (evt.getPropertyName().equals("S")) {
-            s.setText(Common.byteToHex((byte) evt.getNewValue(), false));
-        } else if (evt.getPropertyName().equals("PC")) {
-            pc.setText(Common.shortToHex((short) evt.getNewValue(), false));
-        } else {
-            throw new RuntimeException("Unknown property: " + evt.getPropertyName());
-        }
-//        else if (evt.getPropertyName().equals("P")) {
-//            statusFlagsPanel.repaint();
-//        }
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
+        a.setText(Common.byteToHex(registers.getA(), false));
+        x.setText(Common.byteToHex(registers.getX(), false));
+        y.setText(Common.byteToHex(registers.getY(), false));
+        s.setText(Common.byteToHex(registers.getS(), false));
+        pc.setText(Common.shortToHex(registers.getPC(), false));
     }
 }
