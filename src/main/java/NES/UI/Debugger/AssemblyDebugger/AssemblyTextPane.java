@@ -12,22 +12,26 @@ import java.awt.*;
 public class AssemblyTextPane extends JTextPane {
 
     private final CPURegisters cpuRegisters;
+    private JScrollPane scrollPane;
     private final Highlighter.HighlightPainter highlightPainter;
-    private String text;
 
     private final Highlighter highlighter;
-    private final AssemblyStyledDocument assemblyDocument;
+    private final AssemblyStyledDocument styledDocument;
 
     public AssemblyTextPane(CPU cpu, byte[] cpu_memory) {
         this.cpuRegisters = cpu.registers;
 
         this.highlighter = getHighlighter();
         this.highlightPainter = new DefaultHighlighter.DefaultHighlightPainter(Color.YELLOW);
-        this.assemblyDocument = new AssemblyStyledDocument(
-                this, cpu_memory, true, 1024);
+        this.styledDocument = new AssemblyStyledDocument(
+                this, cpu_memory, true, 2048);
 
         setEditable(false);
         setFont(new Font("monospaced", Font.PLAIN, 12));
+    }
+
+    public void setScrollPane(JScrollPane scrollPane) {
+        this.scrollPane = scrollPane;
     }
 
     // Call when CPU finishes executing instruction and is ready for next instruction.
@@ -38,7 +42,7 @@ public class AssemblyTextPane extends JTextPane {
         // Convert address to assembly line, and get starting offset of that line and end offset.
         short pc = cpuRegisters.getPC();
         AssemblyTextStructure.AssemblyLineTextStructure structure
-                = assemblyDocument.get_assembly_line(pc);
+                = styledDocument.get_assembly_line(pc);
         if (structure == null) {
             // do not throw exception, the assembly line to highlight is not loaded.
             return;
@@ -52,6 +56,20 @@ public class AssemblyTextPane extends JTextPane {
             throw new RuntimeException(e);
         }
 
+        // TODO: Scroll to highlighted line.
+        if (scrollPane == null) {
+            return;
+        }
+        Rectangle caretRectangle = null;
+        try {
+            caretRectangle = modelToView(start_offset);
+        } catch (BadLocationException e) {
+            throw new RuntimeException(e);
+        }
+        Rectangle viewRectangle = new Rectangle(0, caretRectangle.y -
+                (scrollPane.getHeight() - caretRectangle.height) / 2,
+                scrollPane.getWidth(), scrollPane.getHeight());
+        scrollRectToVisible(viewRectangle);
 
     }
 }

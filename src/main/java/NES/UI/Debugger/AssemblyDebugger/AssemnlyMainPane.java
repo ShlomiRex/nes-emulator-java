@@ -15,7 +15,6 @@ public class AssemnlyMainPane extends JPanel {
     public final AssemblyTextPane assembly_text_area;
 
     public AssemnlyMainPane(CPU cpu, byte[] cpu_memory) {
-        CPURegisters cpuRegisters = cpu.registers;
 
         setBorder(BorderFactory.createLoweredBevelBorder());
 
@@ -25,57 +24,9 @@ public class AssemnlyMainPane extends JPanel {
         assembly_text_area.ready_next_instruction();
 
         JScrollPane scrollPane = new JScrollPane(assembly_text_area);
+        assembly_text_area.setScrollPane(scrollPane);
         scrollPane.setPreferredSize(new Dimension(300, 600));
         add(scrollPane);
-    }
-
-//    private void initializeAssemblyText() throws BadLocationException {
-//        short pc = (short) (cpuRegisters.getPC() & 0xFFFF);
-//
-//        //TODO: Change assembly_line_num to something bigger... it should write all the assembly lines
-//        for (int assembly_line_num = 0; assembly_line_num < 350; assembly_line_num++) {
-//            AssemblyInfo info = Decoder.decode_assembly_line(cpu_memory, pc);
-//
-//            // Assembly line address
-//            String str_addr = Common.shortToHex(pc, true);
-//            append(str_addr+"\t", attr_black);
-//
-//            // Instructions bytes (1-3 bytes)
-//            append(info.str_instr_bytes+"\t", attr_gray);
-//
-//            // Opcode
-//            if (info.instr_info != null)
-//                append(info.instr_info.instr.toString()+" ", attr_blue);
-//            else
-//                append("UNDEFINED", attr_blue);
-//
-//            // Operands
-//            String operands = info.decoded_operand_or_symbol;
-//            if (operands != null) {
-////                if (operands.contains("#")) {
-////                    // Not symbol - get the prefix and suffix
-////                    String[] split = operands.split("\\$");
-////                    append(split[0], attr_blue);
-////                    append("$"+split[1], attr_green);
-////                }
-////                else {
-////                    // Symbol
-////                    append(operands, attr_blue);
-////                }
-//                append(operands, attr_green);
-//            }
-//
-//            append("\n", attr_black);
-//            if (info.instr_info != null)
-//                pc += info.instr_info.bytes;
-//            else
-//                pc += 1;
-//        }
-//    }
-
-    private void append(String str, SimpleAttributeSet set) throws BadLocationException {
-        Document doc = assembly_text_area.getStyledDocument();
-        doc.insertString(doc.getLength(), str, set);
     }
 
     @Override
