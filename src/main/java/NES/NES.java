@@ -43,20 +43,13 @@ public class NES {
         cpu.res_interrupt();
     }
 
-    public void run(Runnable update_debugger) {
+    public void run() {
         is_running = true;
         while (is_running) {
             cpu.clock_tick();
             ppu.clock_tick();
             ppu.clock_tick();
             ppu.clock_tick();
-//            if (update_debugger != null)
-//                update_debugger.run();
-//            try {
-//                Thread.sleep(10);
-//            } catch (InterruptedException e) {
-//                throw new RuntimeException(e);
-//            }
         }
     }
 

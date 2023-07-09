@@ -1,9 +1,9 @@
 package NES.CPU;
 
 import NES.CPU.Decoder.Decoder;
-import NES.CPU.Decoder.DecoderException;
 import NES.CPU.Decoder.InstructionInfo;
 import NES.CPU.Registers.CPURegisters;
+import NES.CPU.Registers.Flags;
 import NES.Common;
 import NES.PPU.PPURegisters;
 import org.slf4j.Logger;
@@ -1159,15 +1159,13 @@ public class CPU {
     }
 
     /**
-     * Push PC onto stack, adding offset to PC.
-     * @param offset
+     * Push PC onto stack. Pushes high byte first, then low byte.
      */
-    private void push_pc(short offset) {
-        byte pc_msb = (byte) ((registers.getPC() + offset) >> 8);
-        byte pc_lsb = (byte) (registers.getPC() + offset);
+    private void push_pc() {
+        byte pc_msb = (byte) ((registers.getPC()) >> 8);
+        byte pc_lsb = (byte) (registers.getPC());
         push_stack(pc_msb); // store high
         push_stack(pc_lsb); // store low
-        registers.setPC((short) (registers.getPC() + offset + offset));
     }
 
     /**
@@ -1206,28 +1204,40 @@ public class CPU {
     public void nmi_interrupt() {
         //logger.debug("NMI interrupt called");
         // Store current flags onto stack and when returning, restore them.
-        push_pc((short) 0);
-        byte p_flag = registers.getP().getAllFlags();
+        push_pc();
 
-        // Set B (break) flag to 0.
-        p_flag = Common.Bits.setBit(p_flag, 4, false);
+        setFlag(Flags.BREAK, false);
+        setFlag(Flags.UNUSED, true);
+        setFlag(Flags.INTERRUPT, true);
 
-        // Set I (interrupt) flag to 1.
-        p_flag = Common.Bits.setBit(p_flag, 2, true);
+        push_stack(registers.getP().getAllFlags());
 
-        // Set U (unused) flag to 1.
-        p_flag = Common.Bits.setBit(p_flag, 5, true);
-
-        push_stack(p_flag);
-
-        // Load interrupt vector and jump to address.
         byte vector_lsb = read_memory((short) 0xFFFA);
         byte vector_msb = read_memory((short) 0xFFFB);
         short new_pc = Common.makeShort(vector_lsb, vector_msb);
-        //logger.debug("Jumping to interrupt address: " + Common.shortToHex(new_pc, true));
         registers.setPC(new_pc);
 
-        cycles = 8; // TODO: IDK why but he does this: https://github.com/OneLoneCoder/olcNES/blob/ac5ce64cdb3a390a89d550c5f130682b37eeb080/Part%232%20-%20CPU/olc6502.cpp#L248C2-L248C2
+        cycles += 8; // TODO: IDK why but he does this: https://github.com/OneLoneCoder/olcNES/blob/ac5ce64cdb3a390a89d550c5f130682b37eeb080/Part%232%20-%20CPU/olc6502.cpp#L248C2-L248C2
+    }
+
+    public void irq_interrupt() {
+        // if interrupt flag is not set, then do interrupt. Else, ignore. (This is the I flag - ignore interrupts if set)
+        if (!Common.Bits.getBit(registers.getP().getAllFlags(), 2)) {
+            push_pc();
+
+            byte p_flag = registers.getP().getAllFlags();
+            setFlag(Flags.BREAK, false );
+            setFlag(Flags.UNUSED, true );
+            setFlag(Flags.INTERRUPT, true );
+            push_stack(p_flag);
+
+            byte vector_lsb = read_memory((short) 0xFFFE);
+            byte vector_msb = read_memory((short) 0xFFFF);
+            short new_pc = Common.makeShort(vector_lsb, vector_msb);
+            registers.setPC(new_pc);
+
+            cycles += 7; // TODO: IDK why
+        }
     }
 
     /**
@@ -1492,5 +1502,9 @@ public class CPU {
         registers.getP().modify_n((byte) result);
         registers.getP().modify_z((byte) result);
         registers.getP().setCarry(carry);
+    }
+
+    private void setFlag(Flags flag, boolean value) {
+        registers.setFlag(flag, value);
     }
 }

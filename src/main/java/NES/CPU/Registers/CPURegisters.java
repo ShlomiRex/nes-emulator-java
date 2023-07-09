@@ -1,9 +1,6 @@
 package NES.CPU.Registers;
 
 import NES.Common;
-import NES.UI.Debugger.CPUDebugger.RegistersPanel;
-
-import java.beans.PropertyChangeEvent;
 
 public class CPURegisters {
 
@@ -89,6 +86,11 @@ public class CPURegisters {
 
     public void setS(byte s) {
         this.S = s;
+    }
+
+    public void setFlag(Flags flag, boolean value) {
+        byte new_p = Common.Bits.setBit(P.getAllFlags(), flag.getBit(), value);
+        P.setAllFlags(new_p);
     }
 
     public void incrementPC() {
