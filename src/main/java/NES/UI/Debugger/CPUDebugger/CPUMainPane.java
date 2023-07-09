@@ -10,11 +10,13 @@ import java.awt.*;
 public class CPUMainPane extends JPanel {
     private final CPUButtonPane button_pane;
 
+    public final JPanel stack_pane;
+
     public CPUMainPane(CPU cpu, AssemblyTextPane assembly_text_pane) {
         setBorder(BorderFactory.createTitledBorder("CPU"));
 
         JPanel reg_pane = new RegistersPanel(cpu.registers);
-        JPanel stack_pane = new StackPanel(cpu);
+        stack_pane = new StackPanel(cpu);
         button_pane = new CPUButtonPane(cpu, this, assembly_text_pane);
         JPanel cycles_pane = new CyclesPane(cpu);
         JPanel num_instr_pane = new NumInstructionsPane(cpu);

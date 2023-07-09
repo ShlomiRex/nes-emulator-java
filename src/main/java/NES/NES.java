@@ -37,6 +37,9 @@ public class NES {
 
         ppu = new PPU(header.getMirrorType(), chr_rom);
         cpu = new CPU(cpu_memory, ppu.registers);
+
+        ppu.set_cpu_nmi_callback(cpu::nmi_interrupt);
+
         cpu.res_interrupt();
     }
 

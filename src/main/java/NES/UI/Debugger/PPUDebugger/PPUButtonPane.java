@@ -15,7 +15,7 @@ public class PPUButtonPane extends JPanel {
     private final Logger logger = LoggerFactory.getLogger(PPUButtonPane.class);
     private boolean is_running;
 
-    public PPUButtonPane(PPU ppu, JPanel debugger_pane) {
+    public PPUButtonPane(PPU ppu, JPanel ppu_debugger_pane, JPanel cpu_stack_pane) {
         JButton btn_tick = new JButton("Tick");
         JButton btn_run = new JButton("Run");
         JButton btn_stop = new JButton("Stop");
@@ -65,7 +65,7 @@ public class PPUButtonPane extends JPanel {
 
                     @Override
                     protected void done() {
-                        debugger_pane.repaint();
+                        ppu_debugger_pane.repaint();
                     }
                 };
                 worker.execute();
@@ -94,7 +94,7 @@ public class PPUButtonPane extends JPanel {
 
                     @Override
                     protected void process(List<Void> chunks) {
-                        debugger_pane.repaint();
+                        ppu_debugger_pane.repaint();
                     }
                 };
                 worker.execute();
@@ -112,7 +112,7 @@ public class PPUButtonPane extends JPanel {
                 btn_run.setEnabled(true);
                 btn_stop.setEnabled(false);
 
-                debugger_pane.repaint();
+                ppu_debugger_pane.repaint();
             }
         });
 
@@ -144,7 +144,7 @@ public class PPUButtonPane extends JPanel {
 
                     @Override
                     protected void process(List<Void> chunks) {
-                        debugger_pane.repaint();
+                        ppu_debugger_pane.repaint();
                     }
                 };
                 worker.execute();
@@ -171,7 +171,7 @@ public class PPUButtonPane extends JPanel {
                                     break;
                                 ppu.clock_tick();
                             }
-                            debugger_pane.repaint();
+                            ppu_debugger_pane.repaint();
                         }
                         btn_tick.setEnabled(true);
                         btn_run.setEnabled(true);
@@ -196,8 +196,8 @@ public class PPUButtonPane extends JPanel {
                         btn_run.setEnabled(false);
                         btn_stop.setEnabled(true);
 
-                        boolean nmi = Common.Bits.getBit(ppu.registers.getPPUSTATUS(), 7);
-                        while (is_running && !nmi) {
+                        // While NMI bit is 0
+                        while (is_running && !Common.Bits.getBit(ppu.registers.getPPUSTATUS(), 7)) {
                             ppu.clock_tick();
                         }
                         publish();
@@ -207,7 +207,7 @@ public class PPUButtonPane extends JPanel {
 
                     @Override
                     protected void process(List<Void> chunks) {
-                        debugger_pane.repaint();
+                        ppu_debugger_pane.repaint();
                     }
 
                     @Override
@@ -216,7 +216,8 @@ public class PPUButtonPane extends JPanel {
                         btn_tick.setEnabled(true);
                         btn_run.setEnabled(true);
                         btn_stop.setEnabled(false);
-                        debugger_pane.repaint();
+                        ppu_debugger_pane.repaint();
+                        cpu_stack_pane.repaint();
                     }
                 };
                 worker.execute();

@@ -138,11 +138,6 @@ public class PPU {
      * Clock tick for PPU.
      */
     public void clock_tick() {
-        // Simulate PPU updates with random data for demonstration
-//        for (int i = 0; i < frameBuffer.length; i++) {
-//            frameBuffer[i] = (byte) (Math.random() * 256); // Random pixel value between 0-255
-//        }
-
         if (frame == 60) {
             frame = 0;
             return;
@@ -160,15 +155,10 @@ public class PPU {
             return;
         }
 
-        // TODO: Decide what to do
-//        if (scanline == 240 && cycle == 0) {
-//            // The PPU is idle during this cycle, but FCEUX emulator renders frame at this exact time.
-//            draw_frame();
-//        }
-
         if (scanline == 241 && cycle == 1) {
             // VBlank start
-            registers.writePPUSTATUS((byte) (registers.readPPUSTATUS() | 0x80)); // Set bit 7
+            byte new_ppu_status = Common.Bits.setBit(registers.readPPUSTATUS(), 7, true);
+            registers.writePPUSTATUS(new_ppu_status); // Set bit 7
 
             if (cpu_nmi_callback != null)
                 cpu_nmi_callback.run();

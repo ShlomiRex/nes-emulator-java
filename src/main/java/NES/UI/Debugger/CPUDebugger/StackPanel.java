@@ -25,9 +25,9 @@ public class StackPanel extends JPanel {
 
         JScrollPane scrollPane = new JScrollPane(my_list);
 
-        add(new JLabel("$1FF"));
+        //add(new JLabel("$1FF"));
         add(scrollPane);
-        add(new JLabel("$100"));
+        //add(new JLabel("$100"));
     }
 
     @Override
@@ -38,9 +38,10 @@ public class StackPanel extends JPanel {
         // If stack not empty
         if (stack_pointer != 0xFF) {
             model.clear(); // Clear the list, we add elements again
-            for(int i = 0xFF; i >= stack_pointer; i--) {
-                byte mem = cpu.get_memory((short) (0x100 + i));
-                model.addElement(String.format("%02X", mem));
+            for(int i = 0xFF; i > stack_pointer; i--) {
+                short addr = (short) (0x100 + i);
+                byte mem = cpu.get_memory(addr);
+                model.addElement(String.format("%03X : %02X", addr, mem));
             }
         }
     }

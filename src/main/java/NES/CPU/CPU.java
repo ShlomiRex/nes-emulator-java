@@ -1145,6 +1145,9 @@ public class CPU {
     }
 
     private void push_stack(byte data) {
+        logger.debug("Pushing to stack: " +
+                Common.byteToHex(data, true) +
+                " at address: " + Common.byteToHex(registers.getS(), true));
         write_memory(Common.makeShort(registers.getS(), (byte) 0x01), data);
         registers.setS((byte) (registers.getS() - 1));
     }
@@ -1200,13 +1203,21 @@ public class CPU {
         registers.getP().setCarry(new_c); // TODO: Expected true
     }
 
-    private void nmi_interrupt() {
+    public void nmi_interrupt() {
         //logger.debug("NMI interrupt called");
         // Store current flags onto stack and when returning, restore them.
         push_pc((short) 0);
         byte p_flag = registers.getP().getAllFlags();
-        // Read about B flag: https://www.nesdev.org/wiki/Status_flags#The_B_flag
+
+        // Set B (break) flag to 0.
         p_flag = Common.Bits.setBit(p_flag, 4, false);
+
+        // Set I (interrupt) flag to 1.
+        p_flag = Common.Bits.setBit(p_flag, 2, true);
+
+        // Set U (unused) flag to 1.
+        p_flag = Common.Bits.setBit(p_flag, 5, true);
+
         push_stack(p_flag);
 
         // Load interrupt vector and jump to address.
@@ -1215,6 +1226,8 @@ public class CPU {
         short new_pc = Common.makeShort(vector_lsb, vector_msb);
         //logger.debug("Jumping to interrupt address: " + Common.shortToHex(new_pc, true));
         registers.setPC(new_pc);
+
+        cycles = 8; // TODO: IDK why but he does this: https://github.com/OneLoneCoder/olcNES/blob/ac5ce64cdb3a390a89d550c5f130682b37eeb080/Part%232%20-%20CPU/olc6502.cpp#L248C2-L248C2
     }
 
     /**
