@@ -35,14 +35,11 @@ public class StackPanel extends JPanel {
         super.paintComponent(g);
         int stack_pointer = cpu.registers.S & 0xFF;
 
-        // If stack not empty
-        if (stack_pointer != 0xFF) {
-            model.clear(); // Clear the list, we add elements again
-            for(int i = 0xFF; i > stack_pointer; i--) {
-                short addr = (short) (0x100 + i);
-                byte mem = cpu.get_memory(addr);
-                model.addElement(String.format("%03X : %02X", addr, mem));
-            }
+        model.clear(); // Clear the list, we add elements again
+        for(int i = 0xFF; i > stack_pointer; i--) {
+            short addr = (short) (0x100 + i);
+            byte mem = cpu.get_memory(addr);
+            model.addElement(String.format("%03X : %02X", addr, mem));
         }
     }
 }
