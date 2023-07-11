@@ -1,6 +1,8 @@
 package NES.UI.Debugger.PPUDebugger;
 
 import NES.PPU.PPU;
+import NES.UI.Debugger.AssemblyDebugger.AssemblyTextPane;
+import NES.UI.Debugger.CPUDebugger.CPUMainPane;
 import NES.UI.Debugger.PPUDebugger.Palette.PaletteMemoryPane;
 import NES.UI.Debugger.PPUDebugger.Palette.SystemPalettePane;
 import NES.UI.Debugger.PPUDebugger.PatternTable.PatternTablesPane;
@@ -13,7 +15,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class PPUMainPane extends JPanel {
-    public PPUMainPane(PPU ppu, JPanel cpu_stack_pane) {
+    public PPUMainPane(PPU ppu, CPUMainPane cpu_main_pane, AssemblyTextPane assemblyTextPane) {
         setBorder(BorderFactory.createTitledBorder("PPU"));
 
         // Containers
@@ -30,7 +32,7 @@ public class PPUMainPane extends JPanel {
         palette_pane.setLayout(new BoxLayout(palette_pane, BoxLayout.PAGE_AXIS));
 
         // Main panels
-        JPanel button_pane = new PPUButtonPane(ppu, top_flow_pane, cpu_stack_pane); // We don't need to update unrelated panels
+        JPanel button_pane = new PPUButtonPane(ppu, top_flow_pane, cpu_main_pane, assemblyTextPane); // We don't need to update unrelated panels
         JPanel cycles_pane = new CyclesPane(ppu);
         JPanel scanline_pane = new ScanlinePane(ppu);
         JPanel frame_pane = new FramePane(ppu);

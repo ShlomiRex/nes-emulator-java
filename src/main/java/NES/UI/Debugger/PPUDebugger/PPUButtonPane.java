@@ -2,6 +2,8 @@ package NES.UI.Debugger.PPUDebugger;
 
 import NES.Common;
 import NES.PPU.PPU;
+import NES.UI.Debugger.AssemblyDebugger.AssemblyTextPane;
+import NES.UI.Debugger.CPUDebugger.CPUMainPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +17,7 @@ public class PPUButtonPane extends JPanel {
     private final Logger logger = LoggerFactory.getLogger(PPUButtonPane.class);
     private boolean is_running;
 
-    public PPUButtonPane(PPU ppu, JPanel ppu_debugger_pane, JPanel cpu_stack_pane) {
+    public PPUButtonPane(PPU ppu, JPanel ppu_debugger_pane, CPUMainPane cpu_main_pane, AssemblyTextPane assemblyTextPane) {
         JButton btn_tick = new JButton("Tick");
         JButton btn_run = new JButton("Run");
         JButton btn_stop = new JButton("Stop");
@@ -113,6 +115,8 @@ public class PPUButtonPane extends JPanel {
                 btn_stop.setEnabled(false);
 
                 ppu_debugger_pane.repaint();
+
+                assemblyTextPane.highlight_current_instruction();
             }
         });
 
@@ -217,7 +221,7 @@ public class PPUButtonPane extends JPanel {
                         btn_run.setEnabled(true);
                         btn_stop.setEnabled(false);
                         ppu_debugger_pane.repaint();
-                        cpu_stack_pane.repaint();
+                        cpu_main_pane.stack_pane.repaint();
                     }
                 };
                 worker.execute();

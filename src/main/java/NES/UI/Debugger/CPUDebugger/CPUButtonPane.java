@@ -55,7 +55,7 @@ public class CPUButtonPane extends JPanel {
                     protected void done() {
                         debugger_pane.repaint();
                         repaint_ppu_pane_runnable.run();
-                        assembly_text_pane.ready_next_instruction();
+                        assembly_text_pane.highlight_current_instruction();
                     }
                 };
                 worker.execute();
@@ -85,7 +85,7 @@ public class CPUButtonPane extends JPanel {
                     @Override
                     protected void process(List<Void> chunks) {
                         debugger_pane.repaint();
-                        assembly_text_pane.ready_next_instruction();
+                        assembly_text_pane.highlight_current_instruction();
                     }
 
                     @Override

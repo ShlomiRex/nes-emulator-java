@@ -34,9 +34,8 @@ public class AssemblyTextPane extends JTextPane {
         this.scrollPane = scrollPane;
     }
 
-    // Call when CPU finishes executing instruction and is ready for next instruction.
-    // Here we move the highlighter to the next instruction.
-    public void ready_next_instruction() {
+    // Here we move the highlighter to the next instruction, and jump the view to it.
+    public void highlight_current_instruction() {
         highlighter.removeAllHighlights();
 
         // Convert address to assembly line, and get starting offset of that line and end offset.
