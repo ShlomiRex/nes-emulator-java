@@ -45,31 +45,6 @@ public class CPURegisters {
         return Common.Bits.getBit(P, flag.getBit());
     }
 
-    public boolean getCarry() {
-        return Common.Bits.getBit(P, 0);
-    }
-    public boolean getZero() {
-        return Common.Bits.getBit(P, 1);
-    }
-    public boolean getInterruptDisable() {
-        return Common.Bits.getBit(P, 2);
-    }
-    public boolean getDecimal() {
-        return Common.Bits.getBit(P, 3);
-    }
-    public boolean getBreak() {
-        return Common.Bits.getBit(P, 4);
-    }
-    public boolean getUnused() {
-        return Common.Bits.getBit(P, 5);
-    }
-    public boolean getNegative() {
-        return Common.Bits.getBit(P, 7);
-    }
-    public boolean getOverflow() {
-        return Common.Bits.getBit(P, 6);
-    }
-
 
 
     public void modify_n(byte value) {
@@ -79,8 +54,5 @@ public class CPURegisters {
     public void modify_z(byte result) {
         setFlag(Flags.ZERO, result == 0);
     }
-
-
-
 
 }

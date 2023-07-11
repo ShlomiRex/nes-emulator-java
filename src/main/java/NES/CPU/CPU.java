@@ -1064,14 +1064,14 @@ public class CPU {
                 short addr_tmp = (short) (registers.PC + operand);
                 byte addr_tmp_high = (byte) ((addr_tmp >> 8) & 0xFF);
                 if (
-                        (instr == Instructions.BMI && registers.getNegative()     == true)    ||
-                                (instr == Instructions.BPL && registers.getNegative()     == false)   ||
-                                (instr == Instructions.BNE && registers.getZero()         == false)   ||
-                                (instr == Instructions.BVC && registers.getOverflow()     == false)   ||
-                                (instr == Instructions.BVS && registers.getOverflow()     == true)    ||
-                                (instr == Instructions.BEQ && registers.getZero()         == true)    ||
-                                (instr == Instructions.BCS && registers.getCarry()        == true)    ||
-                                (instr == Instructions.BCC && registers.getCarry()        == false)) {
+                        (instr == Instructions.BMI && registers.getFlag(NEGATIVE)     == true)    ||
+                                (instr == Instructions.BPL && registers.getFlag(NEGATIVE)     == false)   ||
+                                (instr == Instructions.BNE && registers.getFlag(ZERO)         == false)   ||
+                                (instr == Instructions.BVC && registers.getFlag(OVERFLOW)     == false)   ||
+                                (instr == Instructions.BVS && registers.getFlag(OVERFLOW)     == true)    ||
+                                (instr == Instructions.BEQ && registers.getFlag(ZERO)         == true)    ||
+                                (instr == Instructions.BCS && registers.getFlag(CARRY)        == true)    ||
+                                (instr == Instructions.BCC && registers.getFlag(CARRY)        == false)) {
                     // Branch taken
 
                     read_memory(registers.PC); // dummy read
@@ -1224,7 +1224,7 @@ public class CPU {
 
     public void irq_interrupt() {
         // if interrupt flag is not set, then do interrupt. Else, ignore. (This is the I flag - ignore interrupts if set)
-        if (!registers.getInterruptDisable()) {
+        if (!registers.getFlag(INTERRUPT)) {
             push_pc();
 
             setFlag(BREAK, false);
@@ -1274,11 +1274,11 @@ public class CPU {
     }
 
     private void exec_adc() {
-        byte result = (byte) (registers.A + fetched_data + (registers.getCarry() ? 1 : 0));
+        byte result = (byte) (registers.A + fetched_data + (registers.getFlag(CARRY) ? 1 : 0));
 
         byte m_plus_a = (byte) (fetched_data + registers.A);
         boolean is_carry = Common.isAdditionCarry(fetched_data, registers.A);
-        boolean is_carry2 = Common.isAdditionCarry(m_plus_a, (byte) (registers.getCarry() ? 1 : 0));
+        boolean is_carry2 = Common.isAdditionCarry(m_plus_a, (byte) (registers.getFlag(CARRY) ? 1 : 0));
         boolean negative_flag_set = ((registers.A ^ result) & (fetched_data ^ result) & 0x80) != 0;
 
         registers.modify_n(result);
@@ -1328,7 +1328,7 @@ public class CPU {
 //        else
 //            fetched_data = read_memory(fetched_addr);
 
-        boolean in_carry = registers.getCarry();
+        boolean in_carry = registers.getFlag(CARRY);
         boolean out_carry;
         byte result;
         if (is_left_shift) {
@@ -1411,11 +1411,11 @@ public class CPU {
         // Like ADC but we invert the fetched data
         fetched_data = (byte) (fetched_data ^ 0xFF);
 
-        byte result = (byte) (registers.A + fetched_data + (registers.getCarry() ? 1 : 0));
+        byte result = (byte) (registers.A + fetched_data + (registers.getFlag(CARRY) ? 1 : 0));
 
         byte m_plus_a = (byte) (fetched_data + registers.A);
         boolean is_carry = Common.isAdditionCarry(fetched_data, registers.A);
-        boolean is_carry2 = Common.isAdditionCarry(m_plus_a, (byte) (registers.getCarry() ? 1 : 0));
+        boolean is_carry2 = Common.isAdditionCarry(m_plus_a, (byte) (registers.getFlag(CARRY) ? 1 : 0));
         boolean negative_flag_set = ((registers.A ^ result) & (fetched_data ^ result) & 0x80) != 0;
 
         registers.modify_n(result);

@@ -11,13 +11,13 @@ public class TestCPURegisters {
         CPURegisters cpuRegisters = new CPURegisters();
 
         cpuRegisters.modify_z((byte) 0);
-        assertEquals(cpuRegisters.getZero(), true);
+        assertEquals(cpuregisters.getFlag(ZERO), true);
 
         cpuRegisters.modify_z((byte) 0xFF);
-        assertEquals(cpuRegisters.getZero(), false);
+        assertEquals(cpuregisters.getFlag(ZERO), false);
 
         cpuRegisters.modify_z((byte) 0);
-        assertEquals(cpuRegisters.getZero(), true);
+        assertEquals(cpuregisters.getFlag(ZERO), true);
     }
 
     @Test
@@ -25,21 +25,21 @@ public class TestCPURegisters {
         CPURegisters cpuRegisters = new CPURegisters();
 
         cpuRegisters.modify_n((byte) 0);
-        assertEquals(cpuRegisters.getNegative(), false);
+        assertEquals(cpuregisters.getFlag(NEGATIVE), false);
 
         cpuRegisters.modify_n((byte) 0xAA);
-        assertEquals(cpuRegisters.getNegative(), true);
+        assertEquals(cpuregisters.getFlag(NEGATIVE), true);
 
         cpuRegisters.modify_n((byte) 0x56);
-        assertEquals(cpuRegisters.getNegative(), false);
+        assertEquals(cpuregisters.getFlag(NEGATIVE), false);
 
         cpuRegisters.modify_n((byte) 0xFF);
-        assertEquals(cpuRegisters.getNegative(), true);
+        assertEquals(cpuregisters.getFlag(NEGATIVE), true);
 
         cpuRegisters.modify_n((byte) 0x7F);
-        assertEquals(cpuRegisters.getNegative(), false);
+        assertEquals(cpuregisters.getFlag(NEGATIVE), false);
 
         cpuRegisters.modify_n((byte) 0x80);
-        assertEquals(cpuRegisters.getNegative(), true);
+        assertEquals(cpuregisters.getFlag(NEGATIVE), true);
     }
 }

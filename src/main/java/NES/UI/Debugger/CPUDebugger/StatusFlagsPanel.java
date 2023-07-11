@@ -6,6 +6,8 @@ import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 
+import static NES.CPU.Registers.Flags.*;
+
 public class StatusFlagsPanel extends JPanel {
 
     private final CPURegisters cpuRegisters;
@@ -19,27 +21,35 @@ public class StatusFlagsPanel extends JPanel {
 
         c = new JCheckBox("C");
         c.setEnabled(false);
+        c.setToolTipText("Carry bit flag");
 
         z = new JCheckBox("Z");
         z.setEnabled(false);
+        z.setToolTipText("Zero bit flag");
 
         i = new JCheckBox("I");
         i.setEnabled(false);
+        i.setToolTipText("Interrupt disable bit flag");
 
         d = new JCheckBox("D");
         d.setEnabled(false);
+        d.setToolTipText("Decimal mode bit flag");
 
         b = new JCheckBox("B");
         b.setEnabled(false);
+        b.setToolTipText("Break bit flag");
 
         u = new JCheckBox("U");
         u.setEnabled(false);
+        u.setToolTipText("Unused bit flag");
 
         v = new JCheckBox("V");
         v.setEnabled(false);
+        v.setToolTipText("Overflow bit flag");
 
         n = new JCheckBox("N");
         n.setEnabled(false);
+        n.setToolTipText("Negative bit flag");
 
         // Swap order so its like binary right to left
         add(n);
@@ -56,16 +66,16 @@ public class StatusFlagsPanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        c.setSelected(cpuRegisters.getCarry());
-        z.setSelected(cpuRegisters.getZero());
-        i.setSelected(cpuRegisters.getInterruptDisable());
-        d.setSelected(cpuRegisters.getDecimal());
+        c.setSelected(cpuRegisters.getFlag(CARRY));
+        z.setSelected(cpuRegisters.getFlag(ZERO));
+        i.setSelected(cpuRegisters.getFlag(INTERRUPT));
+        d.setSelected(cpuRegisters.getFlag(DECIMAL));
 
         // Both bits are not used really
-        b.setSelected(cpuRegisters.getBreak());
-        u.setSelected(cpuRegisters.getUnused());
+        b.setSelected(cpuRegisters.getFlag(BREAK));
+        u.setSelected(cpuRegisters.getFlag(UNUSED));
 
-        v.setSelected(cpuRegisters.getOverflow());
-        n.setSelected(cpuRegisters.getNegative());
+        v.setSelected(cpuRegisters.getFlag(OVERFLOW));
+        n.setSelected(cpuRegisters.getFlag(NEGATIVE));
     }
 }
