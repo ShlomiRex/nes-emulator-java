@@ -158,14 +158,21 @@ public class PPU {
 
         if (scanline == 241 && cycle == 1) {
             // VBlank start
+
+            logger.debug("VBlank start");
+
             registers.PPUSTATUS = Common.Bits.setBit(registers.PPUSTATUS, 7, true);
 
             /**
              * Bit 7 of PPUCTRL: Generate an NMI at the start of the vertical blanking interval (0: off; 1: on)
              * The PPUCTRL controls the NMI line.
              */
-            if (Common.Bits.getBit(registers.getPPUCTRL(), 7))
+            if (Common.Bits.getBit(registers.getPPUCTRL(), 7)) {
                 bus.nmi_line = true;
+                logger.debug("Generating NMI interrupt");
+            } else {
+                logger.debug("Not generating NMI interrupt");
+            }
 
             // Repaint the game canvas
             if (trigger_game_canvas_repaint != null)
@@ -279,7 +286,7 @@ public class PPU {
                     addr -= 0x800;
             }
             vram[((addr - 0x2000) % 0x400)] = value;
-            logger.debug("Writing to name table at index: " + ((addr - 0x2000) % 0x400));
+            //logger.debug("Writing to name table at index: " + ((addr - 0x2000) % 0x400));
         } else if (addr >= 0x3F00 && addr <= 0x3FFF) {
             // Palette RAM
             palette_ram[addr - 0x3F00] = value;

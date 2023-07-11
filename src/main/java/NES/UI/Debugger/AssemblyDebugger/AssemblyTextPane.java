@@ -2,6 +2,8 @@ package NES.UI.Debugger.AssemblyDebugger;
 
 import NES.CPU.CPU;
 import NES.CPU.Registers.CPURegisters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
@@ -11,6 +13,7 @@ import java.awt.*;
 
 public class AssemblyTextPane extends JTextPane {
 
+    private final Logger logger = LoggerFactory.getLogger(AssemblyTextPane.class);
     private final CPURegisters cpuRegisters;
     private JScrollPane scrollPane;
     private final Highlighter.HighlightPainter highlightPainter;
@@ -24,7 +27,7 @@ public class AssemblyTextPane extends JTextPane {
         this.highlighter = getHighlighter();
         this.highlightPainter = new DefaultHighlighter.DefaultHighlightPainter(Color.YELLOW);
         this.styledDocument = new AssemblyStyledDocument(
-                this, cpu_memory, true, 2048);
+                this, cpu_memory, true, 1024 * 16);
 
         setEditable(false);
         setFont(new Font("monospaced", Font.PLAIN, 12));
@@ -44,6 +47,7 @@ public class AssemblyTextPane extends JTextPane {
                 = styledDocument.get_assembly_line(pc);
         if (structure == null) {
             // do not throw exception, the assembly line to highlight is not loaded.
+            logger.error("Assembly line to highlight is not loaded, PC: {}", pc);
             return;
         }
         int start_offset = structure.document_offset();

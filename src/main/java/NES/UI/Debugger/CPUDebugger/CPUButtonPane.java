@@ -28,6 +28,10 @@ public class CPUButtonPane extends JPanel {
         JButton btn_run = new JButton("Run");
         JButton btn_stop = new JButton("Stop");
 
+        JButton btn_run_custom_ticks = new JButton("Run custom ticks");
+        JTextField txt_custom_ticks = new JTextField("16");
+        txt_custom_ticks.setColumns(4);
+
         JPanel box_pane = new JPanel();
         box_pane.setLayout(new BoxLayout(box_pane, BoxLayout.PAGE_AXIS));
         box_pane.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
@@ -35,9 +39,14 @@ public class CPUButtonPane extends JPanel {
         box_pane.add(btn_run);
         box_pane.add(btn_stop);
 
+        JPanel box_pane2 = new JPanel();
+        box_pane2.add(btn_run_custom_ticks);
+        box_pane2.add(txt_custom_ticks);
+
         btn_stop.setEnabled(false);
 
         add(box_pane);
+        add(box_pane2);
 
         btn_tick.addActionListener(new AbstractAction() {
             @Override
@@ -109,6 +118,33 @@ public class CPUButtonPane extends JPanel {
                 btn_stop.setEnabled(false);
 
                 debugger_pane.repaint();
+            }
+        });
+
+        btn_run_custom_ticks.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                logger.debug("Run custom ticks clicked");
+
+                SwingWorker<Void, Void> worker = new SwingWorker<>() {
+                    @Override
+                    protected Void doInBackground() {
+                        int ticks = Integer.parseInt(txt_custom_ticks.getText());
+                        for (int i = 0; i < ticks; i++) {
+                            cpu.clock_tick();
+                        }
+                        publish();
+                        return null;
+                    }
+
+                    @Override
+                    protected void done() {
+                        debugger_pane.repaint();
+                        repaint_ppu_pane_runnable.run();
+                        assembly_text_pane.highlight_current_instruction();
+                    }
+                };
+                worker.execute();
             }
         });
     }

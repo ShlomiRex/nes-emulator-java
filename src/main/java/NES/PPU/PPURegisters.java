@@ -72,26 +72,8 @@ public class PPURegisters {
         return before;
     }
 
-    public void writePPUCTRL(byte value) {
-        byte old_value = PPUCTRL;
-        boolean old_nmi = Common.Bits.getBit(old_value, 7);
-        boolean new_nmi = Common.Bits.getBit(value, 7);
-
-        if (old_nmi && !new_nmi) {
-            logger.info("Disabling 'Generate NMI' in PPUCTRL");
-        } else {
-            logger.info("Enabling 'Generate NMI' in PPUCTRL");
-        }
-
-        PPUCTRL = value;
-    }
-
     public void writePPUMASK(byte value) {
         PPUMASK = value;
-    }
-
-    public void writePPUSTATUS(byte b) {
-        PPUSTATUS = b;
     }
 
     public void writeOAMADDR(byte value) {
@@ -245,5 +227,9 @@ public class PPURegisters {
      */
     public byte getOAMDMA() {
         return OAMDMA;
+    }
+
+    public void writePPUCTRL(byte value) {
+        PPUCTRL = value;
     }
 }

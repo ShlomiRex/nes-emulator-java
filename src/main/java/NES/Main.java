@@ -18,7 +18,7 @@ public class Main {
         String hb1 = "6502_programs/single_sprite/hb1.nes";
         String mario = "6502_programs/mario/Super Mario Bros (E).nes";
 
-        String program = nestest;
+        String program = mario;
 
         ROMParser romParser = new ROMParser(program);
 
