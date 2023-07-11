@@ -1,5 +1,6 @@
 package NES.CPU;
 
+import NES.Bus.Bus;
 import NES.CPU.Decoder.Decoder;
 import NES.CPU.Decoder.InstructionInfo;
 import NES.CPU.Registers.CPURegisters;
@@ -31,11 +32,13 @@ public class CPU {
 
     private byte fetched_data; // Set in addressing modes, used afterwards.
     private short fetched_addr; // Set in addressing modes, used afterwards.
+    private final Bus bus;
 
-    public CPU(byte[] cpu_memory, PPURegisters ppuRegisters) {
+    public CPU(Bus bus, byte[] cpu_memory, PPURegisters ppuRegisters) {
         if (cpu_memory.length != 1024 * 64)
             throw new RuntimeException("Unexpected CPU memory address space size");
 
+        this.bus = bus;
         this.memory = cpu_memory;
         this.ppuRegisters = ppuRegisters;
 
@@ -48,6 +51,12 @@ public class CPU {
 
         // Log current PC
         //logger.debug("PC: " + Common.shortToHex(registers.PC, true));
+
+        // We can't ignore the NMI interrupt which is called when PPU VBlank starts.
+        if (bus.nmi_line) {
+            nmi_interrupt();
+            return;
+        }
 
         // Fetch
         byte opcode = read_memory(registers.PC); // Read at address of Program Counter (duh!)

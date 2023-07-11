@@ -47,10 +47,10 @@ public class AssemblyStyledDocument {
         // Initialized assembly text structure
         assemblyTextStructure = new AssemblyTextStructure();
 
-        // Starting PC - we can start from 0 if we want
-        //pc = (short) (cpu.registers.PC & 0xFFFF);
-        short starting_pc = (short) 0xC004;
-        pc = starting_pc;
+        // Starting PC is the reset vector
+        byte reset_lsb = cpu_memory[0xFFFC];
+        byte reset_msb = cpu_memory[0xFFFD];
+        pc = Common.makeShort(reset_lsb, reset_msb);
 
         for (int asm_line_num = 0; asm_line_num < lines_to_display; asm_line_num++) {
             short old_pc = pc;

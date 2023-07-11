@@ -1,6 +1,7 @@
 package NES;
 
 
+import NES.Bus.Bus;
 import NES.CPU.CPU;
 import NES.Cartridge.ROMParser;
 import NES.Cartridge.iNESHeader;
@@ -35,10 +36,9 @@ public class NES {
             System.arraycopy(prg_rom, 0, this.cpu_memory, 0x8000, 1024*32);
         }
 
-        ppu = new PPU(header.getMirrorType(), chr_rom);
-        cpu = new CPU(cpu_memory, ppu.registers);
-
-        ppu.set_cpu_nmi_callback(cpu::nmi_interrupt);
+        Bus bus = new Bus();
+        ppu = new PPU(bus, header.getMirrorType(), chr_rom);
+        cpu = new CPU(bus, cpu_memory, ppu.registers);
 
         cpu.reset();
     }

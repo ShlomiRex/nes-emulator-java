@@ -1,5 +1,6 @@
 package NES.PPU;
 
+import NES.Bus.Bus;
 import NES.Cartridge.Mirroring;
 import NES.Cartridge.iNESHeader;
 import NES.Common;
@@ -55,13 +56,13 @@ public class PPU {
     private Runnable trigger_game_canvas_repaint;
 
     private final Mirroring mirroring;
+    private final Bus bus;
 
-    private Runnable cpu_nmi_callback;
-
-    public PPU(Mirroring mirroring, byte[] chr_rom) {
+    public PPU(Bus bus, Mirroring mirroring, byte[] chr_rom) {
         if (chr_rom.length != 1024 * 8)
             throw new IllegalArgumentException("Unexpected CHR ROM / pattern table size");
 
+        this.bus = bus;
         this.mirroring = mirroring;
         this.chr_rom = chr_rom;
 
@@ -71,10 +72,6 @@ public class PPU {
         this.registers = new PPURegisters(this);
 
         reset();
-    }
-
-    public void set_cpu_nmi_callback(Runnable callback) {
-        this.cpu_nmi_callback = callback;
     }
 
     public void reset() {
@@ -163,17 +160,22 @@ public class PPU {
             // VBlank start
             registers.PPUSTATUS = Common.Bits.setBit(registers.PPUSTATUS, 7, true);
 
-            //TODO: What to do here? Using debugger, it completly messes up the palette.
-//            if (cpu_nmi_callback != null)
-//                cpu_nmi_callback.run();
+            /**
+             * Bit 7 of PPUCTRL: Generate an NMI at the start of the vertical blanking interval (0: off; 1: on)
+             * The PPUCTRL controls the NMI line.
+             */
+            if (Common.Bits.getBit(registers.getPPUCTRL(), 7))
+                bus.nmi_line = true;
 
+            // Repaint the game canvas
             if (trigger_game_canvas_repaint != null)
                 trigger_game_canvas_repaint.run();
         }
 
+        // Scanline 261: Post render scanline
         if (scanline == 261 && cycle == 1) {
             // VBlank end
-            registers.writePPUSTATUS((byte) (registers.readPPUSTATUS() & 0x7F)); // Clear bit 7
+            registers.PPUSTATUS = Common.Bits.setBit(registers.PPUSTATUS, 7, false);
         }
 
         cycle ++;
@@ -252,8 +254,13 @@ public class PPU {
         if (addr >= 0x0000 && addr <= 0x1FFF) {
             // CHR ROM / pattern table
             throw new RuntimeException("Cannot write to CHR ROM");
-        } else if (addr >= 0x2000 && addr <= 0x2FFF) {
-            // Name table
+        } else if ((addr >= 0x2000 && addr <= 0x2FFF) ||
+                (addr >= 0x3000 && addr <= 0x3EFF)) {
+            // Name table (second if - mirrors of 0x2000-0x2EFF)
+
+            // If mirror of 0x2000-0x2EFF
+            if (addr >= 0x3000)
+                addr -= 0x1000;
 
             int nametable_id = 0;
             if (addr >= 0x2400 && addr <= 0x27FF)
@@ -272,12 +279,11 @@ public class PPU {
                     addr -= 0x800;
             }
             vram[((addr - 0x2000) % 0x400)] = value;
-        } else if (addr >= 0x3000 && addr <= 0x3EFF) {
-            // Mirrors of 0x2000-0x2EFF
-            vram[addr - 0x3000] = value;
+            logger.debug("Writing to name table at index: " + ((addr - 0x2000) % 0x400));
         } else if (addr >= 0x3F00 && addr <= 0x3FFF) {
             // Palette RAM
             palette_ram[addr - 0x3F00] = value;
+            logger.debug("Writing to palette RAM at index: " + (addr - 0x3F00));
         }
     }
 
