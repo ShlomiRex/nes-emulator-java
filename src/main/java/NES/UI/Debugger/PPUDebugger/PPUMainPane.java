@@ -3,6 +3,7 @@ package NES.UI.Debugger.PPUDebugger;
 import NES.PPU.PPU;
 import NES.UI.Debugger.AssemblyDebugger.AssemblyTextPane;
 import NES.UI.Debugger.CPUDebugger.CPUMainPane;
+import NES.UI.Debugger.PPUDebugger.Nametable.NametablePane;
 import NES.UI.Debugger.PPUDebugger.Palette.PaletteMemoryPane;
 import NES.UI.Debugger.PPUDebugger.Palette.SystemPalettePane;
 import NES.UI.Debugger.PPUDebugger.PatternTable.PatternTablesPane;
@@ -41,6 +42,7 @@ public class PPUMainPane extends JPanel {
         JPanel pattern_tables_pane = new PatternTablesPane(ppu);
         JPanel system_palette_pane = new SystemPalettePane();
         JPanel palette_memory_pane = new PaletteMemoryPane(ppu);
+        JPanel nametable_pane = new NametablePane();
 
         // Add panels
         status_info_pane.add(cycles_pane);
@@ -60,6 +62,7 @@ public class PPUMainPane extends JPanel {
 
         box_pane.add(top_flow_pane);
         box_pane.add(bottom_flow_pane);
+        box_pane.add(nametable_pane);
 
         add(box_pane);
     }

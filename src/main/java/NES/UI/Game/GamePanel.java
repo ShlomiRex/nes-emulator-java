@@ -31,7 +31,7 @@ public class GamePanel extends JPanel {
         super.paintComponent(g);
 
         // TODO: uncomment
-        //ppu.draw_frame(g, getWidth(), getHeight());
+        ppu.draw_frame(g, getWidth(), getHeight());
 //
 //        // Clear the screen
 //        g.setColor(Color.BLACK);
