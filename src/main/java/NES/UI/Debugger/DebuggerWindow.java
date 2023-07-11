@@ -12,7 +12,7 @@ public class DebuggerWindow extends JFrame {
 
     public DebuggerWindow(NES nes) {
         setTitle("Java NES Emulator - Debugger");
-        setSize(1800, 800);
+        setPreferredSize(new Dimension(1200, 800));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 

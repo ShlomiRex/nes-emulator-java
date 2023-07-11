@@ -8,8 +8,10 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public class NametableCanvas extends JPanel {
+public class NametableCanvas extends JPanel implements MouseListener, MouseMotionListener {
 
     private final Logger logger = LoggerFactory.getLogger(NametableCanvas.class);
     private static final int ROWS = 30;
@@ -17,32 +19,16 @@ public class NametableCanvas extends JPanel {
 
     private static final int SCALE = 2;
 
-    private int tile_hover = -1;
+    protected AtomicInteger tile_hover = new AtomicInteger(-1);
+    protected AtomicInteger tile_selected = new AtomicInteger(-1);
+    private final NametableInfoPane info_pane;
 
-    public NametableCanvas() {
+    public NametableCanvas(NametableInfoPane info_pane) {
+        this.info_pane = info_pane;
         setPreferredSize(new Dimension(256 * SCALE, 240 * SCALE));
 
-        addMouseMotionListener(new MouseAdapter() {
-            @Override
-            public void mouseMoved(MouseEvent e) {
-                super.mouseMoved(e);
-
-                int x = e.getX() / (8 * SCALE);
-                int y = e.getY() / (8 * SCALE);
-
-                tile_hover = y * COLUMNS + x;
-                repaint();
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                super.mouseExited(e);
-
-                tile_hover = -1;
-                logger.debug("Mouse exited");
-                repaint();
-            }
-        });
+        addMouseListener(this);
+        addMouseMotionListener(this);
     }
 
     @Override
@@ -59,14 +45,66 @@ public class NametableCanvas extends JPanel {
             g.drawLine(x * 8 * SCALE, 0, x * 8 * SCALE, getHeight());
         }
 
-        // Draw the tile hover
+        int tile_hover = this.tile_hover.get();
+        int tile_selected = this.tile_selected.get();
+
         if (tile_hover != -1) {
             int x = tile_hover % COLUMNS;
             int y = tile_hover / COLUMNS;
-
             g.setColor(Color.BLUE);
             g.drawRect(x * 8 * SCALE, y * 8 * SCALE, 8 * SCALE, 8 * SCALE);
-//            g.fillRect(0, 0, 100, 100);
         }
+
+        if (tile_selected != -1) {
+            int x = tile_selected % COLUMNS;
+            int y = tile_selected / COLUMNS;
+            g.setColor(Color.RED);
+            g.drawRect(x * 8 * SCALE, y * 8 * SCALE, 8 * SCALE, 8 * SCALE);
+        }
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e) {
+        int x = e.getX() / (8 * SCALE);
+        int y = e.getY() / (8 * SCALE);
+
+        tile_hover.set(y * COLUMNS + x);
+        repaint();
+
+        info_pane.repaint();
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+        tile_hover.set(-1);
+        repaint();
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+        tile_selected.set(tile_hover.get());
+
+        repaint();
+        info_pane.repaint();
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+
     }
 }
