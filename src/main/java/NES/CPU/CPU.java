@@ -1147,9 +1147,9 @@ public class CPU {
     }
 
     private void push_stack(byte data) {
-        logger.debug("Pushing to stack: " +
-                Common.byteToHex(data, true) +
-                " at address: " + Common.byteToHex(registers.S, true));
+//        logger.debug("Pushing to stack: " +
+//                Common.byteToHex(data, true) +
+//                " at address: " + Common.byteToHex(registers.S, true));
         write_memory(Common.makeShort(registers.S, (byte) 0x01), data);
         registers.S = (byte) (registers.S - 1);
     }

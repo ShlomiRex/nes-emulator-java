@@ -13,9 +13,12 @@ import java.io.IOException;
 public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
     public static void main(String[] args) throws IOException, ROMParser.ParsingException {
-        String program = "6502_programs/nestest/nestest.nes";
-        //String program = "6502_programs/greenscreen/greenscreen.nes";
-        //String program = "6502_programs/single_sprite/hb1.nes";
+        String nestest = "6502_programs/nestest/nestest.nes";
+        String greenscreen = "6502_programs/greenscreen/greenscreen.nes";
+        String hb1 = "6502_programs/single_sprite/hb1.nes";
+        String mario = "6502_programs/mario/Super Mario Bros (E).nes";
+
+        String program = mario;
 
         ROMParser romParser = new ROMParser(program);
 

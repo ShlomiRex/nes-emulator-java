@@ -39,7 +39,7 @@ public class StackPanel extends JPanel {
         for(int i = 0xFF; i > stack_pointer; i--) {
             short addr = (short) (0x100 + i);
             byte mem = cpu.get_memory(addr);
-            model.addElement(String.format("%03X : %02X", addr, mem));
+            model.addElement(String.format("%02X: %02X", i, mem));
         }
     }
 }

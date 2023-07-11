@@ -221,7 +221,7 @@ public class PPUButtonPane extends JPanel {
                         btn_run.setEnabled(true);
                         btn_stop.setEnabled(false);
                         ppu_debugger_pane.repaint();
-                        cpu_main_pane.stack_pane.repaint();
+                        cpu_main_pane.repaint();
                     }
                 };
                 worker.execute();

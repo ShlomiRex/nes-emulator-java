@@ -22,7 +22,7 @@ public class PPURegisters {
      */
 
 
-    private byte PPUCTRL, PPUMASK, PPUSTATUS, OAMADDR, OAMDATA, PPUDATA, OAMDMA;
+    protected byte PPUCTRL, PPUMASK, PPUSTATUS, OAMADDR, OAMDATA, PPUDATA, OAMDMA;
 
     private short PPUADDR, PPUSCROLL;
 
@@ -63,7 +63,10 @@ public class PPURegisters {
      */
     public byte readPPUSTATUS() {
         byte before = PPUSTATUS;
+
+        // Clear vblank flag
         PPUSTATUS = Common.Bits.setBit(PPUSTATUS, 7, false);
+
         PPUADDR_flipflop_write_high = true;
         PPUSCROLL_flipflop_write_high = true;
         return before;

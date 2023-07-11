@@ -1,0 +1,4 @@
+In debug more when running CPU and then PPU and stopping, the palette RAM is not initialized
+
+Allow user to select palette and then re-draw the pattern tables with the selected palette.
+Maybe use radio buttons?

@@ -152,13 +152,20 @@ public class PPU {
             return;
         }
 
+        if (scanline == -1 && cycle == 1) {
+            // Pre-render scanline
+
+            // Clear vblank flag
+            registers.PPUSTATUS = Common.Bits.setBit(registers.PPUSTATUS, 7, false);
+        }
+
         if (scanline == 241 && cycle == 1) {
             // VBlank start
-            byte new_ppu_status = Common.Bits.setBit(registers.readPPUSTATUS(), 7, true);
-            registers.writePPUSTATUS(new_ppu_status); // Set bit 7
+            registers.PPUSTATUS = Common.Bits.setBit(registers.PPUSTATUS, 7, true);
 
-            if (cpu_nmi_callback != null)
-                cpu_nmi_callback.run();
+            //TODO: What to do here? Using debugger, it completly messes up the palette.
+//            if (cpu_nmi_callback != null)
+//                cpu_nmi_callback.run();
 
             if (trigger_game_canvas_repaint != null)
                 trigger_game_canvas_repaint.run();
