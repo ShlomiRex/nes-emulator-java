@@ -3,7 +3,6 @@ package CPU;
 import NES.CPU.CPU;
 import NES.CPU.Decoder.Decoder;
 import NES.CPU.Decoder.InstructionInfo;
-import NES.CPU.Registers.StatusFlags;
 import NES.Common;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -398,10 +397,10 @@ public class TestCPU {
         boolean final_negative = Common.Bits.getBit(p.byteValue(), 7); // negative
 
         // Test CPU flags
-        assertEquals(pc.shortValue(), cpu.registers.getPC());
-        assertEquals(a.byteValue(), cpu.registers.getA());
-        assertEquals(x.byteValue(), cpu.registers.getX());
-        assertEquals(y.byteValue(), cpu.registers.getY());
+        assertEquals(pc.shortValue(), cpu.registers.PC);
+        assertEquals(a.byteValue(), cpu.registers.A);
+        assertEquals(x.byteValue(), cpu.registers.X);
+        assertEquals(y.byteValue(), cpu.registers.Y);
         assertEquals(final_carry, curr_carry, "Carry flag is not equal, expected: " + final_carry + ", actual: " + curr_carry);
         assertEquals(final_zero, curr_zero, "Zero flag is not equal, expected: " + final_zero + ", actual: " + curr_zero);
         assertEquals(final_int_disable, curr_int_disable, "Interrupt disable flag is not equal, expected: " + final_int_disable + ", actual: " + curr_int_disable);
@@ -410,7 +409,7 @@ public class TestCPU {
         assertEquals(final_overflow, curr_overflow, "Overflow flag is not equal, expected: " + final_overflow + ", actual: " + curr_overflow);
         assertEquals(final_negative, curr_negative, "Negative flag is not equal, expected: " + final_negative + ", actual: " + curr_negative);
         assertEquals(p.byteValue(), cpu.registers.P); // just in case
-        assertEquals(s.byteValue(), cpu.registers.getS());
+        assertEquals(s.byteValue(), cpu.registers.S);
 
         // Test ram
         for (int i = 0; i < ram.length(); i++) {

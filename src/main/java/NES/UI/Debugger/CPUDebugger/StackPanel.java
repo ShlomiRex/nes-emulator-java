@@ -33,7 +33,7 @@ public class StackPanel extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        int stack_pointer = cpu.registers.getS() & 0xFF;
+        int stack_pointer = cpu.registers.S & 0xFF;
 
         // If stack not empty
         if (stack_pointer != 0xFF) {

@@ -48,7 +48,7 @@ public class AssemblyStyledDocument {
         assemblyTextStructure = new AssemblyTextStructure();
 
         // Starting PC - we can start from 0 if we want
-        //pc = (short) (cpu.registers.getPC() & 0xFFFF);
+        //pc = (short) (cpu.registers.PC & 0xFFFF);
         short starting_pc = (short) 0xC004;
         pc = starting_pc;
 

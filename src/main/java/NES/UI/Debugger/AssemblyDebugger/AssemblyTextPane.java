@@ -40,7 +40,7 @@ public class AssemblyTextPane extends JTextPane {
         highlighter.removeAllHighlights();
 
         // Convert address to assembly line, and get starting offset of that line and end offset.
-        short pc = cpuRegisters.getPC();
+        short pc = cpuRegisters.PC;
         AssemblyTextStructure.AssemblyLineTextStructure structure
                 = styledDocument.get_assembly_line(pc);
         if (structure == null) {

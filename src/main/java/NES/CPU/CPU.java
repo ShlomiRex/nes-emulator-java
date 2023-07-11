@@ -47,11 +47,11 @@ public class CPU {
         //logger.debug(registers.toString());
 
         // Log current PC
-        //logger.debug("PC: " + Common.shortToHex(registers.getPC(), true));
+        //logger.debug("PC: " + Common.shortToHex(registers.PC, true));
 
         // Fetch
-        byte opcode = read_memory(registers.getPC()); // Read at address of Program Counter (duh!)
-        registers.incrementPC(); // Increment PC
+        byte opcode = read_memory(registers.PC); // Read at address of Program Counter (duh!)
+        registers.PC ++;
 
         // Decode
         InstructionInfo instr_info = Decoder.decode_opcode(opcode);
@@ -134,7 +134,7 @@ public class CPU {
         short new_pc = read_address_from_memory((short) 0xFFFC);
         //logger.debug("Jumping to interrupt address: " + Common.shortToHex(new_pc, true));
 
-        registers.setPC(new_pc);
+        registers.PC = new_pc;
         cycles = 7; // TODO: Is it 7 or 8 cycles?
     }
 
@@ -153,14 +153,14 @@ public class CPU {
         switch(instr) {
             case BRK:
                 // read next instruction byte (and throw it away), increment PC
-                read_memory(registers.getPC());
-                registers.incrementPC();
+                read_memory(registers.PC);
+                registers.PC ++;
 
                 // push PCH on stack, decrement S
-                push_stack((byte) (registers.getPC() >> 8));
+                push_stack((byte) (registers.PC >> 8));
 
                 // push PCL on stack, decrement S
-                push_stack((byte) (registers.getPC() & 0xFF));
+                push_stack((byte) (registers.PC & 0xFF));
 
                 // push P on stack (with B flag set), decrement S
                 push_stack((byte) (registers.P | 0b00010000));
@@ -171,17 +171,17 @@ public class CPU {
                 // fetch PCH
                 byte pch = read_memory((short) 0xFFFF);
 
-                registers.setPC(Common.makeShort(pcl, pch));
+                registers.PC = Common.makeShort(pcl, pch);
 
                 // Set interrupt disable flag (bit 2 of status register)
-                registers.setInterruptDisable(true);
+                registers.setFlag(INTERRUPT, true);
 
                 break;
             case RTI:
                 // read next instruction byte (and throw it away)
-                read_memory(registers.getPC()); // dummy read
+                read_memory(registers.PC); // dummy read
 
-                read_memory(Common.makeShort(registers.getS(), (byte) 0x01)); // dummy read
+                read_memory(Common.makeShort(registers.S, (byte) 0x01)); // dummy read
 
                 // pull P from stack, increment S
                 byte p = pop_stack();
@@ -192,7 +192,7 @@ public class CPU {
                 // pull PCH from stack
                 byte pch2 = pop_stack();
 
-                registers.setPC(Common.makeShort(pcl2, pch2));
+                registers.PC = Common.makeShort(pcl2, pch2);
 
                 p &= 0b11101111; // Clear bits 4
                 p |= 0b00100000; // Set bits 5
@@ -201,10 +201,10 @@ public class CPU {
                 break;
             case RTS:
                 // read next instruction byte (and throw it away)
-                read_memory(registers.getPC());
+                read_memory(registers.PC);
 
                 // increment S
-                read_memory(Common.makeShort(registers.getS(), (byte) 0x01)); // dummy read
+                read_memory(Common.makeShort(registers.S, (byte) 0x01)); // dummy read
 
                 // pull PCL from stack, increment S
                 pcl = pop_stack();
@@ -213,15 +213,15 @@ public class CPU {
                 pch = pop_stack();
 
                 // increment PC
-                registers.setPC(Common.makeShort(pcl, pch));
-                read_memory(registers.getPC()); // dummy read
-                registers.incrementPC();
+                registers.PC = Common.makeShort(pcl, pch);
+                read_memory(registers.PC); // dummy read
+                registers.PC ++;
                 break;
             case PHA:
             case PHP:
                 // read next instruction byte (and throw it away)
-                read_memory(registers.getPC());
-                //registers.incrementPC();
+                read_memory(registers.PC);
+                //registers.PC ++;
 
                 if (instr == Instructions.PHP) {
                     byte new_p = registers.P;
@@ -229,27 +229,27 @@ public class CPU {
                     push_stack(new_p);
 
                 } else {
-                    push_stack(registers.getA());
+                    push_stack(registers.A);
                 }
 
                 break;
             case PLA:
             case PLP:
                 // read next instruction byte (and throw it away)
-                read_memory(registers.getPC());
-                //registers.incrementPC();
+                read_memory(registers.PC);
+                //registers.PC ++;
 
                 // increment S
-                read_memory(Common.makeShort(registers.getS(), (byte) 0x01));
-                //registers.setS((byte) (registers.getS() + 1));
+                read_memory(Common.makeShort(registers.S, (byte) 0x01));
+                //registers.setS((byte) (registers.S + 1));
 
                 // pull register from stack
                 byte reg = pop_stack();
 
                 if (instr == Instructions.PLA) {
-                    registers.setA(reg);
-                    registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.getA(), 7));
-                    registers.setFlag(ZERO, registers.getA() == 0);
+                    registers.A = reg;
+                    registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.A, 7));
+                    registers.setFlag(ZERO, registers.A == 0);
                 }
                 else {
                     registers.P = reg;
@@ -260,21 +260,21 @@ public class CPU {
                 break;
             case JSR:
                 // fetch low address byte, increment PC
-                byte addr_low = read_memory(registers.getPC());
-                registers.incrementPC();
+                byte addr_low = read_memory(registers.PC);
+                registers.PC ++;
 
                 // internal operation (predecrement S?)
-                read_memory(Common.makeShort(registers.getS(), (byte) 0x01));
+                read_memory(Common.makeShort(registers.S, (byte) 0x01));
 
                 // push PCH on stack, decrement S
-                push_stack((byte) ((registers.getPC()) >> 8));
+                push_stack((byte) ((registers.PC) >> 8));
 
                 // push PCL on stack, decrement S
-                push_stack((byte) ((registers.getPC()) & 0xFF));
+                push_stack((byte) ((registers.PC) & 0xFF));
 
                 // copy low address byte to PCL, fetch high address byte to PCH
-                byte pc_high = read_memory(registers.getPC());
-                registers.setPC(Common.makeShort(addr_low, pc_high));
+                byte pc_high = read_memory(registers.PC);
+                registers.PC = Common.makeShort(addr_low, pc_high);
                 break;
             default:
                 is_instructions_accessing_the_stack = false;
@@ -342,13 +342,13 @@ public class CPU {
                 registers.setFlag(INTERRUPT, false);
                 break;
             case STA:
-                write_memory(fetched_addr, registers.getA());
+                write_memory(fetched_addr, registers.A);
                 break;
             case TAX:
                 exec_tax();
                 break;
             case CPX:
-                exec_cmp(addrmode, registers.getX());
+                exec_cmp(addrmode, registers.X);
                 break;
             case CLV:
                 registers.setFlag(OVERFLOW, false);
@@ -357,13 +357,13 @@ public class CPU {
                 exec_tay();
                 break;
             case CPY:
-                exec_cmp(addrmode, registers.getY());
+                exec_cmp(addrmode, registers.Y);
                 break;
             case STX:
-                write_memory(fetched_addr, registers.getX());
+                write_memory(fetched_addr, registers.X);
                 break;
             case STY:
-                write_memory(fetched_addr, registers.getY());
+                write_memory(fetched_addr, registers.Y);
                 break;
             case BCC:
             case NOP:
@@ -381,7 +381,7 @@ public class CPU {
                 exec_lsr(addrmode == AddressingMode.ACCUMULATOR);
                 break;
             case CMP:
-                exec_cmp(addrmode, registers.getA());
+                exec_cmp(addrmode, registers.A);
                 break;
             case ROL:
                 exec_rol_or_ror(addrmode == AddressingMode.ACCUMULATOR, true);
@@ -450,7 +450,7 @@ public class CPU {
                 exec_tya();
                 break;
             case TXS:
-                registers.setS(registers.getX());
+                registers.S = registers.X;
                 break;
             case ASL:
                 exec_asl(addrmode == AddressingMode.ACCUMULATOR);
@@ -478,19 +478,19 @@ public class CPU {
      */
     private void indirect_addressing() {
         // fetch pointer address low, increment PC
-        byte pointer_addr_low = read_memory(registers.getPC());
-        registers.incrementPC();
+        byte pointer_addr_low = read_memory(registers.PC);
+        registers.PC ++;
 
         // fetch pointer address high, increment PC
-        byte pointer_addr_high = read_memory(registers.getPC());
-        registers.incrementPC();
+        byte pointer_addr_high = read_memory(registers.PC);
+        registers.PC ++;
 
         // fetch low address to latch
         byte latch_low = read_memory(Common.makeShort(pointer_addr_low, pointer_addr_high));
 
         // fetch PCH, copy latch to PCL
         byte latch_high = read_memory(Common.makeShort((byte) (pointer_addr_low + 1), pointer_addr_high));
-        registers.setPC(Common.makeShort(latch_low, latch_high));
+        registers.PC = Common.makeShort(latch_low, latch_high);
     }
 
     /**
@@ -509,13 +509,13 @@ public class CPU {
             case SBC:
             case LAX:
                 // fetch pointer address, increment PC
-                byte pointer_addr = read_memory(registers.getPC());
-                registers.incrementPC();
+                byte pointer_addr = read_memory(registers.PC);
+                registers.PC ++;
 
                 // read from the address, add X to it
                 short addr = (short) (pointer_addr & 0xFF);
                 byte effective_addr = read_memory((short) (pointer_addr & 0xFF));
-                addr += registers.getX();
+                addr += registers.X;
 
                 // fetch effective address low
                 byte effective_addr_low = read_memory((short) (addr & 0xFF));
@@ -537,13 +537,13 @@ public class CPU {
                 // SLO, SRE, RLA, RRA, ISB, DCP
 
                 // fetch pointer address, increment PC
-                pointer_addr = read_memory(registers.getPC());
-                registers.incrementPC();
+                pointer_addr = read_memory(registers.PC);
+                registers.PC ++;
 
                 // read from the address, add X to it
                 addr = (short) (pointer_addr & 0xFF);
                 effective_addr = read_memory((short) (pointer_addr & 0xFF));
-                addr += registers.getX();
+                addr += registers.X;
 
                 // fetch effective address low
                 effective_addr_low = read_memory((short) (addr & 0xFF));
@@ -565,13 +565,13 @@ public class CPU {
             case STA:
             case SAX:
                 // fetch pointer address, increment PC
-                pointer_addr = read_memory(registers.getPC());
-                registers.incrementPC();
+                pointer_addr = read_memory(registers.PC);
+                registers.PC ++;
 
                 // read from the address, add X to it
                 addr = (short) (pointer_addr & 0xFF);
                 effective_addr = read_memory((short) (pointer_addr & 0xFF));
-                addr += registers.getX();
+                addr += registers.X;
 
                 // fetch effective address low
                 effective_addr_low = read_memory((short) (addr & 0xFF));
@@ -590,9 +590,9 @@ public class CPU {
     private void indirect_indexed_addressing(Instructions instr, AddressingMode addrmode) {
         byte register;
         if (addrmode == AddressingMode.INDIRECT_X)
-            register = registers.getX();
+            register = registers.X;
         else
-            register = registers.getY();
+            register = registers.Y;
 
         switch(instr) {
             // Read instructions (LDA, EOR, AND, ORA, ADC, SBC, CMP)
@@ -605,8 +605,8 @@ public class CPU {
             case CMP:
             case LAX:
                 // fetch pointer address, increment PC
-                byte pointer_addr = read_memory(registers.getPC());
-                registers.incrementPC();
+                byte pointer_addr = read_memory(registers.PC);
+                registers.PC ++;
 
                 // fetch effective address low
                 byte effective_addr_low = read_memory((short) (pointer_addr & 0xFF));
@@ -648,8 +648,8 @@ public class CPU {
                 // SHA
 
                 // fetch pointer address, increment PC
-                pointer_addr = read_memory(registers.getPC());
-                registers.incrementPC();
+                pointer_addr = read_memory(registers.PC);
+                registers.PC ++;
 
                 // fetch effective address low
                 effective_addr_low = read_memory((short) (pointer_addr & 0xFF));
@@ -673,9 +673,9 @@ public class CPU {
     private void absolute_indexed_addressing(Instructions instr, AddressingMode addrmode) {
         byte register;
         if (addrmode == AddressingMode.ABSOLUTE_X)
-            register = registers.getX();
+            register = registers.X;
         else
-            register = registers.getY();
+            register = registers.Y;
 
         switch(instr) {
             // Read instructions (LDA, LDX, LDY, EOR, AND, ORA, ADC, SBC, CMP, BIT, LAX, LAE, SHS, NOP)
@@ -695,13 +695,13 @@ public class CPU {
                 // LAE, SHS
 
                 // fetch low byte of address, increment PC
-                byte low_byte = read_memory(registers.getPC());
-                registers.incrementPC();
+                byte low_byte = read_memory(registers.PC);
+                registers.PC ++;
 
                 // fetch high byte of address, add index register to low address byte, increment PC
-                byte high_byte = read_memory(registers.getPC());
+                byte high_byte = read_memory(registers.PC);
                 byte new_low_byte = (byte) (low_byte + register);
-                registers.incrementPC();
+                registers.PC ++;
 
                 // read from effective address, fix the high byte of effective address
                 short effective_addr = Common.makeShort(new_low_byte, high_byte);
@@ -726,13 +726,13 @@ public class CPU {
                 // SLO, SRE, RLA, RRA, ISB, DCP
 
                 // fetch low byte of address, increment PC
-                low_byte = read_memory(registers.getPC());
-                registers.incrementPC();
+                low_byte = read_memory(registers.PC);
+                registers.PC ++;
 
                 // fetch high byte of address, add index register X to low address byte, increment PC
-                high_byte = read_memory(registers.getPC());
+                high_byte = read_memory(registers.PC);
                 new_low_byte = (byte) (low_byte + register);
-                registers.incrementPC();
+                registers.PC ++;
 
                 // read from effective address, fix the high byte of effective address
                 effective_addr = Common.makeShort(new_low_byte, high_byte);
@@ -759,13 +759,13 @@ public class CPU {
                 // SHA, SHX, SHY
 
                 // fetch low byte of address, increment PC
-                low_byte = read_memory(registers.getPC());
-                registers.incrementPC();
+                low_byte = read_memory(registers.PC);
+                registers.PC ++;
 
                 // fetch high byte of address, add index register to low address byte, increment PC
-                high_byte = read_memory(registers.getPC());
+                high_byte = read_memory(registers.PC);
                 new_low_byte = (byte) (low_byte + register);
-                registers.incrementPC();
+                registers.PC ++;
 
                 // read from effective address, fix the high byte of effective address
                 effective_addr = Common.makeShort(new_low_byte, high_byte);
@@ -785,13 +785,13 @@ public class CPU {
 
     private void accumulator_or_implied_addressing(Instructions instr) {
         // read next instruction byte (and throw it away)
-        read_memory(registers.getPC());
+        read_memory(registers.PC);
     }
 
     private void immediate_addressing() {
         // fetch value, increment PC
-        byte value = read_memory(registers.getPC());
-        registers.incrementPC();
+        byte value = read_memory(registers.PC);
+        registers.PC ++;
 
         fetched_data = value;
     }
@@ -812,17 +812,17 @@ public class CPU {
             case NOP:
             case LAX:
                 // fetch address, increment PC
-                byte addr_low = read_memory(registers.getPC());
-                registers.incrementPC();
+                byte addr_low = read_memory(registers.PC);
+                registers.PC ++;
 
                 // read from address, add index register to it
                 read_memory((short) (addr_low & 0xFF));
                 byte register;
                 // TODO: Move register outside of switch-case this should be at top of function
                 if (addrmode == AddressingMode.ZEROPAGE_X)
-                    register = registers.getX();
+                    register = registers.X;
                 else
-                    register = registers.getY();
+                    register = registers.Y;
                 addr_low += register;
 
                 // read from effective address
@@ -840,12 +840,12 @@ public class CPU {
                 // SLO, SRE, RLA, RRA, ISB, DCP
 
                 // fetch address, increment PC
-                addr_low = read_memory(registers.getPC());
-                registers.incrementPC();
+                addr_low = read_memory(registers.PC);
+                registers.PC ++;
 
                 // read from address, add index register X to it
                 read_memory((short) (addr_low & 0xFF));
-                addr_low += registers.getX();
+                addr_low += registers.X;
 
                 // read from effective address
                 effective_addr = Common.makeShort(addr_low, (byte) 0x00);
@@ -864,15 +864,15 @@ public class CPU {
             case STY:
             case SAX:
                 // fetch address, increment PC
-                addr_low = read_memory(registers.getPC());
-                registers.incrementPC();
+                addr_low = read_memory(registers.PC);
+                registers.PC ++;
 
                 // read from address, add index register to it
                 read_memory((short) (addr_low & 0xFF));
                 if (addrmode == AddressingMode.ZEROPAGE_X)
-                    register = registers.getX();
+                    register = registers.X;
                 else
-                    register = registers.getY();
+                    register = registers.Y;
                 addr_low += register;
 
                 // write to effective address
@@ -905,8 +905,8 @@ public class CPU {
             case CPY: // Same for CPY
             case LAX:
                 // fetch address, increment PC
-                addr_low = read_memory(registers.getPC());
-                registers.incrementPC();
+                addr_low = read_memory(registers.PC);
+                registers.PC ++;
 
                 // read from effective address
                 effective_addr = Common.makeShort(addr_low, (byte) 0x00);
@@ -924,8 +924,8 @@ public class CPU {
                 // SLO, SRE, RLA, RRA, ISB
 
                 // fetch address, increment PC
-                addr_low = read_memory(registers.getPC());
-                registers.incrementPC();
+                addr_low = read_memory(registers.PC);
+                registers.PC ++;
 
                 // read from effective address
                 effective_addr = Common.makeShort(addr_low, (byte) 0x00);
@@ -944,8 +944,8 @@ public class CPU {
             case STY:
             case SAX:
                 // fetch address, increment PC
-                addr_low = read_memory(registers.getPC());
-                registers.incrementPC();
+                addr_low = read_memory(registers.PC);
+                registers.PC ++;
 
                 // write register to effective address
                 // Note: we store address, and after the addressing mode is finished, we execute in different place
@@ -963,11 +963,11 @@ public class CPU {
            // JMP
            case JMP:
                // fetch low address byte, increment PC
-               addr_low = read_memory(registers.getPC());
-               registers.incrementPC();
+               addr_low = read_memory(registers.PC);
+               registers.PC ++;
 
                // copy low address byte to PCL, fetch high address byte to PCH
-               registers.setPC(Common.makeShort(addr_low, read_memory(registers.getPC())));
+               registers.PC = Common.makeShort(addr_low, read_memory(registers.PC));
                break;
            // Read instructions: LDA, LDX, LDY, EOR, AND, ORA, ADC, SBC, CMP, BIT, LAX, NOP
            case LDA:
@@ -985,12 +985,12 @@ public class CPU {
            case CPY: // Same for CPY
            case LAX:
                 //fetch low byte of address, increment PC
-                addr_low = read_memory(registers.getPC());
-                registers.incrementPC();
+                addr_low = read_memory(registers.PC);
+                registers.PC ++;
 
                 // fetch high byte of address, increment PC
-                addr_high = read_memory(registers.getPC());
-                registers.incrementPC();
+                addr_high = read_memory(registers.PC);
+                registers.PC ++;
 
                 // read from effective address
                 short effective_addr = Common.makeShort(addr_low, addr_high);
@@ -1007,12 +1007,12 @@ public class CPU {
                // SLO, SRE, RLA, RRA, ISB, DCP
 
                //fetch low byte of address, increment PC
-               addr_low = read_memory(registers.getPC());
-               registers.incrementPC();
+               addr_low = read_memory(registers.PC);
+               registers.PC ++;
 
                // fetch high byte of address, increment PC
-               addr_high = read_memory(registers.getPC());
-               registers.incrementPC();
+               addr_high = read_memory(registers.PC);
+               registers.PC ++;
 
                // read from effective address
                effective_addr = Common.makeShort(addr_low, addr_high);
@@ -1031,12 +1031,12 @@ public class CPU {
            case STY:
            case SAX:
                 // fetch low byte of address, increment PC
-                addr_low = read_memory(registers.getPC());
-                registers.incrementPC();
+                addr_low = read_memory(registers.PC);
+                registers.PC ++;
 
                 // fetch high byte of address, increment PC
-                addr_high = read_memory(registers.getPC());
-                registers.incrementPC();
+                addr_high = read_memory(registers.PC);
+                registers.PC ++;
 
                 // write register to effective address
                 // Note: we store address, and after the addressing mode is finished, we execute in different place
@@ -1058,10 +1058,10 @@ public class CPU {
             case BCS:
             case BNE:
             case BEQ:
-                byte operand = read_memory(registers.getPC());
-                registers.incrementPC();
+                byte operand = read_memory(registers.PC);
+                registers.PC ++;
 
-                short addr_tmp = (short) (registers.getPC() + operand);
+                short addr_tmp = (short) (registers.PC + operand);
                 byte addr_tmp_high = (byte) ((addr_tmp >> 8) & 0xFF);
                 if (
                         (instr == Instructions.BMI && registers.getNegative()     == true)    ||
@@ -1074,20 +1074,20 @@ public class CPU {
                                 (instr == Instructions.BCC && registers.getCarry()        == false)) {
                     // Branch taken
 
-                    read_memory(registers.getPC()); // dummy read
+                    read_memory(registers.PC); // dummy read
 
                     // Set low 8-bits of PC to low 8-bits of addr_tmp
-                    registers.setPC((short) ((registers.getPC() & 0xFF00) | (addr_tmp & 0xFF)));
-                    if (addr_tmp_high != (byte) (registers.getPC() >> 8)) {
+                    registers.PC = (short) ((registers.PC & 0xFF00) | (addr_tmp & 0xFF));
+                    if (addr_tmp_high != (byte) (registers.PC >> 8)) {
                         // Page boundary crossed
-                        read_memory(registers.getPC()); // dummy read
-                        registers.setPC(addr_tmp);
+                        read_memory(registers.PC); // dummy read
+                        registers.PC = addr_tmp;
                     }
-//                    read_memory(registers.getPC()); // dummy read
-//                    registers.incrementPC();
+//                    read_memory(registers.PC); // dummy read
+//                    registers.PC ++;
                 } else {
                     // Branch is not taken
-                    //registers.incrementPC();
+                    //registers.PC ++;
                 }
                 break;
             default:
@@ -1104,11 +1104,11 @@ public class CPU {
 //            case BNE:
 //            case BEQ:
 //                // fetch relative address, increment PC
-//                byte relative_addr = read_memory(registers.getPC());
-//                registers.incrementPC();
+//                byte relative_addr = read_memory(registers.PC);
+//                registers.PC ++;
 //
 //                // add relative address to PC
-//                fetched_addr = (short) (registers.getPC() + relative_addr);
+//                fetched_addr = (short) (registers.PC + relative_addr);
 //                break;
 //            default:
 //                throw new RuntimeException("Instruction not implemented: " + instr);
@@ -1149,23 +1149,23 @@ public class CPU {
     private void push_stack(byte data) {
         logger.debug("Pushing to stack: " +
                 Common.byteToHex(data, true) +
-                " at address: " + Common.byteToHex(registers.getS(), true));
-        write_memory(Common.makeShort(registers.getS(), (byte) 0x01), data);
-        registers.setS((byte) (registers.getS() - 1));
+                " at address: " + Common.byteToHex(registers.S, true));
+        write_memory(Common.makeShort(registers.S, (byte) 0x01), data);
+        registers.S = (byte) (registers.S - 1);
     }
 
     public byte pop_stack() {
-        //read_memory(Common.makeShort(registers.getS(), (byte) 0x01)); // dummy read
-        registers.setS((byte) ((registers.getS() & 0xFF) + 1));
-        return read_memory(Common.makeShort(registers.getS(), (byte) 0x01));
+        //read_memory(Common.makeShort(registers.S, (byte) 0x01)); // dummy read
+        registers.S = (byte) ((registers.S & 0xFF) + 1);
+        return read_memory(Common.makeShort(registers.S, (byte) 0x01));
     }
 
     /**
      * Push PC onto stack. Pushes high byte first, then low byte.
      */
     private void push_pc() {
-        byte pc_msb = (byte) ((registers.getPC()) >> 8);
-        byte pc_lsb = (byte) (registers.getPC());
+        byte pc_msb = (byte) ((registers.PC) >> 8);
+        byte pc_lsb = (byte) (registers.PC);
         push_stack(pc_msb); // store high
         push_stack(pc_lsb); // store low
     }
@@ -1217,7 +1217,7 @@ public class CPU {
         byte vector_lsb = read_memory((short) 0xFFFA);
         byte vector_msb = read_memory((short) 0xFFFB);
         short new_pc = Common.makeShort(vector_lsb, vector_msb);
-        registers.setPC(new_pc);
+        registers.PC = new_pc;
 
         cycles += 8; // TODO: IDK why but he does this: https://github.com/OneLoneCoder/olcNES/blob/ac5ce64cdb3a390a89d550c5f130682b37eeb080/Part%232%20-%20CPU/olc6502.cpp#L248C2-L248C2
     }
@@ -1235,7 +1235,7 @@ public class CPU {
             byte vector_lsb = read_memory((short) 0xFFFE);
             byte vector_msb = read_memory((short) 0xFFFF);
             short new_pc = Common.makeShort(vector_lsb, vector_msb);
-            registers.setPC(new_pc);
+            registers.PC = new_pc;
 
             cycles += 7; // TODO: IDK why
         }
@@ -1268,41 +1268,41 @@ public class CPU {
     }
 
     private void exec_lda() {
-        registers.setA(fetched_data);
+        registers.A = fetched_data;
         registers.setFlag(NEGATIVE, Common.Bits.getBit(fetched_data, 7));
         registers.setFlag(ZERO, fetched_data == 0);
     }
 
     private void exec_adc() {
-        byte result = (byte) (registers.getA() + fetched_data + (registers.getCarry() ? 1 : 0));
+        byte result = (byte) (registers.A + fetched_data + (registers.getCarry() ? 1 : 0));
 
-        byte m_plus_a = (byte) (fetched_data + registers.getA());
-        boolean is_carry = Common.isAdditionCarry(fetched_data, registers.getA());
+        byte m_plus_a = (byte) (fetched_data + registers.A);
+        boolean is_carry = Common.isAdditionCarry(fetched_data, registers.A);
         boolean is_carry2 = Common.isAdditionCarry(m_plus_a, (byte) (registers.getCarry() ? 1 : 0));
-        boolean negative_flag_set = ((registers.getA() ^ result) & (fetched_data ^ result) & 0x80) != 0;
+        boolean negative_flag_set = ((registers.A ^ result) & (fetched_data ^ result) & 0x80) != 0;
 
         registers.modify_n(result);
         registers.modify_z(result);
         registers.setFlag(CARRY, is_carry || is_carry2);
         registers.setFlag(OVERFLOW, negative_flag_set);
-        registers.setA(result);
+        registers.A = result;
     }
 
     private void exec_tax() {
-        registers.setX(registers.getA());
-        registers.setFlag(ZERO, registers.getX() == 0);
-        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.getX(), 7));
+        registers.X = registers.A;
+        registers.setFlag(ZERO, registers.X == 0);
+        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.X, 7));
     }
 
     private void exec_tay() {
-        registers.setY(registers.getA());
-        registers.setFlag(ZERO, registers.getY() == 0);
-        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.getY(), 7));
+        registers.Y = registers.A;
+        registers.setFlag(ZERO, registers.Y == 0);
+        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.Y, 7));
     }
 
     private void exec_lsr(boolean is_accumulator) {
         if (is_accumulator)
-            fetched_data = registers.getA();
+            fetched_data = registers.A;
 
         // In addressing mode we already fetched it. So we don't need to read again.
 //        else
@@ -1315,14 +1315,14 @@ public class CPU {
         registers.setFlag(NEGATIVE, Common.Bits.getBit(result, 7));
 
         if (is_accumulator)
-            registers.setA(result);
+            registers.A = result;
         else
             write_memory(fetched_addr, result);
     }
 
     private void exec_rol_or_ror(boolean is_accumulator, boolean is_left_shift) {
         if (is_accumulator)
-            fetched_data = registers.getA();
+            fetched_data = registers.A;
 
         // In addressing mode we already fetched it. So we don't need to read again.
 //        else
@@ -1347,33 +1347,33 @@ public class CPU {
         registers.setFlag(NEGATIVE, Common.Bits.getBit(result, 7));
 
         if (is_accumulator)
-            registers.setA(result);
+            registers.A = result;
         else
             write_memory(fetched_addr, result);
     }
 
     private void exec_and() {
-        registers.setA((byte) (registers.getA() & fetched_data));
-        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.getA(), 7));
-        registers.setFlag(ZERO, registers.getA() == 0);
+        registers.A = (byte) (registers.A & fetched_data);
+        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.A, 7));
+        registers.setFlag(ZERO, registers.A == 0);
     }
 
     private void exec_tsx() {
-        registers.setX(registers.getS());
-        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.getX(), 7));
-        registers.setFlag(ZERO, registers.getX() == 0);
+        registers.X = registers.S;
+        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.X, 7));
+        registers.setFlag(ZERO, registers.X == 0);
     }
 
     private void exec_txa() {
-        registers.setA(registers.getX());
-        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.getA(), 7));
-        registers.setFlag(ZERO, registers.getA() == 0);
+        registers.A = registers.X;
+        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.A, 7));
+        registers.setFlag(ZERO, registers.A == 0);
     }
 
     private void exec_ora() {
-        registers.setA((byte) (registers.getA() | fetched_data));
-        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.getA(), 7));
-        registers.setFlag(ZERO, registers.getA() == 0);
+        registers.A = (byte) (registers.A | fetched_data);
+        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.A, 7));
+        registers.setFlag(ZERO, registers.A == 0);
     }
 
     private void exec_inc_or_dec(boolean is_inc) {
@@ -1384,80 +1384,80 @@ public class CPU {
     }
 
     private void exec_ldx() {
-        registers.setX(fetched_data);
-        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.getX(), 7));
-        registers.setFlag(ZERO, registers.getX() == 0);
+        registers.X = fetched_data;
+        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.X, 7));
+        registers.setFlag(ZERO, registers.X == 0);
     }
 
     private void exec_bit() {
         registers.setFlag(NEGATIVE, Common.Bits.getBit(fetched_data, 7));
         registers.setFlag(OVERFLOW, Common.Bits.getBit(fetched_data, 6));
-        registers.setFlag(ZERO, (registers.getA() & fetched_data) == 0);
+        registers.setFlag(ZERO, (registers.A & fetched_data) == 0);
     }
 
     private void exec_eor() {
-        registers.setA((byte) (registers.getA() ^ fetched_data));
-        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.getA(), 7));
-        registers.setFlag(ZERO, registers.getA() == 0);
+        registers.A = (byte) (registers.A ^ fetched_data);
+        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.A, 7));
+        registers.setFlag(ZERO, registers.A == 0);
     }
 
     private void exec_ldy() {
-        registers.setY(fetched_data);
-        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.getY(), 7));
-        registers.setFlag(ZERO, registers.getY() == 0);
+        registers.Y = fetched_data;
+        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.Y, 7));
+        registers.setFlag(ZERO, registers.Y == 0);
     }
 
     private void exec_sbc() {
         // Like ADC but we invert the fetched data
         fetched_data = (byte) (fetched_data ^ 0xFF);
 
-        byte result = (byte) (registers.getA() + fetched_data + (registers.getCarry() ? 1 : 0));
+        byte result = (byte) (registers.A + fetched_data + (registers.getCarry() ? 1 : 0));
 
-        byte m_plus_a = (byte) (fetched_data + registers.getA());
-        boolean is_carry = Common.isAdditionCarry(fetched_data, registers.getA());
+        byte m_plus_a = (byte) (fetched_data + registers.A);
+        boolean is_carry = Common.isAdditionCarry(fetched_data, registers.A);
         boolean is_carry2 = Common.isAdditionCarry(m_plus_a, (byte) (registers.getCarry() ? 1 : 0));
-        boolean negative_flag_set = ((registers.getA() ^ result) & (fetched_data ^ result) & 0x80) != 0;
+        boolean negative_flag_set = ((registers.A ^ result) & (fetched_data ^ result) & 0x80) != 0;
 
         registers.modify_n(result);
         registers.modify_z(result);
         registers.setFlag(CARRY, is_carry || is_carry2);
         registers.setFlag(OVERFLOW, negative_flag_set);
-        registers.setA(result);
+        registers.A = result;
     }
 
     private void exec_iny() {
-        registers.setY((byte) (registers.getY() + 1));
-        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.getY(), 7));
-        registers.setFlag(ZERO, registers.getY() == 0);
+        registers.Y = (byte) (registers.Y + 1);
+        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.Y, 7));
+        registers.setFlag(ZERO, registers.Y == 0);
     }
 
     private void exec_inx() {
-        registers.setX((byte) (registers.getX() + 1));
-        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.getX(), 7));
-        registers.setFlag(ZERO, registers.getX() == 0);
+        registers.X = (byte) (registers.X + 1);
+        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.X, 7));
+        registers.setFlag(ZERO, registers.X == 0);
     }
 
     private void exec_dey() {
-        registers.setY((byte) (registers.getY() - 1));
-        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.getY(), 7));
-        registers.setFlag(ZERO, registers.getY() == 0);
+        registers.Y = (byte) (registers.Y - 1);
+        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.Y, 7));
+        registers.setFlag(ZERO, registers.Y == 0);
     }
 
     private void exec_dex() {
-        registers.setX((byte) (registers.getX() - 1));
-        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.getX(), 7));
-        registers.setFlag(ZERO, registers.getX() == 0);
+        registers.X = (byte) (registers.X - 1);
+        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.X, 7));
+        registers.setFlag(ZERO, registers.X == 0);
     }
 
     private void exec_tya() {
-        registers.setA(registers.getY());
-        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.getA(), 7));
-        registers.setFlag(ZERO, registers.getA() == 0);
+        registers.A = registers.Y;
+        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.A, 7));
+        registers.setFlag(ZERO, registers.A == 0);
     }
 
     private void exec_asl(boolean is_accumulator) {
         if (is_accumulator)
-            fetched_data = registers.getA();
+            fetched_data = registers.A;
 
         // In addressing mode we already fetched it. So we don't need to read again.
 //        else
@@ -1470,20 +1470,20 @@ public class CPU {
         registers.setFlag(NEGATIVE, Common.Bits.getBit(result, 7));
 
         if (is_accumulator)
-            registers.setA(result);
+            registers.A = result;
         else
             write_memory(fetched_addr, result);
     }
 
     private void exec_lax() {
-        registers.setA(fetched_data);
-        registers.setX(fetched_data);
-        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.getA(), 7));
-        registers.setFlag(ZERO, registers.getA() == 0);
+        registers.A = fetched_data;
+        registers.X = fetched_data;
+        registers.setFlag(NEGATIVE, Common.Bits.getBit(registers.A, 7));
+        registers.setFlag(ZERO, registers.A == 0);
     }
 
     private void exec_sax() {
-        byte result = (byte) (registers.getA() & registers.getX());
+        byte result = (byte) (registers.A & registers.X);
         write_memory(fetched_addr, result);
     }
 
@@ -1494,7 +1494,7 @@ public class CPU {
         write_memory(fetched_addr, value);
 
         // Compare the updated value with the accumulator
-        int accumulator = registers.getA() & 0xFF;
+        int accumulator = registers.A & 0xFF;
         int result = accumulator - value;
 
         boolean carry = (accumulator & 0xFF) > (value & 0xFF);

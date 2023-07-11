@@ -70,21 +70,21 @@ public class RegistersPanel extends JPanel {
         add(statusFlagsPanel);
 
         // Start with initial values
-        a.setText(Common.byteToHex(registers.getA(), false));
-        x.setText(Common.byteToHex(registers.getX(), false));
-        y.setText(Common.byteToHex(registers.getY(), false));
-        s.setText(Common.byteToHex(registers.getS(), false));
-        pc.setText(Common.shortToHex(registers.getPC(), false));
+        a.setText(Common.byteToHex(registers.A, false));
+        x.setText(Common.byteToHex(registers.X, false));
+        y.setText(Common.byteToHex(registers.Y, false));
+        s.setText(Common.byteToHex(registers.S, false));
+        pc.setText(Common.shortToHex(registers.PC, false));
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        a.setText(Common.byteToHex(registers.getA(), false));
-        x.setText(Common.byteToHex(registers.getX(), false));
-        y.setText(Common.byteToHex(registers.getY(), false));
-        s.setText(Common.byteToHex(registers.getS(), false));
-        pc.setText(Common.shortToHex(registers.getPC(), false));
+        a.setText(Common.byteToHex(registers.A, false));
+        x.setText(Common.byteToHex(registers.X, false));
+        y.setText(Common.byteToHex(registers.Y, false));
+        s.setText(Common.byteToHex(registers.S, false));
+        pc.setText(Common.shortToHex(registers.PC, false));
     }
 }

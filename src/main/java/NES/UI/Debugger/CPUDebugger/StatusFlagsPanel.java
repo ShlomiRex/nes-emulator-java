@@ -1,7 +1,6 @@
 package NES.UI.Debugger.CPUDebugger;
 
 import NES.CPU.Registers.CPURegisters;
-import NES.CPU.Registers.StatusFlags;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;

@@ -41,56 +41,9 @@ public class CPURegisters {
         P = Common.Bits.setBit(P, flag.getBit(), value);
     }
 
-    public short getPC() {
-        return PC;
+    public boolean getFlag(Flags flag) {
+        return Common.Bits.getBit(P, flag.getBit());
     }
-
-    public byte getA() {
-        return A;
-    }
-
-    public byte getX() {
-        return X;
-    }
-
-    public byte getY() {
-        return Y;
-    }
-
-    public byte getS() {
-        return S;
-    }
-
-    public void setA(byte A) {
-        this.A = A;
-    }
-
-    public void setX(byte X) {
-        this.X = X;
-    }
-
-    public void setY(byte Y) {
-        this.Y = Y;
-    }
-
-    public void setPC(short PC) {
-        this.PC = PC;
-    }
-
-    public void setS(byte s) {
-        this.S = s;
-    }
-
-    public void incrementPC() {
-        PC++;
-    }
-
-    public void setInterruptDisable(boolean b) {
-        P = Common.Bits.setBit(P, 2, b);
-    }
-
-
-
 
     public boolean getCarry() {
         return Common.Bits.getBit(P, 0);
