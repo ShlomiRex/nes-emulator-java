@@ -9,9 +9,6 @@ import org.slf4j.LoggerFactory;
 import java.awt.*;
 
 public class PPU {
-    private static final int SCREEN_WIDTH = 256;
-    private static final int SCREEN_HEIGHT = 240;
-
     private final Logger logger = LoggerFactory.getLogger(PPU.class);
     public final PPURegisters registers;
 
@@ -176,13 +173,6 @@ public class PPU {
     }
 
     /**
-     * The CPU will stop and execute the NMI interrupt.
-     */
-    private void send_nmi_to_cpu() {
-
-    }
-
-    /**
      * Called from within JavaSwing GUI thread.
      * @param g
      * @param width The container width
@@ -215,9 +205,9 @@ public class PPU {
         int pixel_height = 8;
 
         // For each nametable byte (960 bytes) - the remaining 64 bytes are attribute table bytes (for total of 1024)
-        for (int row = 0; row < 30; row++) {
-            for (int col = 0; col < 32; col++) {
-                byte background_pattern_tile_index = vram[row * 32 + col];
+        for (int tile_row = 0; tile_row < 30; tile_row++) {
+            for (int tile_col = 0; tile_col < 32; tile_col++) {
+                byte background_pattern_tile_index = vram[tile_row * 32 + tile_col];
                 short full_pattern_index = (short) (right_pattern_table_index + background_pattern_tile_index); // Get from right pattern table (backgrounds)
 
                 // Get the 8x8 pixel tile
@@ -227,7 +217,7 @@ public class PPU {
                         // Read color from attribute table
                         Color pixelColor = get_palette(pixelValue).getB();
                         g.setColor(pixelColor);
-                        g.fillRect((col * 8 + pixel_col) * pixel_width, (row * 8 + pixel_row) * pixel_height, pixel_width, pixel_height);
+                        g.fillRect((tile_col * 8 + pixel_col) * pixel_width, (tile_row * 8 + pixel_row) * pixel_height, pixel_width, pixel_height);
                     }
                 }
             }

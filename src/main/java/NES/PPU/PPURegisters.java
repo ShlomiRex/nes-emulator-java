@@ -145,15 +145,32 @@ public class PPURegisters {
     }
 
     public byte readPPUDATA() {
-        byte value = PPUDATA_read_buffer;
+        byte ret = PPUDATA_read_buffer;
         PPUDATA_read_buffer = ppu.read(PPUADDR);
-        PPUADDR += (short) (Common.Bits.getBit(PPUCTRL, 2) ? 32 : 1);
+
+        /*
+        If address is in palette range, the data is not delayed.
+        Source: https://www.nesdev.org/wiki/PPU_registers#The%20PPUDATA%20read%20buffer%20(post-fetch)
+        When reading while the VRAM address is in the range 0–$3EFF (i.e., before the palettes), the read will return
+        the contents of an internal read buffer.
+        After the CPU reads and gets the contents of the internal buffer, the PPU will immediately update the
+        internal buffer with the byte at the current VRAM address.
+        Reading palette data from $3F00–$3FFF works differently. The palette data is placed immediately on the data bus,
+        and hence no priming read is required. Reading the palettes still updates the internal buffer though
+         */
+        if (PPUADDR >= 0x3F00)
+            ret = PPUDATA_read_buffer;
+
+        // VRAM address increment per CPU read/write of PPUDATA
+        // (0: add 1, going across; 1: add 32, going down)
+        boolean vram_addr_increment = Common.Bits.getBit(PPUCTRL, 2);
+        PPUADDR += (short) (vram_addr_increment ? 32 : 1);
 
         // Post fetch
         if (PPUADDR > 0x3FFF) {
             PPUADDR &= 0x3FFF;
         }
-        return value;
+        return ret;
     }
 
     public void writeOAMDMA(byte value) {
