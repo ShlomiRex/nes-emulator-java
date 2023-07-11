@@ -352,7 +352,7 @@ public class TestCPU {
         cpu.registers.setA(a.byteValue());
         cpu.registers.setX(x.byteValue());
         cpu.registers.setY(y.byteValue());
-        cpu.registers.setP(new StatusFlags((byte) p.intValue()));
+        cpu.registers.P = (byte) p.intValue();
         cpu.registers.setS(s.byteValue());
 
         // Init the RAM
@@ -380,7 +380,7 @@ public class TestCPU {
         JSONArray ram = (JSONArray) final_result.get("ram");
 
         // Bit flags
-        byte curr_p = cpu.registers.getP().getAllFlags();
+        byte curr_p = cpu.registers.P;
         boolean curr_carry = Common.Bits.getBit(curr_p, 0); // carry
         boolean curr_zero = Common.Bits.getBit(curr_p, 1); // zero
         boolean curr_int_disable = Common.Bits.getBit(curr_p, 2); // interrupt disable
@@ -409,7 +409,7 @@ public class TestCPU {
         assertEquals(final_break, curr_break, "Break flag is not equal, expected: " + final_break + ", actual: " + curr_break);
         assertEquals(final_overflow, curr_overflow, "Overflow flag is not equal, expected: " + final_overflow + ", actual: " + curr_overflow);
         assertEquals(final_negative, curr_negative, "Negative flag is not equal, expected: " + final_negative + ", actual: " + curr_negative);
-        assertEquals(p.byteValue(), cpu.registers.getP().getAllFlags()); // just in case
+        assertEquals(p.byteValue(), cpu.registers.P); // just in case
         assertEquals(s.byteValue(), cpu.registers.getS());
 
         // Test ram

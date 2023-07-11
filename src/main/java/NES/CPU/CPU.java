@@ -163,7 +163,7 @@ public class CPU {
                 push_stack((byte) (registers.getPC() & 0xFF));
 
                 // push P on stack (with B flag set), decrement S
-                push_stack((byte) (registers.getP().getAllFlags() | 0b00010000));
+                push_stack((byte) (registers.P | 0b00010000));
 
                 // fetch PCL
                 byte pcl = read_memory((short) 0xFFFE);
@@ -174,7 +174,7 @@ public class CPU {
                 registers.setPC(Common.makeShort(pcl, pch));
 
                 // Set interrupt disable flag (bit 2 of status register)
-                registers.setFlag(INTERRUPT, true);
+                registers.setInterruptDisable(true);
 
                 break;
             case RTI:
@@ -196,7 +196,7 @@ public class CPU {
 
                 p &= 0b11101111; // Clear bits 4
                 p |= 0b00100000; // Set bits 5
-                registers.getP().setAllFlags(p);
+                registers.P = p;
 
                 break;
             case RTS:
@@ -224,7 +224,7 @@ public class CPU {
                 //registers.incrementPC();
 
                 if (instr == Instructions.PHP) {
-                    byte new_p = registers.getP().getAllFlags();
+                    byte new_p = registers.P;
                     new_p |= 0b00110000; // Set B and U flags
                     push_stack(new_p);
 
@@ -252,7 +252,7 @@ public class CPU {
                     registers.setFlag(ZERO, registers.getA() == 0);
                 }
                 else {
-                    registers.getP().setAllFlags(reg);
+                    registers.P = reg;
                     registers.setFlag(BREAK, false);
                     registers.setFlag(UNUSED, true);
                 }
@@ -1064,14 +1064,14 @@ public class CPU {
                 short addr_tmp = (short) (registers.getPC() + operand);
                 byte addr_tmp_high = (byte) ((addr_tmp >> 8) & 0xFF);
                 if (
-                        (instr == Instructions.BMI && registers.getP().getNegative()     == true)    ||
-                                (instr == Instructions.BPL && registers.getP().getNegative()     == false)   ||
-                                (instr == Instructions.BNE && registers.getP().getZero()         == false)   ||
-                                (instr == Instructions.BVC && registers.getP().getOverflow()     == false)   ||
-                                (instr == Instructions.BVS && registers.getP().getOverflow()     == true)    ||
-                                (instr == Instructions.BEQ && registers.getP().getZero()         == true)    ||
-                                (instr == Instructions.BCS && registers.getP().getCarry()        == true)    ||
-                                (instr == Instructions.BCC && registers.getP().getCarry()        == false)) {
+                        (instr == Instructions.BMI && registers.getNegative()     == true)    ||
+                                (instr == Instructions.BPL && registers.getNegative()     == false)   ||
+                                (instr == Instructions.BNE && registers.getZero()         == false)   ||
+                                (instr == Instructions.BVC && registers.getOverflow()     == false)   ||
+                                (instr == Instructions.BVS && registers.getOverflow()     == true)    ||
+                                (instr == Instructions.BEQ && registers.getZero()         == true)    ||
+                                (instr == Instructions.BCS && registers.getCarry()        == true)    ||
+                                (instr == Instructions.BCC && registers.getCarry()        == false)) {
                     // Branch taken
 
                     read_memory(registers.getPC()); // dummy read
@@ -1212,7 +1212,7 @@ public class CPU {
         setFlag(UNUSED, true);
         setFlag(INTERRUPT, true);
 
-        push_stack(registers.getP().getAllFlags());
+        push_stack(registers.P);
 
         byte vector_lsb = read_memory((short) 0xFFFA);
         byte vector_msb = read_memory((short) 0xFFFB);
@@ -1224,14 +1224,13 @@ public class CPU {
 
     public void irq_interrupt() {
         // if interrupt flag is not set, then do interrupt. Else, ignore. (This is the I flag - ignore interrupts if set)
-        if (!Common.Bits.getBit(registers.getP().getAllFlags(), 2)) {
+        if (!registers.getInterruptDisable()) {
             push_pc();
 
-            byte p_flag = registers.getP().getAllFlags();
-            setFlag(BREAK, false );
-            setFlag(UNUSED, true );
-            setFlag(INTERRUPT, true );
-            push_stack(p_flag);
+            setFlag(BREAK, false);
+            setFlag(UNUSED, true);
+            setFlag(INTERRUPT, true);
+            push_stack(registers.P);
 
             byte vector_lsb = read_memory((short) 0xFFFE);
             byte vector_msb = read_memory((short) 0xFFFF);
@@ -1275,15 +1274,15 @@ public class CPU {
     }
 
     private void exec_adc() {
-        byte result = (byte) (registers.getA() + fetched_data + (registers.getP().getCarry() ? 1 : 0));
+        byte result = (byte) (registers.getA() + fetched_data + (registers.getCarry() ? 1 : 0));
 
         byte m_plus_a = (byte) (fetched_data + registers.getA());
         boolean is_carry = Common.isAdditionCarry(fetched_data, registers.getA());
-        boolean is_carry2 = Common.isAdditionCarry(m_plus_a, (byte) (registers.getP().getCarry() ? 1 : 0));
+        boolean is_carry2 = Common.isAdditionCarry(m_plus_a, (byte) (registers.getCarry() ? 1 : 0));
         boolean negative_flag_set = ((registers.getA() ^ result) & (fetched_data ^ result) & 0x80) != 0;
 
-        registers.getP().modify_n(result);
-        registers.getP().modify_z(result);
+        registers.modify_n(result);
+        registers.modify_z(result);
         registers.setFlag(CARRY, is_carry || is_carry2);
         registers.setFlag(OVERFLOW, negative_flag_set);
         registers.setA(result);
@@ -1329,7 +1328,7 @@ public class CPU {
 //        else
 //            fetched_data = read_memory(fetched_addr);
 
-        boolean in_carry = registers.getP().getCarry();
+        boolean in_carry = registers.getCarry();
         boolean out_carry;
         byte result;
         if (is_left_shift) {
@@ -1412,15 +1411,15 @@ public class CPU {
         // Like ADC but we invert the fetched data
         fetched_data = (byte) (fetched_data ^ 0xFF);
 
-        byte result = (byte) (registers.getA() + fetched_data + (registers.getP().getCarry() ? 1 : 0));
+        byte result = (byte) (registers.getA() + fetched_data + (registers.getCarry() ? 1 : 0));
 
         byte m_plus_a = (byte) (fetched_data + registers.getA());
         boolean is_carry = Common.isAdditionCarry(fetched_data, registers.getA());
-        boolean is_carry2 = Common.isAdditionCarry(m_plus_a, (byte) (registers.getP().getCarry() ? 1 : 0));
+        boolean is_carry2 = Common.isAdditionCarry(m_plus_a, (byte) (registers.getCarry() ? 1 : 0));
         boolean negative_flag_set = ((registers.getA() ^ result) & (fetched_data ^ result) & 0x80) != 0;
 
-        registers.getP().modify_n(result);
-        registers.getP().modify_z(result);
+        registers.modify_n(result);
+        registers.modify_z(result);
         registers.setFlag(CARRY, is_carry || is_carry2);
         registers.setFlag(OVERFLOW, negative_flag_set);
         registers.setA(result);
@@ -1501,8 +1500,8 @@ public class CPU {
         boolean carry = (accumulator & 0xFF) > (value & 0xFF);
 
         // Set the processor flags accordingly
-        registers.getP().modify_n((byte) result);
-        registers.getP().modify_z((byte) result);
+        registers.modify_n((byte) result);
+        registers.modify_z((byte) result);
         registers.setFlag(CARRY, carry);
     }
 

@@ -1,5 +1,6 @@
 package NES.UI.Debugger.CPUDebugger;
 
+import NES.CPU.Registers.CPURegisters;
 import NES.CPU.Registers.StatusFlags;
 
 import javax.swing.*;
@@ -8,11 +9,11 @@ import java.awt.*;
 
 public class StatusFlagsPanel extends JPanel {
 
-    private final StatusFlags statusFlags;
+    private final CPURegisters cpuRegisters;
     private final JCheckBox n,v,u,b,d,i,z,c;
 
-    public StatusFlagsPanel(StatusFlags statusFlags) {
-        this.statusFlags = statusFlags;
+    public StatusFlagsPanel(CPURegisters cpuRegisters) {
+        this.cpuRegisters = cpuRegisters;
 
         setBorder(new TitledBorder("Status Flags"));
         setLayout(new GridLayout(2, 4));
@@ -56,16 +57,16 @@ public class StatusFlagsPanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        c.setSelected(statusFlags.getCarry());
-        z.setSelected(statusFlags.getZero());
-        i.setSelected(statusFlags.getInterruptDisable());
-        d.setSelected(statusFlags.getDecimal());
+        c.setSelected(cpuRegisters.getCarry());
+        z.setSelected(cpuRegisters.getZero());
+        i.setSelected(cpuRegisters.getInterruptDisable());
+        d.setSelected(cpuRegisters.getDecimal());
 
         // Both bits are not used really
-        b.setSelected(statusFlags.getB());
-        u.setSelected(statusFlags.getUnused());
+        b.setSelected(cpuRegisters.getBreak());
+        u.setSelected(cpuRegisters.getUnused());
 
-        v.setSelected(statusFlags.getOverflow());
-        n.setSelected(statusFlags.getNegative());
+        v.setSelected(cpuRegisters.getOverflow());
+        n.setSelected(cpuRegisters.getNegative());
     }
 }

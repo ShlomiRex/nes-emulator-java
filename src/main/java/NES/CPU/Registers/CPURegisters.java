@@ -4,13 +4,10 @@ import NES.Common;
 
 public class CPURegisters {
 
-    private byte A, X, Y, S;
-    private short PC;
-
-    private StatusFlags P;
+    public byte A, X, Y, S, P;
+    public short PC;
 
     public CPURegisters() {
-        P = new StatusFlags();
         reset();
     }
 
@@ -21,7 +18,7 @@ public class CPURegisters {
         String y = "Y: " + Common.byteToHex(Y, false);
         String s = "S: " + Common.byteToHex(S, false);
         String pc = "PC: " + Common.shortToHex(PC, false);
-        String p = "P: NV-BDIZC " + Common.byteToBinary(P.getAllFlags()) + " (" + Common.byteToHex(P.getAllFlags(), true) + ")";
+        String p = "P: NV-BDIZC " + Common.byteToBinary(P) + " (" + Common.byteToHex(P, true) + ")";
 
         StringBuilder sb = new StringBuilder();
         sb.append(a).append("\t");
@@ -35,9 +32,13 @@ public class CPURegisters {
 
     public void reset() {
         A = X = Y = 0;
-        P.reset();
+        P = 0b0010_0000; // Set 'UNUSED' flag to 1
         S = (byte) 0xFD;
         PC = 0;
+    }
+
+    public void setFlag(Flags flag, boolean value) {
+        P = Common.Bits.setBit(P, flag.getBit(), value);
     }
 
     public short getPC() {
@@ -60,10 +61,6 @@ public class CPURegisters {
         return S;
     }
 
-    public StatusFlags getP() {
-        return P;
-    }
-
     public void setA(byte A) {
         this.A = A;
     }
@@ -76,10 +73,6 @@ public class CPURegisters {
         this.Y = Y;
     }
 
-    public void setP(StatusFlags P) {
-        this.P = P;
-    }
-
     public void setPC(short PC) {
         this.PC = PC;
     }
@@ -88,12 +81,53 @@ public class CPURegisters {
         this.S = s;
     }
 
-    public void setFlag(Flags flag, boolean value) {
-        byte new_p = Common.Bits.setBit(P.getAllFlags(), flag.getBit(), value);
-        P.setAllFlags(new_p);
-    }
-
     public void incrementPC() {
         PC++;
     }
+
+    public void setInterruptDisable(boolean b) {
+        P = Common.Bits.setBit(P, 2, b);
+    }
+
+
+
+
+    public boolean getCarry() {
+        return Common.Bits.getBit(P, 0);
+    }
+    public boolean getZero() {
+        return Common.Bits.getBit(P, 1);
+    }
+    public boolean getInterruptDisable() {
+        return Common.Bits.getBit(P, 2);
+    }
+    public boolean getDecimal() {
+        return Common.Bits.getBit(P, 3);
+    }
+    public boolean getBreak() {
+        return Common.Bits.getBit(P, 4);
+    }
+    public boolean getUnused() {
+        return Common.Bits.getBit(P, 5);
+    }
+    public boolean getNegative() {
+        return Common.Bits.getBit(P, 7);
+    }
+    public boolean getOverflow() {
+        return Common.Bits.getBit(P, 6);
+    }
+
+
+
+    public void modify_n(byte value) {
+        setFlag(Flags.NEGATIVE, Common.Bits.getBit(value, 7));
+    }
+
+    public void modify_z(byte result) {
+        setFlag(Flags.ZERO, result == 0);
+    }
+
+
+
+
 }

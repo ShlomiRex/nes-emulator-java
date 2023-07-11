@@ -22,8 +22,8 @@ public class Main {
         NES nes = new NES(romParser);
 
         //TODO: Change according to my needs.
-        //run_without_debugger(nes);
-        run_with_debugger(nes);
+        run_without_debugger(nes);
+        //run_with_debugger(nes);
     }
 
     private static void run_with_debugger(NES nes) {

@@ -10,36 +10,36 @@ public class TestCPURegisters {
     public void test_p_modify_z() {
         CPURegisters cpuRegisters = new CPURegisters();
 
-        cpuRegisters.getP().modify_z((byte) 0);
-        assertEquals(cpuRegisters.getP().getZero(), true);
+        cpuRegisters.modify_z((byte) 0);
+        assertEquals(cpuRegisters.getZero(), true);
 
-        cpuRegisters.getP().modify_z((byte) 0xFF);
-        assertEquals(cpuRegisters.getP().getZero(), false);
+        cpuRegisters.modify_z((byte) 0xFF);
+        assertEquals(cpuRegisters.getZero(), false);
 
-        cpuRegisters.getP().modify_z((byte) 0);
-        assertEquals(cpuRegisters.getP().getZero(), true);
+        cpuRegisters.modify_z((byte) 0);
+        assertEquals(cpuRegisters.getZero(), true);
     }
 
     @Test
     public void test_p_modify_n() {
         CPURegisters cpuRegisters = new CPURegisters();
 
-        cpuRegisters.getP().modify_n((byte) 0);
-        assertEquals(cpuRegisters.getP().getNegative(), false);
+        cpuRegisters.modify_n((byte) 0);
+        assertEquals(cpuRegisters.getNegative(), false);
 
-        cpuRegisters.getP().modify_n((byte) 0xAA);
-        assertEquals(cpuRegisters.getP().getNegative(), true);
+        cpuRegisters.modify_n((byte) 0xAA);
+        assertEquals(cpuRegisters.getNegative(), true);
 
-        cpuRegisters.getP().modify_n((byte) 0x56);
-        assertEquals(cpuRegisters.getP().getNegative(), false);
+        cpuRegisters.modify_n((byte) 0x56);
+        assertEquals(cpuRegisters.getNegative(), false);
 
-        cpuRegisters.getP().modify_n((byte) 0xFF);
-        assertEquals(cpuRegisters.getP().getNegative(), true);
+        cpuRegisters.modify_n((byte) 0xFF);
+        assertEquals(cpuRegisters.getNegative(), true);
 
-        cpuRegisters.getP().modify_n((byte) 0x7F);
-        assertEquals(cpuRegisters.getP().getNegative(), false);
+        cpuRegisters.modify_n((byte) 0x7F);
+        assertEquals(cpuRegisters.getNegative(), false);
 
-        cpuRegisters.getP().modify_n((byte) 0x80);
-        assertEquals(cpuRegisters.getP().getNegative(), true);
+        cpuRegisters.modify_n((byte) 0x80);
+        assertEquals(cpuRegisters.getNegative(), true);
     }
 }

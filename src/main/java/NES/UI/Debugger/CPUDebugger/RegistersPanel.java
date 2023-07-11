@@ -66,7 +66,7 @@ public class RegistersPanel extends JPanel {
         pc.setColumns(4);
 
         // P
-        JPanel statusFlagsPanel = new StatusFlagsPanel(registers.getP());
+        JPanel statusFlagsPanel = new StatusFlagsPanel(registers);
         add(statusFlagsPanel);
 
         // Start with initial values
