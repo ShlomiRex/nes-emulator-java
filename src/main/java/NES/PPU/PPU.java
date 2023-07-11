@@ -101,6 +101,8 @@ public class PPU {
      * @return A pixel pattern (8x8=64 pixels), each byte = pixel is color index (0,1,2,3).
      */
     public byte[][] convert_pattern_tile_to_pixel_pattern(byte[] tile) {
+        //TODO: This may cause regression since we call this for each tile, for each frame.
+        // For now I leave this as is. I need to not create new objects for each tile.
         byte[][] pixels = new byte[8][8]; // Each pixel is 1 byte with values 0,1,2 or 3. No more.
 
         // Loop over bit planes (each plane = 8 bytes)

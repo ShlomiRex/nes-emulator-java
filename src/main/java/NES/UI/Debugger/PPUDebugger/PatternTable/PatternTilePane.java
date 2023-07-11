@@ -67,6 +67,7 @@ public class PatternTilePane extends JPanel {
             for (int col = 0; col < 8; col++) {
                 byte pixel = pixels[row][col];
                 if (pixel != 0) {
+                    g.setColor(ppu.get_palette(pixel).getB());
                     g.fillRect(col * pixel_width, row * pixel_height, pixel_width, pixel_height);
                 }
             }

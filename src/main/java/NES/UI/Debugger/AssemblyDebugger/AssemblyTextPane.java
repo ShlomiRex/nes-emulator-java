@@ -2,6 +2,7 @@ package NES.UI.Debugger.AssemblyDebugger;
 
 import NES.CPU.CPU;
 import NES.CPU.Registers.CPURegisters;
+import NES.Common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +48,7 @@ public class AssemblyTextPane extends JTextPane {
                 = styledDocument.get_assembly_line(pc);
         if (structure == null) {
             // do not throw exception, the assembly line to highlight is not loaded.
-            logger.error("Assembly line to highlight is not loaded, PC: {}", pc);
+            logger.error("Assembly line to highlight is not loaded, PC: {}", Common.shortToHex(pc, true));
             return;
         }
         int start_offset = structure.document_offset();

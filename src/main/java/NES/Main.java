@@ -15,10 +15,11 @@ public class Main {
     public static void main(String[] args) throws IOException, ROMParser.ParsingException {
         String nestest = "6502_programs/nestest/nestest.nes";
         String greenscreen = "6502_programs/greenscreen/greenscreen.nes";
-        String hb1 = "6502_programs/single_sprite/hb1.nes";
+        String single_sprite = "6502_programs/single_sprite/hb1.nes";
         String mario = "6502_programs/mario/Super Mario Bros (E).nes";
+        String color_test = "6502_programs/color_test/color_test.nes";
 
-        String program = mario;
+        String program = nestest;
 
         ROMParser romParser = new ROMParser(program);
 

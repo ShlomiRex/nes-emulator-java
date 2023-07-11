@@ -31,7 +31,10 @@ public class PatternTablesPane extends JPanel {
         for(byte row = 0; row < 16; row ++) {
             for (byte col = 0; col < 16; col++) {
                 byte tile_index = (byte)(col + row * 16);
-                table_canvas.add(new PatternTilePane(ppu, tile_index, is_left_pattern_table, left_pattern_table_tile_index));
+
+                PatternTilePane tile = new PatternTilePane(
+                        ppu, tile_index, is_left_pattern_table, left_pattern_table_tile_index);
+                table_canvas.add(tile);
             }
         }
 
