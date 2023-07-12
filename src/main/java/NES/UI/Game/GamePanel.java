@@ -18,12 +18,13 @@ public class GamePanel extends JPanel {
     private static final int PIXEL_COLUMNS = 256;
     private static final int PIXEL_ROWS = 240;
 
+    public static final int SCALE = 2;
+
     private final PPU ppu;
 
     public GamePanel(PPU ppu) {
         this.ppu = ppu;
-        int scale = 2;
-        setPreferredSize(new Dimension(PIXEL_COLUMNS * scale, PIXEL_ROWS * scale));
+        setPreferredSize(new Dimension(PIXEL_COLUMNS * SCALE, PIXEL_ROWS * SCALE));
     }
 
     @Override

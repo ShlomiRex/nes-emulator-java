@@ -26,6 +26,9 @@ First time rendering basic background (on the right - the game itself):
 First time working complete palette initialization from NESTEST, code is just waiting for input interrupts:
 ![](README-resources/Screenshot%202023-07-05%20014713.png)
 
+First time display working:
+![](README-resources/Screenshot%202023-07-12%20192227.png)
+
 # Resources
 
 The most used resorces:
