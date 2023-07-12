@@ -14,10 +14,12 @@ public class NES {
     private boolean is_running;
 
     public final byte[] cpu_memory; // All 64KB addressable memory
+    public final iNESHeader header;
 
     // We want to deal with creating the memory here, so its more manageable, and each component can take modular memory.
     public NES(ROMParser romParser) {
         iNESHeader header = romParser.getHeader();
+        this.header = header;
         byte[] prg_rom = romParser.getPrg_rom();
         byte[] chr_rom = romParser.getChr_rom();
 

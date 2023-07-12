@@ -14,6 +14,7 @@ public class CPUMainPane extends JPanel {
 
     public CPUMainPane(CPU cpu, AssemblyTextPane assembly_text_pane) {
         setBorder(BorderFactory.createTitledBorder("CPU"));
+        //setPreferredSize(new Dimension(400, 250));
 
         JPanel reg_pane = new RegistersPanel(cpu.registers);
         stack_pane = new StackPanel(cpu);

@@ -26,7 +26,7 @@ public class DebuggerWindow extends JFrame {
 
         AssemnlyMainPane assembly_main_pane = new AssemnlyMainPane(nes.cpu, nes.cpu_memory);
         CPUMainPane main_cpu_debugging_pane = new CPUMainPane(nes.cpu, assembly_main_pane.assembly_text_area);
-        JPanel main_ppu_debugging_pane = new PPUMainPane(nes.ppu, main_cpu_debugging_pane, assembly_main_pane.assembly_text_area);
+        JPanel main_ppu_debugging_pane = new PPUMainPane(nes, main_cpu_debugging_pane, assembly_main_pane.assembly_text_area);
 
         JScrollPane cpu_scroll_pane = new JScrollPane(main_cpu_debugging_pane);
         JScrollPane ppu_scroll_pane = new JScrollPane(main_ppu_debugging_pane);

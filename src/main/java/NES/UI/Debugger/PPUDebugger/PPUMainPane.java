@@ -1,5 +1,7 @@
 package NES.UI.Debugger.PPUDebugger;
 
+import NES.Cartridge.iNESHeader;
+import NES.NES;
 import NES.PPU.PPU;
 import NES.UI.Debugger.AssemblyDebugger.AssemblyTextPane;
 import NES.UI.Debugger.CPUDebugger.CPUMainPane;
@@ -16,8 +18,11 @@ import javax.swing.*;
 import java.awt.*;
 
 public class PPUMainPane extends JPanel {
-    public PPUMainPane(PPU ppu, CPUMainPane cpu_main_pane, AssemblyTextPane assemblyTextPane) {
+    public PPUMainPane(NES nes, CPUMainPane cpu_main_pane, AssemblyTextPane assemblyTextPane) {
         setBorder(BorderFactory.createTitledBorder("PPU"));
+
+        PPU ppu = nes.ppu;
+        iNESHeader header = nes.header;
 
         // Containers
         JPanel box_pane = new JPanel();
@@ -42,7 +47,7 @@ public class PPUMainPane extends JPanel {
         JPanel pattern_tables_pane = new PatternTablesPane(ppu);
         JPanel system_palette_pane = new SystemPalettePane();
         JPanel palette_memory_pane = new PaletteMemoryPane(ppu);
-        JPanel nametable_pane = new NametablePane();
+        JPanel nametable_pane = new NametablePane(header.getMirrorType());
 
         // Add panels
         status_info_pane.add(cycles_pane);

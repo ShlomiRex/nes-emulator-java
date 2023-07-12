@@ -17,14 +17,17 @@ public class NametableCanvas extends JPanel implements MouseListener, MouseMotio
     private static final int ROWS = 30;
     private static final int COLUMNS = 32;
 
-    private static final int SCALE = 2;
+    private static final int SCALE = 1;
 
     protected AtomicInteger tile_hover = new AtomicInteger(-1);
     protected AtomicInteger tile_selected = new AtomicInteger(-1);
     private final NametableInfoPane info_pane;
+    public final int table_index;
 
-    public NametableCanvas(NametableInfoPane info_pane) {
+    public NametableCanvas(int table_index, NametableInfoPane info_pane) {
+        this.table_index = table_index;
         this.info_pane = info_pane;
+
         setPreferredSize(new Dimension(256 * SCALE, 240 * SCALE));
 
         addMouseListener(this);
@@ -76,6 +79,7 @@ public class NametableCanvas extends JPanel implements MouseListener, MouseMotio
 
     @Override
     public void mouseExited(MouseEvent e) {
+        logger.debug("Canvas " + table_index + ": Mouse exited");
         tile_hover.set(-1);
         repaint();
     }
