@@ -11,7 +11,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class NametableCanvas extends JPanel implements MouseListener, MouseMotionListener {
+public class NametableCanvas extends JPanel {
 
     private final Logger logger = LoggerFactory.getLogger(NametableCanvas.class);
     private static final int ROWS = 30;
@@ -19,7 +19,7 @@ public class NametableCanvas extends JPanel implements MouseListener, MouseMotio
 
     private static final int SCALE = 1;
 
-    protected AtomicInteger tile_hover = new AtomicInteger(-1);
+    protected int tile_hover = -1;
     protected AtomicInteger tile_selected = new AtomicInteger(-1);
     private final NametableInfoPane info_pane;
     public final int table_index;
@@ -29,9 +29,6 @@ public class NametableCanvas extends JPanel implements MouseListener, MouseMotio
         this.info_pane = info_pane;
 
         setPreferredSize(new Dimension(256 * SCALE, 240 * SCALE));
-
-        addMouseListener(this);
-        addMouseMotionListener(this);
     }
 
     @Override
@@ -48,7 +45,6 @@ public class NametableCanvas extends JPanel implements MouseListener, MouseMotio
             g.drawLine(x * 8 * SCALE, 0, x * 8 * SCALE, getHeight());
         }
 
-        int tile_hover = this.tile_hover.get();
         int tile_selected = this.tile_selected.get();
 
         if (tile_hover != -1) {
@@ -66,49 +62,4 @@ public class NametableCanvas extends JPanel implements MouseListener, MouseMotio
         }
     }
 
-    @Override
-    public void mouseMoved(MouseEvent e) {
-        int x = e.getX() / (8 * SCALE);
-        int y = e.getY() / (8 * SCALE);
-
-        tile_hover.set(y * COLUMNS + x);
-        repaint();
-
-        info_pane.repaint();
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-        logger.debug("Canvas " + table_index + ": Mouse exited");
-        tile_hover.set(-1);
-        repaint();
-    }
-
-    @Override
-    public void mouseClicked(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-        tile_selected.set(tile_hover.get());
-
-        repaint();
-        info_pane.repaint();
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseDragged(MouseEvent e) {
-
-    }
 }

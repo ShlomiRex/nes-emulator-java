@@ -109,7 +109,7 @@ public class ROMParser {
 
         int mapper = msb_mapper | lsb_mapper;
         if (mapper != 0) {
-            throw new ParsingException("The emulator supports only maper 0, currently.");
+            throw new ParsingException("The emulator supports only maper 0, currently. ROM Mapper: " + mapper);
         }
 
         // Create header object and print

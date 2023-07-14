@@ -201,55 +201,11 @@ public class PPU {
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, width, height);
 
-        boolean show_background = Common.Bits.getBit(registers.getPPUMASK(), 3);
-        boolean show_sprites = Common.Bits.getBit(registers.getPPUMASK(), 4);
-
-        // Get pattern tables
-        int left_pattern_table_index = 0x0000;
-        int right_pattern_table_index = 0x1000;
-
-
-        int pixel_width = 8;
-        int pixel_height = 8;
-
-//        // For each nametable byte (960 bytes) - the remaining 64 bytes are attribute table bytes (for total of 1024)
-//        for (int tile_row = 0; tile_row < 30; tile_row++) {
-//            for (int tile_col = 0; tile_col < 32; tile_col++) {
-//
-//                byte background_pattern_tile_index = vram[tile_row * 32 + tile_col];
-//                short full_pattern_index = (short) (right_pattern_table_index + background_pattern_tile_index); // Get from right pattern table (backgrounds)
-//
-//                logger.debug("Tile: ({}, {})", tile_row, tile_col);
-//
-//                // Get the 8x8 pixel tile
-//                for (int pixel_row = 0; pixel_row < 8; pixel_row ++) {
-//                    for (int pixel_col = 0; pixel_col < 8; pixel_col++) {
-//                        byte pixelValue = chr_rom[full_pattern_index + pixel_row * 8 + pixel_col];
-//                        // Read color from attribute table
-//                        Color pixelColor = get_palette(pixelValue).getB();
-//                        g.setColor(pixelColor);
-//                        g.fillRect((tile_col * 8 + pixel_col) * pixel_width, (tile_row * 8 + pixel_row) * pixel_height, pixel_width, pixel_height);
-//                    }
-//                }
-//            }
-//        }
-
-        // Draw sprites
-
-        draw_nametable(g, 0);
-
-        if (show_sprites) {
-            for (int i = 0; i < 64; i++) {
-                byte sprite_y =             oam[i * 4];
-                byte sprite_tile_index =    oam[i * 4 + 1];
-                byte sprite_attributes =    oam[i * 4 + 2];
-                byte sprite_x =             oam[i * 4 + 3];
-
-            }
-        }
+        // Draw backgrounds
+        draw_nametable(g, 0, width, height);
     }
 
-    private void draw_nametable(Graphics g, int table_index) {
+    private void draw_nametable(Graphics g, int table_index, int width, int height) {
         // Get nametables
         // A nametable is a 1024 byte area of memory used by the PPU to lay out backgrounds.
         // Each byte in the nametable controls one 8x8 pixel character cell
@@ -265,29 +221,35 @@ public class PPU {
 //        int third_attribute_table_index = third_nametable_index + 0x3C0;
 //        int fourth_attribute_table_index = fourth_nametable_index + 0x3C0;
 
-        int pixel_width = GamePanel.SCALE;
-        int pixel_height = GamePanel.SCALE;
+        int pixel_width = width / 256;
+        int pixel_height = height / 240;
 
         g.setColor(Color.WHITE);
         if (table_index == 0) {
             // For each nametable byte (960 bytes) - the remaining 64 bytes are attribute table bytes (for total of 1024)
             for (int tile_row = 0; tile_row < 30; tile_row++) {
                 for (int tile_col = 0; tile_col < 32; tile_col++) {
+
+                    // TODO: Check attribute table. set color per 2x2 meta tiles
+                    //int metatile_palette = get_palette_of_tile(tile_row, tile_col);
+
                     byte pattern_table_index = read((short) (first_nametable_addr + tile_row * 32 + tile_col));
 
                     // 16 bytes per tile
                     byte[] pattern_bytes = get_pattern_tile(pattern_table_index, true);
 
-                    // 64 pixels (8x8)
+                    // 64 pixels (8x8), each pixel value is the index of the color in the palette (0,1,2,3)
                     byte[][] pixels = convert_pattern_tile_to_pixel_pattern(pattern_bytes);
 
                     // Draw pixels
                     for (int pixel_row = 0; pixel_row < 8; pixel_row ++) {
                         for (int pixel_col = 0; pixel_col < 8; pixel_col++) {
-                            byte pixelValue = pixels[pixel_row][pixel_col];
-                            // Read color from attribute table
-                            Color pixelColor = get_palette(pixelValue).getB();
+                            byte palette_index = pixels[pixel_row][pixel_col];
+                            // Color is 2 bits: 00, 01, 10, 11 and it is the index of the color in the palette
+                            Color pixelColor = get_palette(palette_index).getB();
                             g.setColor(pixelColor);
+
+                            // Draw pixel
                             g.fillRect((tile_col * 8 + pixel_col) * pixel_width, (tile_row * 8 + pixel_row) * pixel_height, pixel_width, pixel_height);
                         }
                     }
@@ -302,6 +264,55 @@ public class PPU {
         } else {
             throw new IllegalArgumentException("Invalid nametable index: " + table_index);
         }
+    }
+
+    public int convert_tile_row_to_attribute_block_row(int tile_row) {
+        return tile_row / 2;
+    }
+
+    public int convert_tile_col_to_attribute_block_col(int tile_col) {
+        return tile_col / 2;
+    }
+
+    /**
+     * Calculates the palette index of a tile, by using the color of meta tiles in attribute table.
+     * @param tileRow The row of the tile in the nametable
+     * @param tileCol The column of the tile in the nametable
+     * @return The palette index of the tile (between 0-32)
+     */
+    private void get_palette_of_tile(int tileRow, int tileCol) {
+
+        int tile_block_row = tileRow / 2;
+        int tile_block_col = tileCol / 2;
+
+        // TODO: Remove there checks
+        if (tile_block_col < 0 || tile_block_col > 8) {
+            throw new RuntimeException("Invalid tile block column: " + tile_block_col);
+        }
+        if (tile_block_row < 0 || tile_block_row > 8) {
+            throw new RuntimeException("Invalid tile block row: " + tile_block_row);
+        }
+
+        // Check if tile is top left, top right, bottom left, bottom right
+        if (tileRow % 2 == 0 && tileCol % 2 == 0) {
+            // Top left
+        } else if (tileRow % 2 == 0 && tileCol % 2 == 1) {
+            // Top right
+        } else if (tileRow % 2 == 1 && tileCol % 2 == 0) {
+            // Bottom left
+        } else if (tileRow % 2 == 1 && tileCol % 2 == 1) {
+            // Bottom right
+        } else {
+            // TODO: Remove this check
+            throw new RuntimeException("Invalid tile block row and column: " + tile_block_row + ", " + tile_block_col);
+        }
+
+        int attribute_table_index = (tileRow / 4) * 8 + (tileCol / 4);
+
+        //byte attribute_table_byte = read((short) (0x23C0 + attribute_table_index));
+
+
+        //return palette_index;
     }
 
     /**

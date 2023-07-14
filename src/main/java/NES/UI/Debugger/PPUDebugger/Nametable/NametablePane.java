@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import javax.swing.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 public class NametablePane extends JPanel {
     private final Logger logger = LoggerFactory.getLogger(NametablePane.class);
@@ -59,61 +60,61 @@ public class NametablePane extends JPanel {
         add(box_pane);
         add(info_pane);
 
-        canvas0.addMouseMotionListener(new MouseAdapter() {
+        bind_canvas_mouse_events(canvas0);
+        bind_canvas_mouse_events(canvas1);
+        bind_canvas_mouse_events(canvas2);
+        bind_canvas_mouse_events(canvas3);
+    }
+
+    private void bind_canvas_mouse_events(NametableCanvas canvas) {
+        canvas.addMouseListener(new MouseListener() {
             @Override
-            public void mouseMoved(MouseEvent e) {
-                super.mouseMoved(e);
-                getMirrorCanvas(canvas0).mouseMoved(e);
+            public void mouseClicked(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                super.mouseExited(e);
-                getMirrorCanvas(canvas0).mouseExited(e);
+                mouseExitedEvent(canvas, e);
+                mouseExitedEvent(getMirrorCanvas(canvas), e);
             }
         });
 
-        canvas1.addMouseMotionListener(new MouseAdapter() {
-            @Override
-            public void mouseExited(MouseEvent e) {
-                super.mouseExited(e);
-                getMirrorCanvas(canvas1).mouseExited(e);
-            }
-
+        canvas.addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                super.mouseMoved(e);
-                getMirrorCanvas(canvas1).mouseMoved(e);
+                mouseMovedEvent(canvas, e);
+                mouseMovedEvent(getMirrorCanvas(canvas), e);
             }
         });
+    }
 
-        canvas2.addMouseMotionListener(new MouseAdapter() {
-            @Override
-            public void mouseExited(MouseEvent e) {
-                super.mouseExited(e);
-                getMirrorCanvas(canvas2).mouseExited(e);
-            }
+    private void mouseMovedEvent(NametableCanvas canvas, MouseEvent e) {
+        int x = e.getX() / 8;
+        int y = e.getY() / 8;
 
-            @Override
-            public void mouseMoved(MouseEvent e) {
-                super.mouseMoved(e);
-                getMirrorCanvas(canvas2).mouseMoved(e);
-            }
-        });
+        canvas.tile_hover = y * 32 + x;
+        canvas.repaint();
+    }
 
-        canvas3.addMouseMotionListener(new MouseAdapter() {
-            @Override
-            public void mouseExited(MouseEvent e) {
-                super.mouseExited(e);
-                getMirrorCanvas(canvas3).mouseExited(e);
-            }
-
-            @Override
-            public void mouseMoved(MouseEvent e) {
-                super.mouseMoved(e);
-                getMirrorCanvas(canvas3).mouseMoved(e);
-            }
-        });
+    private void mouseExitedEvent(NametableCanvas canvas, MouseEvent e) {
+        canvas.tile_hover = -1;
+        canvas.repaint();
     }
 
     private NametableCanvas getMirrorCanvas(NametableCanvas original) {
