@@ -20,7 +20,7 @@ public class NametableCanvas extends JPanel {
     public static final int SCALE = 2;
 
     protected int tile_hover = -1;
-    protected AtomicInteger tile_selected = new AtomicInteger(-1);
+    protected int tile_selected = -1;
     private final NametableInfoPane info_pane;
     public final int table_index;
 
@@ -45,43 +45,81 @@ public class NametableCanvas extends JPanel {
 //            g.drawLine(x * 8 * SCALE, 0, x * 8 * SCALE, getHeight());
 //        }
 
-        int tile_selected = this.tile_selected.get();
 
         // Draw hover tile
         if (tile_hover != -1) {
-            int col = tile_hover % COLUMNS;
-            int row = tile_hover / COLUMNS;
-
-            // Top-left graphics coordinates of the tile
-            int canvas_x = col * 8 * SCALE;
-            int canvas_y = row * 8 * SCALE;
-
-            // Draw the hovered tile
-            g.setColor(Color.RED);
-            g.drawRect(canvas_x, canvas_y, 8 * SCALE, 8 * SCALE);
-
-
-            int x_offset = 0;
-            int y_offset = 0;
-
-            if (col % 2 == 1)
-                x_offset = - 8 * SCALE;
-
-            if (row % 2 == 1)
-                y_offset = - 8 * SCALE;
-
-            // Draw the hovered tile block
-            g.setColor(Color.GREEN);
-            g.drawRect(canvas_x + x_offset, canvas_y + y_offset, 8 * SCALE * 2, 8 * SCALE * 2);
+            draw_tile(g, true);
+            draw_tile_block(g, true);
         }
 
         // Draw the selected tile
         if (tile_selected != -1) {
-            int x = tile_selected % COLUMNS;
-            int y = tile_selected / COLUMNS;
-            g.setColor(Color.RED);
-            g.drawRect(x * 8 * SCALE, y * 8 * SCALE, 8 * SCALE, 8 * SCALE);
+            draw_tile(g, false);
+            draw_tile_block(g, false);
         }
+    }
+
+    /**
+     *
+     * @param g
+     * @param is_hover_or_selected True if the tile is hovered. False if the tile is selected.
+     */
+    private void draw_tile(Graphics g, boolean is_hover_or_selected) {
+        int col, row;
+        Color color;
+
+        if (is_hover_or_selected) {
+            col = tile_hover % COLUMNS;
+            row = tile_hover / COLUMNS;
+            color = Color.BLUE;
+        } else {
+            col = tile_selected % COLUMNS;
+            row = tile_selected / COLUMNS;
+            color = Color.RED;
+        }
+
+        // Top-left graphics coordinates of the tile
+        int canvas_x = col * 8 * SCALE;
+        int canvas_y = row * 8 * SCALE;
+
+        g.setColor(color);
+        g.drawRect(canvas_x, canvas_y, 8 * SCALE, 8 * SCALE);
+    }
+
+    /**
+     *
+     * @param g
+     * @param is_hover_or_selected True if the tile is hovered. False if the tile is selected.
+     */
+    private void draw_tile_block(Graphics g, boolean is_hover_or_selected) {
+        int col, row;
+        Color color;
+        if (is_hover_or_selected) {
+            col = tile_hover % COLUMNS;
+            row = tile_hover / COLUMNS;
+            color = Color.GREEN;
+        } else {
+            col = tile_selected % COLUMNS;
+            row = tile_selected / COLUMNS;
+            color = Color.MAGENTA;
+        }
+
+        // Top-left graphics coordinates of the tile
+        int canvas_x = col * 8 * SCALE;
+        int canvas_y = row * 8 * SCALE;
+
+        int x_offset = 0;
+        int y_offset = 0;
+
+        if (col % 2 == 1)
+            x_offset = - 8 * SCALE;
+
+        if (row % 2 == 1)
+            y_offset = - 8 * SCALE;
+
+        // Draw the hovered tile block
+        g.setColor(color);
+        g.drawRect(canvas_x + x_offset, canvas_y + y_offset, 8 * SCALE * 2, 8 * SCALE * 2);
     }
 
 }

@@ -75,7 +75,11 @@ public class NametablePane extends JPanel {
 
             @Override
             public void mousePressed(MouseEvent e) {
+                canvas.tile_selected = canvas.tile_hover;
+                getMirrorCanvas(canvas).tile_selected = canvas.tile_hover;
 
+                canvas.repaint();
+                getMirrorCanvas(canvas).repaint();
             }
 
             @Override
