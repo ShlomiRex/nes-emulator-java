@@ -40,7 +40,11 @@ public class DebuggerWindow extends JFrame {
 
         add(assembly_main_pane, BorderLayout.LINE_START);
         add(main_pane, BorderLayout.CENTER);
-        pack();
+
+        //pack();
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
+
+
         setVisible(true);
         setLocationRelativeTo(null);
     }

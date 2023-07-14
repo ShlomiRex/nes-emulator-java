@@ -105,8 +105,8 @@ public class NametablePane extends JPanel {
     }
 
     private void mouseMovedEvent(NametableCanvas canvas, MouseEvent e) {
-        int x = e.getX() / 8;
-        int y = e.getY() / 8;
+        int x = e.getX() / (8 * NametableCanvas.SCALE);
+        int y = e.getY() / (8 * NametableCanvas.SCALE);
 
         canvas.tile_hover = y * 32 + x;
         canvas.repaint();
