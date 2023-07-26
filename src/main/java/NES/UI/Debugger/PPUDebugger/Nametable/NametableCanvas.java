@@ -24,6 +24,8 @@ public class NametableCanvas extends JPanel {
     protected int tile_selected = -1;
     public final int table_index;
     private final PPU ppu;
+    private boolean show_tile_grid = true;
+    private boolean show_attribute_grid = false;
 
     private final Stroke thickStroke = new BasicStroke(4);
 
@@ -40,16 +42,27 @@ public class NametableCanvas extends JPanel {
 
         ppu.draw_frame(g, getWidth(), getHeight());
 
-        // Draw the grid
-        g.setColor(Color.WHITE);
-
-        for (int y = 0; y < ROWS; y++) {
-            g.drawLine(0, y * 8 * SCALE, getWidth(), y * 8 * SCALE);
+        // Draw tile grid
+        if (show_tile_grid) {
+            g.setColor(Color.WHITE);
+            for (int y = 0; y < ROWS; y++) {
+                g.drawLine(0, y * 8 * SCALE, getWidth(), y * 8 * SCALE);
+            }
+            for (int x = 0; x < COLUMNS; x++) {
+                g.drawLine(x * 8 * SCALE, 0, x * 8 * SCALE, getHeight());
+            }
         }
-        for (int x = 0; x < COLUMNS; x++) {
-            g.drawLine(x * 8 * SCALE, 0, x * 8 * SCALE, getHeight());
-        }
 
+        // Draw attribute grid
+        if (show_attribute_grid) {
+            g.setColor(Color.RED);
+            for (int y = 0; y < ROWS; y+=2) {
+                g.drawLine(0, y * 8 * SCALE, getWidth(), y * 8 * SCALE);
+            }
+            for (int x = 0; x < COLUMNS; x+=2) {
+                g.drawLine(x * 8 * SCALE, 0, x * 8 * SCALE, getHeight());
+            }
+        }
 
         Graphics2D g2 = (Graphics2D) g;
         g2.setStroke(thickStroke);
@@ -132,4 +145,13 @@ public class NametableCanvas extends JPanel {
         g.drawRect(canvas_x + x_offset, canvas_y + y_offset, 8 * SCALE * 2, 8 * SCALE * 2);
     }
 
+    public void setShowTileGrid(boolean isShow) {
+        show_tile_grid = isShow;
+        repaint();
+    }
+
+    public void setShowAttributeGrid(boolean isShow) {
+        show_attribute_grid = isShow;
+        repaint();
+    }
 }

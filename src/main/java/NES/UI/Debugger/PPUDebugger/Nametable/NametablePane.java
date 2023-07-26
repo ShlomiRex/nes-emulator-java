@@ -26,7 +26,7 @@ public class NametablePane extends JPanel {
 
         box_pane.setLayout(new BoxLayout(box_pane, BoxLayout.Y_AXIS));
 
-        info_pane = new TileInfoPane(ppu);
+        info_pane = new TileInfoPane(this, ppu);
 
         canvas0 = new NametableCanvas(ppu, 0);
         canvas1 = new NametableCanvas(ppu, 1);
@@ -172,5 +172,19 @@ public class NametablePane extends JPanel {
         } else {
             throw new RuntimeException("Not implemented");
         }
+    }
+
+    public void setShowTileGrid(boolean is_show) {
+        canvas0.setShowTileGrid(is_show);
+        canvas1.setShowTileGrid(is_show);
+        canvas2.setShowTileGrid(is_show);
+        canvas3.setShowTileGrid(is_show);
+    }
+
+    public void setShowAttributeGrid(boolean is_show) {
+        canvas0.setShowAttributeGrid(is_show);
+        canvas1.setShowAttributeGrid(is_show);
+        canvas2.setShowAttributeGrid(is_show);
+        canvas3.setShowAttributeGrid(is_show);
     }
 }

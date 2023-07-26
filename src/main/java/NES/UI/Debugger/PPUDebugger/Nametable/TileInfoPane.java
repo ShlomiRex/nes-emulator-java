@@ -25,8 +25,10 @@ public class TileInfoPane extends JPanel {
     public static final int SCALE = 16;
     private final PatternTilePane pattern_tile;
     private final PPU ppu;
+    private final NametablePane nametable_pane;
 
-    public TileInfoPane(PPU ppu) {
+    public TileInfoPane(NametablePane nametablePane, PPU ppu) {
+        this.nametable_pane = nametablePane;
         this.ppu = ppu;
 
         setBorder(BorderFactory.createTitledBorder("Tile Info"));
@@ -119,6 +121,16 @@ public class TileInfoPane extends JPanel {
         add(chk_tile_grid);
         add(chk_attr_grid);
         add(last_row_pane);
+
+        chk_tile_grid.setSelected(true);
+        chk_tile_grid.addActionListener(e -> {
+            nametable_pane.setShowTileGrid(chk_tile_grid.isSelected());
+        });
+
+        chk_attr_grid.setSelected(false);
+        chk_attr_grid.addActionListener(e -> {
+            nametable_pane.setShowAttributeGrid(chk_attr_grid.isSelected());
+        });
     }
 
     public void setSelectedTileIndex(boolean is_nametable_A, int selected_tile_index) {
