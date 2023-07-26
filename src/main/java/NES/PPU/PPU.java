@@ -205,7 +205,7 @@ public class PPU {
         draw_nametable(g, 0, width, height);
     }
 
-    private void draw_nametable(Graphics g, int table_index, int width, int height) {
+    public void draw_nametable(Graphics g, int table_index, int width, int height) {
         // Get nametables
         // A nametable is a 1024 byte area of memory used by the PPU to lay out backgrounds.
         // Each byte in the nametable controls one 8x8 pixel character cell
@@ -225,44 +225,56 @@ public class PPU {
         int pixel_height = height / 240;
 
         g.setColor(Color.WHITE);
-        if (table_index == 0) {
-            // For each nametable byte (960 bytes) - the remaining 64 bytes are attribute table bytes (for total of 1024)
-            for (int tile_row = 0; tile_row < 30; tile_row++) {
-                for (int tile_col = 0; tile_col < 32; tile_col++) {
 
-                    // TODO: Check attribute table. set color per 2x2 meta tiles
-                    //int metatile_palette = get_palette_of_tile(tile_row, tile_col);
+        // Draw nametable A
+        if (table_index == 0
+                || (table_index == 1 && mirroring == Mirroring.HORIZONTAL)
+                || (table_index == 2 && mirroring == Mirroring.VERTICAL)
+                || mirroring == Mirroring.SINGLE_SCREEN
+                || (mirroring == Mirroring.FOUR_SCREEN && table_index == 0)) {
+            draw_nametable(g, (short) first_nametable_addr, pixel_width, pixel_height);
+        }
+        // Draw nametable B
+        else if ((table_index == 1 && mirroring == Mirroring.VERTICAL)
+                || (table_index == 2 && mirroring == Mirroring.HORIZONTAL)
+                || (table_index == 3 && mirroring == Mirroring.VERTICAL)
+                || (table_index == 3 && mirroring == Mirroring.HORIZONTAL)) {
+            // TODO: Not yet implemented
+            //draw_nametable(g, (short) second_nametable_addr, pixel_width, pixel_height);
+        } else {
+            throw new IllegalArgumentException("Invalid nametable index: " + table_index);
+        }
+    }
 
-                    byte pattern_table_index = read((short) (first_nametable_addr + tile_row * 32 + tile_col));
+    private void draw_nametable(Graphics g, short baseAddr, int pixel_width, int pixel_height) {
+        // For each nametable byte (960 bytes) - the remaining 64 bytes are attribute table bytes (for total of 1024)
+        for (int tile_row = 0; tile_row < 30; tile_row++) {
+            for (int tile_col = 0; tile_col < 32; tile_col++) {
 
-                    // 16 bytes per tile
-                    byte[] pattern_bytes = get_pattern_tile(pattern_table_index, true);
+                // TODO: Check attribute table. set color per 2x2 meta tiles
+                //int metatile_palette = get_palette_of_tile(tile_row, tile_col);
 
-                    // 64 pixels (8x8), each pixel value is the index of the color in the palette (0,1,2,3)
-                    byte[][] pixels = convert_pattern_tile_to_pixel_pattern(pattern_bytes);
+                byte pattern_table_index = read((short) (baseAddr + tile_row * 32 + tile_col));
 
-                    // Draw pixels
-                    for (int pixel_row = 0; pixel_row < 8; pixel_row ++) {
-                        for (int pixel_col = 0; pixel_col < 8; pixel_col++) {
-                            byte palette_index = pixels[pixel_row][pixel_col];
-                            // Color is 2 bits: 00, 01, 10, 11 and it is the index of the color in the palette
-                            Color pixelColor = get_palette(palette_index).getB();
-                            g.setColor(pixelColor);
+                // 16 bytes per tile
+                byte[] pattern_bytes = get_pattern_tile(pattern_table_index, true);
 
-                            // Draw pixel
-                            g.fillRect((tile_col * 8 + pixel_col) * pixel_width, (tile_row * 8 + pixel_row) * pixel_height, pixel_width, pixel_height);
-                        }
+                // 64 pixels (8x8), each pixel value is the index of the color in the palette (0,1,2,3)
+                byte[][] pixels = convert_pattern_tile_to_pixel_pattern(pattern_bytes);
+
+                // Draw pixels
+                for (int pixel_row = 0; pixel_row < 8; pixel_row ++) {
+                    for (int pixel_col = 0; pixel_col < 8; pixel_col++) {
+                        byte palette_index = pixels[pixel_row][pixel_col];
+                        // Color is 2 bits: 00, 01, 10, 11 and it is the index of the color in the palette
+                        Color pixelColor = get_palette(palette_index).getB();
+                        g.setColor(pixelColor);
+
+                        // Draw pixel
+                        g.fillRect((tile_col * 8 + pixel_col) * pixel_width, (tile_row * 8 + pixel_row) * pixel_height, pixel_width, pixel_height);
                     }
                 }
             }
-        } else if (table_index == 1) {
-
-        } else if (table_index == 2) {
-
-        } else if (table_index == 3) {
-
-        } else {
-            throw new IllegalArgumentException("Invalid nametable index: " + table_index);
         }
     }
 

@@ -23,8 +23,10 @@ public class NametablePane extends JPanel {
         JPanel top_pane = new JPanel();
         JPanel bot_pane = new JPanel();
         JPanel box_pane = new JPanel();
+        JPanel right_pane = new JPanel();
 
         box_pane.setLayout(new BoxLayout(box_pane, BoxLayout.Y_AXIS));
+        right_pane.setLayout(new BoxLayout(right_pane, BoxLayout.Y_AXIS));
 
         info_pane = new TileInfoPane(this, ppu);
 
@@ -59,8 +61,11 @@ public class NametablePane extends JPanel {
         box_pane.add(top_pane);
         box_pane.add(bot_pane);
 
+        right_pane.add(new JLabel("Mirroring: " + mirroring.toString()));
+        right_pane.add(info_pane);
+
         add(box_pane);
-        add(info_pane);
+        add(right_pane);
 
         bind_canvas_mouse_events(canvas0);
         bind_canvas_mouse_events(canvas1);

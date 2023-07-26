@@ -40,7 +40,7 @@ public class NametableCanvas extends JPanel {
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, getWidth(), getHeight());
 
-        ppu.draw_frame(g, getWidth(), getHeight());
+        ppu.draw_nametable(g, table_index, getWidth(), getHeight());
 
         // Draw tile grid
         if (show_tile_grid) {
@@ -78,8 +78,6 @@ public class NametableCanvas extends JPanel {
             draw_tile_block(g, true);
             draw_tile(g, true);
         }
-
-
     }
 
     /**

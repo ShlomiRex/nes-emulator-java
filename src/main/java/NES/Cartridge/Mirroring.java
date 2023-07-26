@@ -2,5 +2,7 @@ package NES.Cartridge;
 
 public enum Mirroring {
     VERTICAL,
-    HORIZONTAL
+    HORIZONTAL,
+    SINGLE_SCREEN,
+    FOUR_SCREEN
 }
