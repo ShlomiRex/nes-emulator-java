@@ -266,55 +266,6 @@ public class PPU {
         }
     }
 
-    public int convert_tile_row_to_attribute_block_row(int tile_row) {
-        return tile_row / 2;
-    }
-
-    public int convert_tile_col_to_attribute_block_col(int tile_col) {
-        return tile_col / 2;
-    }
-
-    /**
-     * Calculates the palette index of a tile, by using the color of meta tiles in attribute table.
-     * @param tileRow The row of the tile in the nametable
-     * @param tileCol The column of the tile in the nametable
-     * @return The palette index of the tile (between 0-32)
-     */
-    private void get_palette_of_tile(int tileRow, int tileCol) {
-
-        int tile_block_row = tileRow / 2;
-        int tile_block_col = tileCol / 2;
-
-        // TODO: Remove there checks
-        if (tile_block_col < 0 || tile_block_col > 8) {
-            throw new RuntimeException("Invalid tile block column: " + tile_block_col);
-        }
-        if (tile_block_row < 0 || tile_block_row > 8) {
-            throw new RuntimeException("Invalid tile block row: " + tile_block_row);
-        }
-
-        // Check if tile is top left, top right, bottom left, bottom right
-        if (tileRow % 2 == 0 && tileCol % 2 == 0) {
-            // Top left
-        } else if (tileRow % 2 == 0 && tileCol % 2 == 1) {
-            // Top right
-        } else if (tileRow % 2 == 1 && tileCol % 2 == 0) {
-            // Bottom left
-        } else if (tileRow % 2 == 1 && tileCol % 2 == 1) {
-            // Bottom right
-        } else {
-            // TODO: Remove this check
-            throw new RuntimeException("Invalid tile block row and column: " + tile_block_row + ", " + tile_block_col);
-        }
-
-        int attribute_table_index = (tileRow / 4) * 8 + (tileCol / 4);
-
-        //byte attribute_table_byte = read((short) (0x23C0 + attribute_table_index));
-
-
-        //return palette_index;
-    }
-
     /**
      * Write to PPU memory.
      * @param addr

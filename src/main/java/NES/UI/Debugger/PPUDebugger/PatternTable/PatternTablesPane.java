@@ -22,8 +22,8 @@ public class PatternTablesPane extends JPanel {
     private JPanel createLeftPatternTable(boolean is_left_pattern_table) {
         // Currently selected tile index
         JPanel tile_index_panel = new JPanel();
-        JLabel left_pattern_table_tile_index = new JLabel("Tile:");
-        tile_index_panel.add(left_pattern_table_tile_index);
+        JLabel lbl_tile_index = new JLabel("Tile:");
+        tile_index_panel.add(lbl_tile_index);
 
         // Pattern table canvas
         JPanel table_canvas = new JPanel();
@@ -33,7 +33,7 @@ public class PatternTablesPane extends JPanel {
                 byte tile_index = (byte)(col + row * 16);
 
                 PatternTilePane tile = new PatternTilePane(
-                        ppu, tile_index, is_left_pattern_table, left_pattern_table_tile_index);
+                        ppu, tile_index, is_left_pattern_table, lbl_tile_index);
                 table_canvas.add(tile);
             }
         }

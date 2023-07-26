@@ -82,7 +82,26 @@ public class NametablePane extends JPanel {
 
                 canvas.tile_selected = selected_tile;
                 mirrored.tile_selected = selected_tile;
-                info_pane.setSelectedTileIndex((byte) selected_tile);
+
+                int table_index = canvas.table_index;
+                boolean is_nametable_A;
+                if (mirroring == Mirroring.HORIZONTAL) {
+                    if (table_index == 0 || table_index == 2) {
+                        is_nametable_A = true;
+                    } else {
+                        is_nametable_A = false;
+                    }
+                } else {
+                    if (table_index == 0 || table_index == 1) {
+                        is_nametable_A = true;
+                    } else {
+                        is_nametable_A = false;
+                    }
+                }
+
+                logger.debug("Selected tile in nametable A? {}, mirroring: {}", is_nametable_A ? "Yes" : "No", mirroring);
+
+                info_pane.setSelectedTileIndex(is_nametable_A, selected_tile);
 
                 canvas.repaint();
                 mirrored.repaint();
