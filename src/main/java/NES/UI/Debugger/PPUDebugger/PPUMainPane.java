@@ -47,7 +47,7 @@ public class PPUMainPane extends JPanel {
         JPanel pattern_tables_pane = new PatternTablesPane(ppu);
         JPanel system_palette_pane = new SystemPalettePane();
         JPanel palette_memory_pane = new PaletteMemoryPane(ppu);
-        JPanel nametable_pane = new NametablePane(header.getMirrorType());
+        JPanel nametable_pane = new NametablePane(ppu, header.getMirrorType());
 
         // Add panels
         status_info_pane.add(cycles_pane);

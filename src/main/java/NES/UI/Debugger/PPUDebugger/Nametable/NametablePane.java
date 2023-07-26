@@ -1,6 +1,7 @@
 package NES.UI.Debugger.PPUDebugger.Nametable;
 
 import NES.Cartridge.Mirroring;
+import NES.PPU.PPU;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,8 +15,9 @@ public class NametablePane extends JPanel {
     private final Mirroring mirroring;
 
     private final NametableCanvas canvas0, canvas1, canvas2, canvas3;
+    private final TileInfoPane info_pane;
 
-    public NametablePane(Mirroring mirroring) {
+    public NametablePane(PPU ppu, Mirroring mirroring) {
         this.mirroring = mirroring;
 
         JPanel top_pane = new JPanel();
@@ -24,12 +26,12 @@ public class NametablePane extends JPanel {
 
         box_pane.setLayout(new BoxLayout(box_pane, BoxLayout.Y_AXIS));
 
-        NametableInfoPane info_pane = new NametableInfoPane();
+        info_pane = new TileInfoPane(ppu);
 
-        canvas0 = new NametableCanvas(0, info_pane);
-        canvas1 = new NametableCanvas(1, info_pane);
-        canvas2 = new NametableCanvas(2, info_pane);
-        canvas3 = new NametableCanvas(3, info_pane);
+        canvas0 = new NametableCanvas(ppu, 0);
+        canvas1 = new NametableCanvas(ppu, 1);
+        canvas2 = new NametableCanvas(ppu, 2);
+        canvas3 = new NametableCanvas(ppu, 3);
 
         JPanel wrapper0 = new JPanel();
         JPanel wrapper1 = new JPanel();
@@ -75,11 +77,15 @@ public class NametablePane extends JPanel {
 
             @Override
             public void mousePressed(MouseEvent e) {
-                canvas.tile_selected = canvas.tile_hover;
-                getMirrorCanvas(canvas).tile_selected = canvas.tile_hover;
+                int selected_tile = canvas.tile_hover;
+                NametableCanvas mirrored = getMirrorCanvas(canvas);
+
+                canvas.tile_selected = selected_tile;
+                mirrored.tile_selected = selected_tile;
+                info_pane.setSelectedTileIndex((byte) selected_tile);
 
                 canvas.repaint();
-                getMirrorCanvas(canvas).repaint();
+                mirrored.repaint();
             }
 
             @Override

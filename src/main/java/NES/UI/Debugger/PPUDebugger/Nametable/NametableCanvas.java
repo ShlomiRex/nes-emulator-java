@@ -1,5 +1,6 @@
 package NES.UI.Debugger.PPUDebugger.Nametable;
 
+import NES.PPU.PPU;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,13 +22,12 @@ public class NametableCanvas extends JPanel {
 
     protected int tile_hover = -1;
     protected int tile_selected = -1;
-    private final NametableInfoPane info_pane;
     public final int table_index;
+    private final PPU ppu;
 
-    public NametableCanvas(int table_index, NametableInfoPane info_pane) {
+    public NametableCanvas(PPU ppu, int table_index) {
+        this.ppu = ppu;
         this.table_index = table_index;
-        this.info_pane = info_pane;
-
         setPreferredSize(new Dimension(256 * SCALE, 240 * SCALE));
     }
 
@@ -36,14 +36,16 @@ public class NametableCanvas extends JPanel {
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, getWidth(), getHeight());
 
-//        // Draw the grid
-//        g.setColor(Color.WHITE);
-//        for (int y = 0; y < ROWS; y++) {
-//            g.drawLine(0, y * 8 * SCALE, getWidth(), y * 8 * SCALE);
-//        }
-//        for (int x = 0; x < COLUMNS; x++) {
-//            g.drawLine(x * 8 * SCALE, 0, x * 8 * SCALE, getHeight());
-//        }
+        ppu.draw_frame(g, getWidth(), getHeight());
+
+        // Draw the grid
+        g.setColor(Color.WHITE);
+        for (int y = 0; y < ROWS; y++) {
+            g.drawLine(0, y * 8 * SCALE, getWidth(), y * 8 * SCALE);
+        }
+        for (int x = 0; x < COLUMNS; x++) {
+            g.drawLine(x * 8 * SCALE, 0, x * 8 * SCALE, getHeight());
+        }
 
 
         // Draw hover tile

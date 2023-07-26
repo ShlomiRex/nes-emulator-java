@@ -11,19 +11,23 @@ import java.awt.event.MouseEvent;
 
 public class PatternTilePane extends JPanel {
     private final PPU ppu;
-    private final byte tile_index;
+    private byte tile_index;
     private final boolean is_left_pattern_table;
 
     private final int panel_width, panel_height;
 
-
-    public PatternTilePane(PPU ppu, byte tile_index, boolean is_left_pattern_table, JLabel selected_tile_label) {
+    public PatternTilePane(PPU ppu,
+                           int panel_width,
+                           int panel_height,
+                           byte tile_index,
+                           boolean is_left_pattern_table,
+                           JLabel selected_tile_label) {
         this.ppu = ppu;
         this.tile_index = tile_index;
         this.is_left_pattern_table = is_left_pattern_table;
 
-        this.panel_width = 16;
-        this.panel_height = 16;
+        this.panel_width = panel_width;
+        this.panel_height = panel_height;
 
         setPreferredSize(new Dimension(panel_width, panel_height));
         addMouseListener(new MouseAdapter() {
@@ -31,18 +35,24 @@ public class PatternTilePane extends JPanel {
             public void mouseEntered(MouseEvent e) {
                 super.mouseEntered(e);
                 setBorder(BorderFactory.createLineBorder(Color.BLUE, 2));
-                selected_tile_label.setText("Tile: $" + Common.byteToHex(tile_index, false));
+                if (selected_tile_label != null)
+                    selected_tile_label.setText("Tile: $" + Common.byteToHex(tile_index, false));
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
                 super.mouseExited(e);
                 setBorder(BorderFactory.createEmptyBorder());
-                selected_tile_label.setText("Tile:");
+                if (selected_tile_label != null)
+                    selected_tile_label.setText("Tile:");
             }
         });
 
         setToolTipText("");
+    }
+
+    public PatternTilePane(PPU ppu, byte tile_index, boolean is_left_pattern_table, JLabel selected_tile_label) {
+        this(ppu, 16, 16, tile_index, is_left_pattern_table, selected_tile_label);
     }
 
     /**
@@ -83,5 +93,10 @@ public class PatternTilePane extends JPanel {
     @Override
     public JToolTip createToolTip() {
         return new PatternTileTooltip(this);
+    }
+
+    public void change_tile_index(byte tile_index) {
+        this.tile_index = tile_index;
+        repaint();
     }
 }
