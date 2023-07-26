@@ -12,7 +12,15 @@ import java.awt.*;
 public class TileInfoPane extends JPanel {
 
     private final Logger logger = LoggerFactory.getLogger(TileInfoPane.class);
-    private final JTextField txt_location, txt_index;
+    private final JTextField
+            txt_ppu_addr,
+            txt_nametable,
+            txt_location,
+            txt_tile_index,
+            txt_tile_addr,
+            txt_attr_data,
+            txt_attr_addr,
+            txt_palette_addr;
     private int selected_tile_index;
     public static final int SCALE = 16;
     private final PatternTilePane pattern_tile;
@@ -20,28 +28,97 @@ public class TileInfoPane extends JPanel {
 
     public TileInfoPane(PPU ppu) {
         this.ppu = ppu;
+
         setBorder(BorderFactory.createTitledBorder("Tile Info"));
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
+        JPanel row1_pane = new JPanel();
+        JPanel row2_pane = new JPanel();
+        JPanel row3_pane = new JPanel();
+        JPanel row4_pane = new JPanel();
+        JPanel row5_pane = new JPanel();
+        JPanel row6_pane = new JPanel();
+        JPanel row7_pane = new JPanel();
+        JPanel row8_pane = new JPanel();
+        JPanel last_row_pane = new JPanel();
+
+        JLabel lbl_ppu_addr = new JLabel("PPU Addr: ");
+        JLabel lbl_nametable = new JLabel("Nametable: ");
         JLabel lbl_location = new JLabel("Location: ");
-        JLabel lbl_index = new JLabel("Selected tile: ");
+        JLabel lbl_tile_index = new JLabel("Tile index: ");
+        JLabel lbl_tile_addr = new JLabel("Tile Addr: ");
+        JLabel lbl_attr_data = new JLabel("Attribute Data: ");
+        JLabel lbl_attr_addr = new JLabel("Attribute Addr: ");
+        JLabel lbl_palette_addr = new JLabel("Palette Addr: ");
 
-        txt_index = new JTextField("");
+        JCheckBox chk_tile_grid = new JCheckBox("Show Tile Grid");
+        JCheckBox chk_attr_grid = new JCheckBox("Show Attribute Grid");
+
+        txt_ppu_addr = new JTextField("");
+        txt_nametable = new JTextField("");
         txt_location = new JTextField("");
+        txt_tile_index = new JTextField("");
+        txt_tile_addr = new JTextField("");
+        txt_attr_data = new JTextField("");
+        txt_attr_addr = new JTextField("");
+        txt_palette_addr = new JTextField("");
 
+        txt_ppu_addr.setColumns(4);
+        txt_nametable.setColumns(4);
         txt_location.setColumns(4);
-        txt_index.setColumns(4);
+        txt_tile_index.setColumns(4);
+        txt_tile_addr.setColumns(4);
+        txt_attr_data.setColumns(4);
+        txt_attr_addr.setColumns(4);
+        txt_palette_addr.setColumns(4);
 
+        txt_ppu_addr.setEditable(false);
+        txt_nametable.setEditable(false);
         txt_location.setEditable(false);
-        txt_index.setEditable(false);
+        txt_tile_index.setEditable(false);
+        txt_tile_addr.setEditable(false);
+        txt_attr_data.setEditable(false);
+        txt_attr_addr.setEditable(false);
+        txt_palette_addr.setEditable(false);
 
-        add(lbl_location);
-        add(txt_location);
+        row1_pane.add(lbl_ppu_addr);
+        row1_pane.add(txt_ppu_addr);
 
-        add(lbl_index);
-        add(txt_index);
+        row2_pane.add(lbl_nametable);
+        row2_pane.add(txt_nametable);
+
+        row3_pane.add(lbl_location);
+        row3_pane.add(txt_location);
+
+        row4_pane.add(lbl_tile_index);
+        row4_pane.add(txt_tile_index);
+
+        row5_pane.add(lbl_tile_addr);
+        row5_pane.add(txt_tile_addr);
+
+        row6_pane.add(lbl_attr_data);
+        row6_pane.add(txt_attr_data);
+
+        row7_pane.add(lbl_attr_addr);
+        row7_pane.add(txt_attr_addr);
+
+        row8_pane.add(lbl_palette_addr);
+        row8_pane.add(txt_palette_addr);
 
         pattern_tile = new PatternTilePane(ppu, 8 * SCALE, 8 * SCALE, (byte)0, true, null);
-        add(pattern_tile);
+        last_row_pane.add(pattern_tile);
+
+        add(row1_pane);
+        add(row2_pane);
+        add(row3_pane);
+        add(row4_pane);
+        add(row5_pane);
+        add(row6_pane);
+        add(row7_pane);
+        add(row8_pane);
+        add(chk_tile_grid);
+        add(chk_attr_grid);
+        add(last_row_pane);
     }
 
     public void setSelectedTileIndex(boolean is_nametable_A, int selected_tile_index) {
@@ -60,6 +137,9 @@ public class TileInfoPane extends JPanel {
 
 
         pattern_tile.change_tile_index(patternTileIndex);
+
+        txt_tile_index.setText(Common.byteToHex(patternTileIndex, true));
+
         this.selected_tile_index = patternTileIndex;
 
         String selected_location = "(" + selected_col + ", " + selected_row + ")";
@@ -73,7 +153,7 @@ public class TileInfoPane extends JPanel {
         super.paintComponent(g);
 
         if (selected_tile_index != -1)
-            txt_index.setText(Common.shortToHex((short) selected_tile_index, false));
+            txt_tile_index.setText(Common.shortToHex((short) selected_tile_index, false));
     }
 
 }

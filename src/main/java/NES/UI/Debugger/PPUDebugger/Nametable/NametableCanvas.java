@@ -25,6 +25,8 @@ public class NametableCanvas extends JPanel {
     public final int table_index;
     private final PPU ppu;
 
+    private final Stroke thickStroke = new BasicStroke(4);
+
     public NametableCanvas(PPU ppu, int table_index) {
         this.ppu = ppu;
         this.table_index = table_index;
@@ -40,6 +42,7 @@ public class NametableCanvas extends JPanel {
 
         // Draw the grid
         g.setColor(Color.WHITE);
+
         for (int y = 0; y < ROWS; y++) {
             g.drawLine(0, y * 8 * SCALE, getWidth(), y * 8 * SCALE);
         }
@@ -48,17 +51,22 @@ public class NametableCanvas extends JPanel {
         }
 
 
-        // Draw hover tile
-        if (tile_hover != -1) {
-            draw_tile(g, true);
-            draw_tile_block(g, true);
-        }
+        Graphics2D g2 = (Graphics2D) g;
+        g2.setStroke(thickStroke);
 
         // Draw the selected tile
         if (tile_selected != -1) {
-            draw_tile(g, false);
             draw_tile_block(g, false);
+            draw_tile(g, false);
         }
+
+        // Draw hover tile
+        if (tile_hover != -1) {
+            draw_tile_block(g, true);
+            draw_tile(g, true);
+        }
+
+
     }
 
     /**
