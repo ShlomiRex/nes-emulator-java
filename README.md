@@ -33,7 +33,11 @@ Fixed debugger nametable canvases + fixed NMI interrupt loop:
 ![](README-resources/Screenshot%202023-07-27%20192342.png)
 
 First time working controller display:
+
 ![](README-resources/Screenshot%202023-07-27%20232945.png)
+
+First time working NESTEST:
+![](README-resources/Screenshot%202023-07-28%20000909.png)
 
 # Resources
 

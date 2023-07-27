@@ -127,6 +127,13 @@ public class CPU {
             res = memory[addr & 0xFFFF];
         }
 
+        // Check for memory mapped registers
+        if (addr == 0x4016 || addr == 0x4017) {
+            res = bus.cpu_read(addr);
+            if (res != 0)
+                logger.debug("Controller read: " + Common.byteToHex(res, true));
+        }
+
         cycles ++;
         if (is_record_memory)
             recorded_memory.add(new MemoryAccessRecord(addr, res, true));
@@ -1152,6 +1159,12 @@ public class CPU {
             // Not PPU address, so write to internal memory.
             memory[addr & 0xFFFF] = value;
         }
+
+        // Check controller writes. If so, write to controller registers and return.
+        if (addr == 0x4016 || addr == 0x4017) {
+            bus.cpu_write(addr, value);
+        }
+
         if (is_record_memory)
             recorded_memory.add(new MemoryAccessRecord(addr, value, false));
     }
