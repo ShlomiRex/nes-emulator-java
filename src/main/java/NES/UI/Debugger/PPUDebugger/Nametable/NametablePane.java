@@ -28,7 +28,7 @@ public class NametablePane extends JPanel {
         box_pane.setLayout(new BoxLayout(box_pane, BoxLayout.Y_AXIS));
         right_pane.setLayout(new BoxLayout(right_pane, BoxLayout.Y_AXIS));
 
-        info_pane = new TileInfoPane(this, ppu);
+        info_pane = new TileInfoPane(this, ppu, mirroring);
 
         canvas0 = new NametableCanvas(ppu, 0);
         canvas1 = new NametableCanvas(ppu, 1);
@@ -83,33 +83,20 @@ public class NametablePane extends JPanel {
             @Override
             public void mousePressed(MouseEvent e) {
                 int selected_tile = canvas.tile_hover;
+                int table_index = canvas.table_index;
                 NametableCanvas mirrored = getMirrorCanvas(canvas);
 
+                // Tell both canvases which tile is selected
                 canvas.tile_selected = selected_tile;
                 mirrored.tile_selected = selected_tile;
 
-                int table_index = canvas.table_index;
-                boolean is_nametable_A;
-                if (mirroring == Mirroring.HORIZONTAL) {
-                    if (table_index == 0 || table_index == 2) {
-                        is_nametable_A = true;
-                    } else {
-                        is_nametable_A = false;
-                    }
-                } else {
-                    if (table_index == 0 || table_index == 1) {
-                        is_nametable_A = true;
-                    } else {
-                        is_nametable_A = false;
-                    }
-                }
+                // Update info pane
+                info_pane.setSelectedTile(selected_tile, table_index);
 
-                logger.debug("Selected tile in nametable A? {}, mirroring: {}", is_nametable_A ? "Yes" : "No", mirroring);
-
-                info_pane.setSelectedTileIndex(is_nametable_A, selected_tile);
-
+                // Repaint
                 canvas.repaint();
                 mirrored.repaint();
+                info_pane.repaint();
             }
 
             @Override

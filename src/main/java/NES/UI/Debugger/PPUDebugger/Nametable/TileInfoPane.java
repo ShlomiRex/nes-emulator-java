@@ -1,5 +1,6 @@
 package NES.UI.Debugger.PPUDebugger.Nametable;
 
+import NES.Cartridge.Mirroring;
 import NES.Common;
 import NES.PPU.PPU;
 import NES.UI.Debugger.PPUDebugger.PatternTable.PatternTilePane;
@@ -21,15 +22,17 @@ public class TileInfoPane extends JPanel {
             txt_attr_data,
             txt_attr_addr,
             txt_palette_addr;
-    private int selected_tile_index;
+    private int selected_tile_index = -1;
     public static final int SCALE = 16;
     private final PatternTilePane pattern_tile;
     private final PPU ppu;
     private final NametablePane nametable_pane;
+    private final Mirroring mirroring;
 
-    public TileInfoPane(NametablePane nametablePane, PPU ppu) {
+    public TileInfoPane(NametablePane nametablePane, PPU ppu, Mirroring mirroring) {
         this.nametable_pane = nametablePane;
         this.ppu = ppu;
+        this.mirroring = mirroring;
 
         setBorder(BorderFactory.createTitledBorder("Tile Info"));
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -133,9 +136,26 @@ public class TileInfoPane extends JPanel {
         });
     }
 
-    public void setSelectedTileIndex(boolean is_nametable_A, int selected_tile_index) {
+    public void setSelectedTile(int selected_tile_index, int table_index) {
         int selected_col = selected_tile_index % 32;
         int selected_row = (selected_tile_index - selected_col) / 30;
+
+        boolean is_nametable_A;
+        if (mirroring == Mirroring.HORIZONTAL) {
+            if (table_index == 0 || table_index == 1) {
+                is_nametable_A = true;
+            } else {
+                is_nametable_A = false;
+            }
+        } else if (mirroring == Mirroring.VERTICAL) {
+            if (table_index == 0 || table_index == 2) {
+                is_nametable_A = true;
+            } else {
+                is_nametable_A = false;
+            }
+        } else {
+            throw new RuntimeException("Not yet implemented");
+        }
 
         short addr;
         if (is_nametable_A) {
@@ -147,25 +167,17 @@ public class TileInfoPane extends JPanel {
         byte patternTileIndex = ppu.read(addr);
         logger.debug("Selected pattern tile index: {}", patternTileIndex);
 
+        // Update fields
+        txt_ppu_addr.setText(Common.shortToHex(addr, true));
+        txt_nametable.setText(String.valueOf(table_index));
+        txt_tile_index.setText(Common.byteToHex(patternTileIndex, false));
+        txt_location.setText("(" + selected_col + ", " + selected_row + ")");
+        txt_attr_addr.setText(Common.shortToHex((short) (addr - (addr % 0x400) + 0x3C0), false));
 
+        // Update pattern tile canvas
         pattern_tile.change_tile_index(patternTileIndex);
 
-        txt_tile_index.setText(Common.byteToHex(patternTileIndex, true));
-
+        // Update parameters
         this.selected_tile_index = patternTileIndex;
-
-        String selected_location = "(" + selected_col + ", " + selected_row + ")";
-        txt_location.setText(selected_location);
-
-        repaint();
     }
-
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-
-        if (selected_tile_index != -1)
-            txt_tile_index.setText(Common.shortToHex((short) selected_tile_index, false));
-    }
-
 }
