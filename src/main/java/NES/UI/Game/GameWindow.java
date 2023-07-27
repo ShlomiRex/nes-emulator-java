@@ -60,14 +60,14 @@ public class GameWindow extends JFrame implements KeyListener {
          */
 
         switch(e.getKeyCode()) {
-            case 'X' -> nes.bus.controllers[0] |= 1;
-            case 'Z' -> nes.bus.controllers[0] |= 2;
-            case 32 -> nes.bus.controllers[0] |= 4;           // Select
-            case 10 -> nes.bus.controllers[0] |= 8;           // Start
-            case 38 -> nes.bus.controllers[0] |= 16;          // Arrow Up
-            case 40 -> nes.bus.controllers[0] |= 32;          // Arrow Down
-            case 37 -> nes.bus.controllers[0] |= 64;          // Arrow Left
-            case 39 -> nes.bus.controllers[0] |= 128;         // Arrow Right
+            case 'X' -> nes.bus.controllers[0] |= 128;
+            case 'Z' -> nes.bus.controllers[0] |= 64;
+            case 32 -> nes.bus.controllers[0] |= 32;           // Select
+            case 10 -> nes.bus.controllers[0] |= 16;           // Start
+            case 38 -> nes.bus.controllers[0] |= 8;              // Arrow Up
+            case 40 -> nes.bus.controllers[0] |= 4;           // Arrow Down
+            case 37 -> nes.bus.controllers[0] |= 2;            // Arrow Left
+            case 39 -> nes.bus.controllers[0] |= 1;         // Arrow Right
         }
         //logger.debug("Controller 0: " + Common.byteToBinary(nes.bus.controllers[0]));
     }
@@ -76,14 +76,14 @@ public class GameWindow extends JFrame implements KeyListener {
     public void keyReleased(KeyEvent e) {
         // Release keys
         switch(e.getKeyCode()) {
-            case 'X' -> nes.bus.controllers[0] &= ~1;
-            case 'Z' -> nes.bus.controllers[0] &= ~2;
-            case 32 -> nes.bus.controllers[0] &= ~4;           // Select
-            case 10 -> nes.bus.controllers[0] &= ~8;           // Start
-            case 38 -> nes.bus.controllers[0] &= ~16;          // Arrow Up
-            case 40 -> nes.bus.controllers[0] &= ~32;          // Arrow Down
-            case 37 -> nes.bus.controllers[0] &= ~64;          // Arrow Left
-            case 39 -> nes.bus.controllers[0] &= ~128;         // Arrow Right
+            case 'X' -> nes.bus.controllers[0] &= ~128;
+            case 'Z' -> nes.bus.controllers[0] &= ~64;
+            case 32 -> nes.bus.controllers[0] &= ~32;           // Select
+            case 10 -> nes.bus.controllers[0] &= ~16;           // Start
+            case 38 -> nes.bus.controllers[0] &= ~8;              // Arrow Up
+            case 40 -> nes.bus.controllers[0] &= ~4;           // Arrow Down
+            case 37 -> nes.bus.controllers[0] &= ~2;            // Arrow Left
+            case 39 -> nes.bus.controllers[0] &= ~1;         // Arrow Right
         }
     }
 }

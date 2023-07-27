@@ -39,6 +39,9 @@ First time working controller display:
 First time working NESTEST:
 ![](README-resources/Screenshot%202023-07-28%20000909.png)
 
+First time working NESTEST, fixed controller input:
+![](README-resources/Animation.gif)
+
 # Resources
 
 The most used resorces:

@@ -45,14 +45,14 @@ public class ControllerGlassPane extends JComponent {
         else if (controller_id != 0)
             throw new RuntimeException("Invalid controller id: " + controller_id + ". Valid values are 0 or 1.");
 
-        boolean is_a_pressed = (controller_dataline & 1) == 1;
-        boolean is_b_pressed = (controller_dataline & 2) == 2;
-        boolean is_select_pressed = (controller_dataline & 4) == 4;
-        boolean is_start_pressed = (controller_dataline & 8) == 8;
-        boolean is_up_pressed = (controller_dataline & 16) == 16;
-        boolean is_down_pressed = (controller_dataline & 32) == 32;
-        boolean is_left_pressed = (controller_dataline & 64) == 64;
-        boolean is_right_pressed = (controller_dataline & 128) == 128;
+        boolean is_a_pressed = (controller_dataline & 128) == 128;
+        boolean is_b_pressed = (controller_dataline & 64) == 64;
+        boolean is_select_pressed = (controller_dataline & 32) == 32;
+        boolean is_start_pressed = (controller_dataline & 16) == 16;
+        boolean is_up_pressed = (controller_dataline & 8) == 8;
+        boolean is_down_pressed = (controller_dataline & 4) == 4;
+        boolean is_left_pressed = (controller_dataline & 2) == 2;
+        boolean is_right_pressed = (controller_dataline & 1) == 1;
 
         // Set transparency
         g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
