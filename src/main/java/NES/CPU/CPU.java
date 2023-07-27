@@ -54,6 +54,7 @@ public class CPU {
 
         // We can't ignore the NMI interrupt which is called when PPU VBlank starts.
         if (bus.nmi_line) {
+            bus.nmi_line = false;
             nmi_interrupt();
             return;
         }
@@ -1225,8 +1226,7 @@ public class CPU {
 
         byte vector_lsb = read_memory((short) 0xFFFA);
         byte vector_msb = read_memory((short) 0xFFFB);
-        short new_pc = Common.makeShort(vector_lsb, vector_msb);
-        registers.PC = new_pc;
+        registers.PC = Common.makeShort(vector_lsb, vector_msb);
 
         cycles += 8; // TODO: IDK why but he does this: https://github.com/OneLoneCoder/olcNES/blob/ac5ce64cdb3a390a89d550c5f130682b37eeb080/Part%232%20-%20CPU/olc6502.cpp#L248C2-L248C2
     }

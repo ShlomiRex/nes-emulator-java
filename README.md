@@ -29,6 +29,9 @@ First time working complete palette initialization from NESTEST, code is just wa
 First time display working:
 ![](README-resources/Screenshot%202023-07-12%20192227.png)
 
+Fixed debugger nametable canvases + fixed NMI interrupt loop:
+![](README-resources/Screenshot%202023-07-27%20192342.png)
+
 # Resources
 
 The most used resorces:

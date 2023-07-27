@@ -10,3 +10,4 @@ it is 'Z' character.
 NES TEST: Debugger: Nametable: Selecting location (0, 14) is fine, but then going to next row, and it selects at location (0, 16)
 why does it jump by 2 in the rows?
 
+When running NES TEST, it stuck at PC: 0xC5AF at instruction PHA.
