@@ -49,10 +49,10 @@ public class GameWindow extends JFrame implements KeyListener {
         /*
         PC Keyboard     |   NES Controller
         -----------------------------------
-          Z             |      A Button
-          X             |      B Button
-          Enter         |      Start Button
+          X             |      A Button
+          Z             |      B Button
           Spacebar      |      Select Button
+          Enter         |      Start Button
           Arrow Up      |      Up Direction
           Arrow Down    |      Down Direction
           Arrow Left    |      Left Direction
@@ -60,10 +60,10 @@ public class GameWindow extends JFrame implements KeyListener {
          */
 
         switch(e.getKeyCode()) {
-            case 'Z' -> nes.bus.controllers[0] |= 1;
-            case 'X' -> nes.bus.controllers[0] |= 2;
-            case 10 -> nes.bus.controllers[0] |= 4;           // Enter
-            case 32 -> nes.bus.controllers[0] |= 8;           // Spacebar
+            case 'X' -> nes.bus.controllers[0] |= 1;
+            case 'Z' -> nes.bus.controllers[0] |= 2;
+            case 32 -> nes.bus.controllers[0] |= 4;           // Select
+            case 10 -> nes.bus.controllers[0] |= 8;           // Start
             case 38 -> nes.bus.controllers[0] |= 16;          // Arrow Up
             case 40 -> nes.bus.controllers[0] |= 32;          // Arrow Down
             case 37 -> nes.bus.controllers[0] |= 64;          // Arrow Left
@@ -76,10 +76,10 @@ public class GameWindow extends JFrame implements KeyListener {
     public void keyReleased(KeyEvent e) {
         // Release keys
         switch(e.getKeyCode()) {
-            case 'Z' -> nes.bus.controllers[0] &= ~1;
-            case 'X' -> nes.bus.controllers[0] &= ~2;
-            case 10 -> nes.bus.controllers[0] &= ~4;           // Enter
-            case 32 -> nes.bus.controllers[0] &= ~8;           // Spacebar
+            case 'X' -> nes.bus.controllers[0] &= ~1;
+            case 'Z' -> nes.bus.controllers[0] &= ~2;
+            case 32 -> nes.bus.controllers[0] &= ~4;           // Select
+            case 10 -> nes.bus.controllers[0] &= ~8;           // Start
             case 38 -> nes.bus.controllers[0] &= ~16;          // Arrow Up
             case 40 -> nes.bus.controllers[0] &= ~32;          // Arrow Down
             case 37 -> nes.bus.controllers[0] &= ~64;          // Arrow Left

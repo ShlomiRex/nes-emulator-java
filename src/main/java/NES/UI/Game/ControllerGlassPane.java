@@ -47,26 +47,48 @@ public class ControllerGlassPane extends JComponent {
         // Draw base canvas
         //g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
         g2d.setColor(Color.WHITE);
-        g2d.fillRect(x, y, pixel_width * 64, pixel_height * 8);
+        g2d.fillRect(x, y, pixel_width * 32, pixel_height * 8);
 
         // Draw border
         g2d.setColor(Color.RED);
-        g2d.drawRect(x, y, pixel_width * 64, pixel_height * 8);
+        g2d.drawRect(x, y, pixel_width * 32, pixel_height * 8);
 
-        // Draft left arrow
+        // Draw left arrow
         g2d.setColor(is_left_pressed? pressed_key_color : released_key_color);
         g2d.fillRect(x, y + pixel_height * 3, pixel_width * 3, pixel_height * 2);
 
-        // Draft up arrow
+        // Draw up arrow
         g2d.setColor(is_up_pressed? pressed_key_color : released_key_color);
         g2d.fillRect(x + pixel_width * 3, y, pixel_width * 2, pixel_height * 3);
 
-        // Draft down arrow
+        // Draw down arrow
         g2d.setColor(is_down_pressed? pressed_key_color : released_key_color);
         g2d.fillRect(x + pixel_width * 3, y + pixel_height * 5, pixel_width * 2, pixel_height * 3);
 
-        // Draft right arrow
+        // Draw right arrow
         g2d.setColor(is_right_pressed? pressed_key_color : released_key_color);
         g2d.fillRect(x + pixel_width * 5, y + pixel_height * 3, pixel_width * 3, pixel_height * 2);
+
+        // Draw select key
+        g2d.setColor(is_select_pressed? pressed_key_color : released_key_color);
+        g2d.fillRect(x + pixel_width * 10, y + pixel_height * 4, pixel_width * 3, pixel_height * 2);
+
+        // Draw start key
+        g2d.setColor(is_start_pressed? pressed_key_color : released_key_color);
+        g2d.fillRect(x + pixel_width * 14, y + pixel_height * 4, pixel_width * 3, pixel_height * 2);
+
+        // Draw B key
+        g2d.setColor(is_b_pressed? pressed_key_color : released_key_color);
+        // Horizontal cross
+        g2d.fillRect(x + pixel_width * 21, y + pixel_height * 3, pixel_width * 4, pixel_height * 2);
+        // Vertical cross
+        g2d.fillRect(x + pixel_width * 22, y + pixel_height * 2, pixel_width * 2, pixel_height * 4);
+
+        // Draw A key
+        g2d.setColor(is_a_pressed? pressed_key_color : released_key_color);
+        // Horizontal cross
+        g2d.fillRect(x + pixel_width * 27, y + pixel_height * 3, pixel_width * 4, pixel_height * 2);
+        // Vertical cross
+        g2d.fillRect(x + pixel_width * 28, y + pixel_height * 2, pixel_width * 2, pixel_height * 4);
     }
 }
