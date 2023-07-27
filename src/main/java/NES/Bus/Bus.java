@@ -7,4 +7,6 @@ public class Bus {
      * The CPU checks this line before executing each instruction.
      */
     public boolean nmi_line;
+
+    public byte[] controllers = new byte[2];
 }

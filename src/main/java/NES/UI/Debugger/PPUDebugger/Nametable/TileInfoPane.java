@@ -157,22 +157,25 @@ public class TileInfoPane extends JPanel {
             throw new RuntimeException("Not yet implemented");
         }
 
-        short addr;
+        short ppu_addr;
         if (is_nametable_A) {
-            addr = 0x2000;
+            ppu_addr = 0x2000;
         } else {
-            addr = 0x2400;
+            ppu_addr = 0x2400;
         }
-        addr += (short) (selected_row * 32 + selected_col);
-        byte patternTileIndex = ppu.read(addr);
+        ppu_addr += (short) (selected_row * 32 + selected_col);
+        //short attr_addr = (short) (ppu_addr - (ppu_addr % 0x400) + 0x3C0 + (selected_col / 4) + (selected_row / 4)*8); // TODO: Uncomment, calculation incorrect
+
+
+        byte patternTileIndex = ppu.read(ppu_addr);
         logger.debug("Selected pattern tile index: {}", patternTileIndex);
 
         // Update fields
-        txt_ppu_addr.setText(Common.shortToHex(addr, true));
+        txt_ppu_addr.setText(Common.shortToHex(ppu_addr, true));
         txt_nametable.setText(String.valueOf(table_index));
         txt_tile_index.setText(Common.byteToHex(patternTileIndex, false));
         txt_location.setText("(" + selected_col + ", " + selected_row + ")");
-        txt_attr_addr.setText(Common.shortToHex((short) (addr - (addr % 0x400) + 0x3C0), false));
+        //txt_attr_addr.setText(Common.shortToHex(attr_addr, false)); // TODO: Uncomment, attr addr is not correct
 
         // Update pattern tile canvas
         pattern_tile.change_tile_index(patternTileIndex);

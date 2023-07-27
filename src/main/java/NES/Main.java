@@ -19,6 +19,7 @@ public class Main {
         String mario = "6502_programs/mario/Super Mario Bros (E).nes";
         String color_test = "6502_programs/color_test/color_test.nes";
         String donkey_kong = "6502_programs/donkey_kong/Donkey Kong Classics (U).nes";
+        String pacman = "6502_programs/pacman/Pac-Man (USA) (Namco).nes";
 
         String program = nestest;
 
@@ -27,13 +28,13 @@ public class Main {
         NES nes = new NES(romParser);
 
         //TODO: Change according to my needs.
-        //run_without_debugger(nes);
-        run_with_debugger(nes);
+        run_without_debugger(nes);
+        //run_with_debugger(nes);
     }
 
     private static void run_with_debugger(NES nes) {
         GamePanel panel = new GamePanel(nes.ppu);
-        GameWindow gameWindow = new GameWindow(panel);
+        GameWindow gameWindow = new GameWindow(nes, panel);
         DebuggerWindow debuggerWindow = new DebuggerWindow(nes); // The debugger controls the NES program on the GUI thread
 
         Runnable redrawRunnable = gameWindow::repaint;
@@ -42,7 +43,7 @@ public class Main {
 
     private static void run_without_debugger(NES nes) {
         GamePanel panel = new GamePanel(nes.ppu);
-        GameWindow gameWindow = new GameWindow(panel);
+        GameWindow gameWindow = new GameWindow(nes, panel);
 
 
         final boolean[] is_running = {true};

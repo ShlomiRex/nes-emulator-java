@@ -15,6 +15,7 @@ public class NES {
 
     public final byte[] cpu_memory; // All 64KB addressable memory
     public final iNESHeader header;
+    public final Bus bus;
 
     // We want to deal with creating the memory here, so its more manageable, and each component can take modular memory.
     public NES(ROMParser romParser) {
@@ -38,7 +39,7 @@ public class NES {
             System.arraycopy(prg_rom, 0, this.cpu_memory, 0x8000, 1024*32);
         }
 
-        Bus bus = new Bus();
+        bus = new Bus();
         ppu = new PPU(bus, header.getMirrorType(), chr_rom);
         cpu = new CPU(bus, cpu_memory, ppu.registers);
 

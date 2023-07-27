@@ -162,7 +162,7 @@ public class PPU {
         if (scanline == 241 && cycle == 1) {
             // VBlank start
 
-            logger.debug("VBlank start");
+            //logger.debug("VBlank start");
 
             registers.PPUSTATUS = Common.Bits.setBit(registers.PPUSTATUS, 7, true);
 
@@ -172,9 +172,9 @@ public class PPU {
              */
             if (Common.Bits.getBit(registers.getPPUCTRL(), 7)) {
                 bus.nmi_line = true;
-                logger.debug("Generating NMI interrupt");
+                //logger.debug("Generating NMI interrupt");
             } else {
-                logger.debug("Not generating NMI interrupt");
+                //logger.debug("Not generating NMI interrupt");
             }
 
             // Repaint the game canvas
@@ -316,7 +316,7 @@ public class PPU {
         } else if (addr >= 0x3F00 && addr <= 0x3FFF) {
             // Palette RAM
             palette_ram[addr - 0x3F00] = value;
-            logger.debug("Writing to palette RAM at index: " + (addr - 0x3F00));
+            //logger.debug("Writing to palette RAM at index: " + (addr - 0x3F00));
         }
     }
 
