@@ -45,6 +45,11 @@ First time working NESTEST, fixed controller input:
 
 First time running Donkey Kong (cool glitches):
 ![](README-resources/Animation2.gif)
+
+First time working donkey kong:
+![](README-resources/Animation4.gif)
+
+
 # Resources
 
 The most used resorces:
