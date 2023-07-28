@@ -297,7 +297,7 @@ public class PPU {
         // Determine base addresses
         int nametable_addr = (registers.PPUCTRL & 0b11) == 0 ? 0x2000 : 0x2400;
         short attributetable_addr = (short) (nametable_addr + 0x3C0);
-        short pattern_table_addr = (short) ((registers.PPUCTRL & 0b1000) == 0 ? 0x0000 : 0x1000);
+        short pattern_table_addr = (short) ((registers.PPUCTRL & 0b10000) == 0 ? 0x0000 : 0x1000);
 
         // Read nametable byte - this is the index of the tile in the pattern table. This index points to 16 bytes of pattern data (2 bitmap planes).
         byte patternIndex = read((short) (nametable_addr + tile_row * 32 + tile_col));
@@ -320,28 +320,22 @@ public class PPU {
         // Read 16 bytes from pattern table - this will form the tile pixels, and their colors, which are chosen from the palette.
         // To avoid copying 16 bytes (for regression reasons), we can just loop over each row, and do this bitmap calculation for each row.
 
-
-
-
-//        byte[] pattern_bytes = get_pattern_tile(patternIndex, true);
-//        byte[][] pixels = convert_pattern_tile_to_pixel_pattern(pattern_bytes);
-
-        // Draw pixels
         for (int pixel_row = 0; pixel_row < 8; pixel_row ++) {
             // Read 2 bitplanes (8 bits per bitplane) from pattern table
-            short tile_base_addr = (short) (pattern_table_addr + ((patternIndex & 0xFF)* 16));
+            short tile_base_addr = (short) (pattern_table_addr + (patternIndex & 0xFF) * 16);
             byte tile_lsb = read((short) (tile_base_addr + pixel_row));
             byte tile_msb = read((short) (tile_base_addr + pixel_row + 8));
 
             for (int pixel_col = 0; pixel_col < 8; pixel_col++) {
                 // Get pixel value (color) from bitplanes (the value must be between 0-3 since we add 2 bits and each can be 0 or 1)
-                byte pixel = (byte) ((tile_lsb & 1) + (tile_msb & 1));
+                byte colorIndex = (byte) ((tile_lsb & 1) + (tile_msb & 1));
                 tile_lsb >>= 1;
                 tile_msb >>= 1;
 
                 // Now we have the pixel value, we can get the color from the palette
-                byte color_index = read((short) (0x3F00 + paletteIndex * 4 + pixel));
-                byte pixelColor = palette_ram[paletteIndex * 4 + pixel];
+                byte pixelColor = read((short) (0x3F00 + paletteIndex * 4 + colorIndex));
+//                byte color_index = read((short) (0x3F00 + paletteIndex * 4 + pixel));
+//                byte pixelColor = palette_ram[paletteIndex * 4 + pixel];
                 int color_row = pixelColor / 16;
                 int color_col = pixelColor % 16;
                 Color c = system_palette[color_row][color_col];

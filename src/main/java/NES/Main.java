@@ -22,7 +22,7 @@ public class Main {
         String donkey_kong_mapper0 = "6502_programs/donkey_kong/Donkey Kong (USA) (GameCube Edition).nes";
         String pacman = "6502_programs/pacman/Pac-Man (USA) (Namco).nes";
 
-        String program = donkey_kong_mapper3;
+        String program = donkey_kong_mapper0;
 
         ROMParser romParser = new ROMParser(program);
 
