@@ -49,6 +49,12 @@ First time running Donkey Kong (cool glitches):
 First time working donkey kong:
 ![](README-resources/Animation4.gif)
 
+Cool glitch:
+![](README-resources/02440f42-e308-4590-9180-ed8955d7d203.jpg)
+
+Found mario face in my debugger:
+![](README-resources/8fe822e2-60fd-44a2-8037-b1576888a490.jpg)
+
 Fixed color issues:
 ![](README-resources/Screenshot%202023-07-29%20012454.png)
 
