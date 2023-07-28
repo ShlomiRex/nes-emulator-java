@@ -2,7 +2,7 @@
 
 This is my attempt to create basic NES emulator in Java.
 
-My goal is to not to look at other's code, but to understand on the high-level the NES architecture and create it in Rust.
+My goal is to not to look at other's code, but to understand on the high-level the NES architecture and create it in Java.
 
 # Screenshots
 
@@ -37,12 +37,13 @@ First time working controller display:
 ![](README-resources/Screenshot%202023-07-27%20232945.png)
 
 First time working NESTEST:
+
 ![](README-resources/Screenshot%202023-07-28%20000909.png)
 
 First time working NESTEST, fixed controller input:
 ![](README-resources/Animation.gif)
 
-First time running Donkey Kong (trying to implement mappers):
+First time running Donkey Kong (cool glitches):
 ![](README-resources/Animation2.gif)
 # Resources
 

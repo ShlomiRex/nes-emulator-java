@@ -18,12 +18,13 @@ public class Main {
         String single_sprite = "6502_programs/single_sprite/hb1.nes";
         String mario = "6502_programs/mario/Super Mario Bros (E).nes";
         String color_test = "6502_programs/color_test/color_test.nes";
-        String donkey_kong = "6502_programs/donkey_kong/Donkey Kong Classics (U).nes";
+        String donkey_kong_mapper3 = "6502_programs/donkey_kong/Donkey Kong Classics (U).nes";
+        String donkey_kong_mapper0 = "6502_programs/donkey_kong/Donkey Kong (USA) (GameCube Edition).nes";
         String pacman = "6502_programs/pacman/Pac-Man (USA) (Namco).nes";
 
-        String program = donkey_kong;
+        String program = donkey_kong_mapper3;
 
-        ROMParser romParser = new ROMParser(nestest);
+        ROMParser romParser = new ROMParser(program);
 
         NES nes = new NES(romParser);
 
