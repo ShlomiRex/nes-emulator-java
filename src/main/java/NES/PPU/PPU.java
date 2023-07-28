@@ -58,6 +58,11 @@ public class PPU {
 
     private final Mirroring mirroring;
     private final Bus bus;
+
+    // TODO: This should be inside the bus
+    /**
+     *  System palette is hard-wired into the NES.
+     */
     private final Color[][] system_palette;
 
     public PPU(Bus bus, Mirroring mirroring, byte[] chr_rom) {
@@ -328,14 +333,13 @@ public class PPU {
 
             for (int pixel_col = 0; pixel_col < 8; pixel_col++) {
                 // Get pixel value (color) from bitplanes (the value must be between 0-3 since we add 2 bits and each can be 0 or 1)
-                byte colorIndex = (byte) ((tile_lsb & 1) + (tile_msb & 1));
+                byte colorIndex = (byte) ((tile_lsb & 1) + (tile_msb & 1) * 2);
                 tile_lsb >>= 1;
                 tile_msb >>= 1;
 
                 // Now we have the pixel value, we can get the color from the palette
+                // Read pixel color from palette RAM
                 byte pixelColor = read((short) (0x3F00 + paletteIndex * 4 + colorIndex));
-//                byte color_index = read((short) (0x3F00 + paletteIndex * 4 + pixel));
-//                byte pixelColor = palette_ram[paletteIndex * 4 + pixel];
                 int color_row = pixelColor / 16;
                 int color_col = pixelColor % 16;
                 Color c = system_palette[color_row][color_col];
@@ -387,9 +391,8 @@ public class PPU {
             vram[((addr - 0x2000) % 0x400)] = value;
             //logger.debug("Writing to name table at index: " + ((addr - 0x2000) % 0x400));
         } else if (addr >= 0x3F00 && addr <= 0x3FFF) {
-            // Palette RAM
-            palette_ram[addr - 0x3F00] = value;
-            //logger.debug("Writing to palette RAM at index: " + (addr - 0x3F00));
+            // Palette RAM + Mirrors of 0x3F00-0x3F1F (0x3F20-0x3FFF is mirrors of 0x3F00-0x3F1F)
+            palette_ram[(addr - 0x3F00) % 32] = value;
         }
     }
 

@@ -49,6 +49,9 @@ First time running Donkey Kong (cool glitches):
 First time working donkey kong:
 ![](README-resources/Animation4.gif)
 
+Fixed color issues:
+![](README-resources/Screenshot%202023-07-29%20012454.png)
+
 
 # Resources
 
