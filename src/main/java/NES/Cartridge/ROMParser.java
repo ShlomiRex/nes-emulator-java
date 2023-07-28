@@ -14,8 +14,8 @@ public class ROMParser {
     private final Logger logger = LoggerFactory.getLogger(ROMParser.class);
 
     private final iNESHeader header;
-    private final byte[] prg_rom; // Size: 16KB exactly, because I only intend to support mapper 0 only. No banks needed
-    private final byte[] chr_rom; // Size: 8KB exactly, like above.
+    private final byte[] prg_rom;
+    private final byte[] chr_rom;
 
     public class ParsingException extends Exception {
         public ParsingException(String message) {
@@ -26,11 +26,14 @@ public class ROMParser {
     public ROMParser(String path) throws IOException, ParsingException {
         File file = new File(path);
         FileInputStream fileInputStream = new FileInputStream(file);
+        logger.info("Reading ROM: " + file.getAbsolutePath());
 
         header = parseHeader(fileInputStream);
         prg_rom = parse_prg_rom(fileInputStream);
         chr_rom = parse_chr_rom(fileInputStream);
 
+        // Here we read the rest of the file, and check that we read all the bytes.
+        // We should have read all the bytes before, in parseHeader, parse_prg_rom and parse_chr_rom.
         byte[] bytes_left = fileInputStream.readAllBytes();
         if (bytes_left.length > 0)
             throw new ParsingException("Expected that I read all the bytes, however there are " +
@@ -39,6 +42,7 @@ public class ROMParser {
 
     private iNESHeader parseHeader(FileInputStream fileInputStream) throws ParsingException, IOException {
         byte[] header_bytes = fileInputStream.readNBytes(16);
+        logger.debug("Read 16 header bytes");
 
         // Check magic bytes
         byte[] magic_bytes = Arrays.copyOfRange(header_bytes, 0, 4);
@@ -108,9 +112,9 @@ public class ROMParser {
 
 
         int mapper = msb_mapper | lsb_mapper;
-        if (mapper != 0) {
-            throw new ParsingException("The emulator supports only maper 0, currently. ROM Mapper: " + mapper);
-        }
+//        if (mapper != 0) {
+//            throw new ParsingException("The emulator supports only maper 0, currently. ROM Mapper: " + mapper);
+//        }
 
         // Create header object and print
         iNESHeader iNESHeader = new iNESHeader(prg_rom_size, chr_rom_size, mapper,
@@ -122,9 +126,11 @@ public class ROMParser {
     }
 
     private byte[] parse_prg_rom(FileInputStream fileInputStream) throws IOException, ParsingException {
-        int prg_rom_size_bytes = 1024 * 16 * this.header.prg_rom_size;
+        int prg_rom_size_bytes = 1024 * 16 * header.prg_rom_size;
 
         byte[] prg_rom = fileInputStream.readNBytes(prg_rom_size_bytes);
+        logger.debug("Read " + prg_rom.length + " bytes of PRG ROM");
+
         if (prg_rom.length != 16*1024 && prg_rom.length != 32*1024) {
             throw new ParsingException("Expected PRG ROM of size 16 or 32KB, currently only supporting mapper 0");
         }
@@ -144,11 +150,13 @@ public class ROMParser {
     private byte[] parse_chr_rom(FileInputStream fileInputStream) throws ParsingException, IOException {
         int chr_rom_bytes = 1024 * 8 * header.chr_rom_size;
         logger.debug("CHR ROM size: " + chr_rom_bytes/1024 + "KB");
-        if (chr_rom_bytes != 8*1024) {
-            throw new ParsingException("Expected CHR ROM of size 8KB in mapper 0.");
-        }
 
-        byte[] chr_rom = fileInputStream.readNBytes(8 * 1024);
+//        if (chr_rom_bytes != 8*1024) {
+//            throw new ParsingException("Expected CHR ROM of size 8KB in mapper 0.");
+//        }
+
+        byte[] chr_rom = fileInputStream.readNBytes(chr_rom_bytes);
+        logger.debug("Read " + chr_rom_bytes + " bytes of CHR ROM");
         return chr_rom;
     }
 

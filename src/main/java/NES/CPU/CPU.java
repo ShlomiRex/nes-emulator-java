@@ -65,12 +65,14 @@ public class CPU {
 
         // Decode
         InstructionInfo instr_info = Decoder.decode_opcode(opcode);
+        if (instr_info == null)
+            throw new RuntimeException("Unknown opcode: " + Common.byteToHex(opcode, true));
 
         Instructions instr = instr_info.instr;
         AddressingMode addrmode = instr_info.addrmode;
-        int bytes = instr_info.bytes;
-        int cycles = instr_info.cycles;
-        Decoder.OopsCycle oops_cycle = instr_info.oopsCycle;
+//        int bytes = instr_info.bytes;
+//        int cycles = instr_info.cycles;
+//        Decoder.OopsCycle oops_cycle = instr_info.oopsCycle;
 //        logger.debug(
 //                instr.toString()+"("+Common.byteToHex(opcode, true)+")\t"
 //                +addrmode+"\tBytes: "
@@ -130,8 +132,8 @@ public class CPU {
         // Check for memory mapped registers
         if (addr == 0x4016 || addr == 0x4017) {
             res = bus.cpu_read(addr);
-            if (res != 0)
-                logger.debug("Controller read: " + Common.byteToHex(res, true));
+//            if (res != 0)
+//                logger.debug("Controller read: " + Common.byteToHex(res, true));
         }
 
         cycles ++;
@@ -483,6 +485,15 @@ public class CPU {
                 break;
             case DCP:
                 exec_dcp();
+                break;
+            case ISC:
+                exec_isc();
+                break;
+            case JAM:
+                exec_jam();
+                break;
+            case RRA:
+                exec_rra();
                 break;
             default:
                 throw new RuntimeException("Instruction not implemented: " + instr);
@@ -853,6 +864,7 @@ public class CPU {
             case ROR:
             case INC:
             case DEC:
+            case DCP:
                 //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
                 // SLO, SRE, RLA, RRA, ISB, DCP
 
@@ -1020,6 +1032,7 @@ public class CPU {
            case ROR:
            case INC:
            case DEC:
+           case DCP:
                //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
                // SLO, SRE, RLA, RRA, ISB, DCP
 
@@ -1529,5 +1542,32 @@ public class CPU {
 
     private void setFlag(Flags flag, boolean value) {
         registers.setFlag(flag, value);
+    }
+
+    private void exec_isc() {
+        // Increment the value at the specified memory address
+        byte value = read_memory(fetched_addr);
+        value = (byte) ((value + 1) & 0xFF); // Increment and wrap around to 0x00 if necessary
+        write_memory(fetched_addr, value);
+
+        // Subtract the updated value from the accumulator
+        int accumulator = registers.A & 0xFF;
+        int result = accumulator - value - (registers.getFlag(CARRY) ? 0 : 1);
+
+        boolean carry = (accumulator & 0xFF) >= (value & 0xFF);
+
+        // Set the processor flags accordingly
+        registers.modify_n((byte) result);
+        registers.modify_z((byte) result);
+        registers.setFlag(CARRY, carry);
+        registers.setFlag(OVERFLOW, ((accumulator ^ value) & 0x80) != 0 && ((accumulator ^ result) & 0x80) != 0);
+    }
+
+    private void exec_jam() {
+
+    }
+
+    private void exec_rra() {
+
     }
 }

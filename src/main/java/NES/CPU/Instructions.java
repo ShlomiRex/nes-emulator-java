@@ -58,4 +58,5 @@ public enum Instructions {
     TXS, // transfer X to stack pointer
     LAX, SAX, DCP, TYA,  // transfer Y to accumulator
     ISC,
+    JAM, RRA,
 }

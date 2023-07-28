@@ -60,8 +60,8 @@ public class PPU {
     private final Bus bus;
 
     public PPU(Bus bus, Mirroring mirroring, byte[] chr_rom) {
-        if (chr_rom.length != 1024 * 8)
-            throw new IllegalArgumentException("Unexpected CHR ROM / pattern table size");
+//        if (chr_rom.length != 1024 * 8)
+//            throw new IllegalArgumentException("Unexpected CHR ROM / pattern table size");
 
         this.bus = bus;
         this.mirroring = mirroring;

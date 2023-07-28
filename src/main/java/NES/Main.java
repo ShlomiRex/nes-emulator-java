@@ -21,9 +21,9 @@ public class Main {
         String donkey_kong = "6502_programs/donkey_kong/Donkey Kong Classics (U).nes";
         String pacman = "6502_programs/pacman/Pac-Man (USA) (Namco).nes";
 
-        String program = nestest;
+        String program = donkey_kong;
 
-        ROMParser romParser = new ROMParser(program);
+        ROMParser romParser = new ROMParser(nestest);
 
         NES nes = new NES(romParser);
 

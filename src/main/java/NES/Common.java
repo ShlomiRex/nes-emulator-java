@@ -72,7 +72,7 @@ public class Common {
             return String.format("0x%04X", s & 0xFFFF);
     }
 
-    public class Bits {
+    public static class Bits {
         public static boolean getBit(byte variable, int bitIndex) {
             // TODO: After testing and everything is working we can remove this check.
             if (bitIndex < 0 || bitIndex > 7)

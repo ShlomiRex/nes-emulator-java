@@ -42,6 +42,8 @@ First time working NESTEST:
 First time working NESTEST, fixed controller input:
 ![](README-resources/Animation.gif)
 
+First time running Donkey Kong (trying to implement mappers):
+![](README-resources/Animation2.gif)
 # Resources
 
 The most used resorces:
