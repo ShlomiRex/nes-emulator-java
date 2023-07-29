@@ -55,6 +55,7 @@ public class Decoder {
         abc[0x2E] = new InstructionInfo(Instructions.ROL, AddressingMode.ABSOLUTE, 3, 6, OopsCycle.NONE);
         abc[0x30] = new InstructionInfo(Instructions.BMI, AddressingMode.RELATIVE, 2, 2, OopsCycle.BranchOccursOn);
         abc[0x31] = new InstructionInfo(Instructions.AND, AddressingMode.INDIRECT_Y, 2, 5, OopsCycle.PageBoundaryCrossed);
+        abc[0x32] = new InstructionInfo(Instructions.NOP, AddressingMode.IMPLIED, 1, 2, OopsCycle.NONE, true); // illegal
         abc[0x3A] = new InstructionInfo(Instructions.NOP, AddressingMode.IMPLIED, 1, 2, OopsCycle.NONE, true); // illegal
         abc[0x34] = new InstructionInfo(Instructions.NOP, AddressingMode.ZEROPAGE_X, 2, 4, OopsCycle.NONE, true); // illegal
         abc[0x35] = new InstructionInfo(Instructions.AND, AddressingMode.ZEROPAGE_X, 2, 4, OopsCycle.NONE);
@@ -64,6 +65,7 @@ public class Decoder {
         abc[0x3C] = new InstructionInfo(Instructions.NOP, AddressingMode.ABSOLUTE_X, 3, 4, OopsCycle.PageBoundaryCrossed, true); // illegal
         abc[0x3D] = new InstructionInfo(Instructions.AND, AddressingMode.ABSOLUTE_X, 3, 4, OopsCycle.PageBoundaryCrossed);
         abc[0x3E] = new InstructionInfo(Instructions.ROL, AddressingMode.ABSOLUTE_X, 3, 7, OopsCycle.NONE);
+        abc[0x3F] = new InstructionInfo(Instructions.NOP, AddressingMode.ABSOLUTE_X, 3, 7, OopsCycle.NONE, true); // illegal
         abc[0x40] = new InstructionInfo(Instructions.RTI, AddressingMode.IMPLIED, 1, 6, OopsCycle.NONE);
         abc[0x41] = new InstructionInfo(Instructions.EOR, AddressingMode.INDIRECT_X, 2, 6, OopsCycle.NONE);
         abc[0x44] = new InstructionInfo(Instructions.NOP, AddressingMode.ZEROPAGE, 2, 3, OopsCycle.NONE, true); // illegal

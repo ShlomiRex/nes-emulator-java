@@ -22,9 +22,6 @@ public class CPU {
     public final CPURegisters registers;
     public long cycles;
     private final byte[] memory; // All addressable memory (64KB)
-
-
-    private final PPURegisters ppuRegisters;
     public long instructions = 0; // counter number of instructions executed
 
     private boolean is_record_memory; // Only used in testing. If true, the CPU will record when memory is read and written.
@@ -33,16 +30,27 @@ public class CPU {
     private byte fetched_data; // Set in addressing modes, used afterwards.
     private short fetched_addr; // Set in addressing modes, used afterwards.
     private final Bus bus;
+    private final boolean is_testing_mode;
 
-    public CPU(Bus bus, byte[] cpu_memory, PPURegisters ppuRegisters) {
+    /**
+     *
+     * @param bus
+     * @param cpu_memory
+     * @param is_testing_mode Only for testing purposes. If true, the CPU will record when memory is read and written. It will also ignore mappings.
+     */
+    public CPU(Bus bus, byte[] cpu_memory, boolean is_testing_mode) {
         if (cpu_memory.length != 1024 * 64)
             throw new RuntimeException("Unexpected CPU memory address space size");
 
         this.bus = bus;
         this.memory = cpu_memory;
-        this.ppuRegisters = ppuRegisters;
+        this.is_testing_mode = is_testing_mode;
 
         this.registers = new CPURegisters();
+    }
+
+    public CPU(Bus bus, byte[] cpu_memory) {
+        this(bus, cpu_memory, false);
     }
 
     public void clock_tick() {
@@ -106,34 +114,38 @@ public class CPU {
 
         byte res = 0;
 
-        // Mirror PPU registers
-        // From NESDEV wiki: "they're mirrored in every 8 bytes from $2008 through $3FFF, so a write to $3456 is the same as a write to $2006."
-        if (addr >= 0x2000 && addr <= 0x3FFF) {
-            addr = (short) (0x2000 + (addr % 8));
-        }
-
-        // Check PPU address space
-        if (addr >= 0x2000 && addr <= 0x2007) {
-            switch (addr) {
-                case 0x2000 -> throw new RuntimeException("Can't read from write-only register: PPUCTRL");
-                case 0x2001 -> throw new RuntimeException("Can't read from write-only register: PPUMASK");
-                case 0x2002 -> res = ppuRegisters.readPPUSTATUS();
-                case 0x2003 -> throw new RuntimeException("Can't read from write-only register: OAMADDR");
-                case 0x2004 -> res = ppuRegisters.readOamData();
-                case 0x2005 -> throw new RuntimeException("Can't read from write-only register: PPUSCROLL");
-                case 0x2006 -> throw new RuntimeException("Can't read from write-only register: PPUADDR");
-                case 0x2007 -> res = ppuRegisters.readPPUDATA();
-            }
-        } else {
-            // Not PPU mapping, read from internal memory
+        if (is_testing_mode) {
             res = memory[addr & 0xFFFF];
-        }
+        } else {
+            // Mirror PPU registers
+            // From NESDEV wiki: "they're mirrored in every 8 bytes from $2008 through $3FFF, so a write to $3456 is the same as a write to $2006."
+            if (addr >= 0x2000 && addr <= 0x3FFF) {
+                addr = (short) (0x2000 + (addr % 8));
+            }
 
-        // Check for memory mapped registers
-        if (addr == 0x4016 || addr == 0x4017) {
-            res = bus.cpu_read(addr);
+            // Check PPU address space
+            if (addr >= 0x2000 && addr <= 0x2007) {
+                switch (addr) {
+                    case 0x2000 -> throw new RuntimeException("Can't read from write-only register: PPUCTRL");
+                    case 0x2001 -> throw new RuntimeException("Can't read from write-only register: PPUMASK");
+                    case 0x2002 -> res = bus.ppuRegisters.readPPUSTATUS();
+                    case 0x2003 -> throw new RuntimeException("Can't read from write-only register: OAMADDR");
+                    case 0x2004 -> res = bus.ppuRegisters.readOamData();
+                    case 0x2005 -> throw new RuntimeException("Can't read from write-only register: PPUSCROLL");
+                    case 0x2006 -> throw new RuntimeException("Can't read from write-only register: PPUADDR");
+                    case 0x2007 -> res = bus.ppuRegisters.readPPUDATA();
+                }
+            } else {
+                // Not PPU mapping, read from internal memory
+                res = memory[addr & 0xFFFF];
+            }
+
+            // Check for memory mapped registers
+            if (addr == 0x4016 || addr == 0x4017) {
+                res = bus.cpu_read(addr);
 //            if (res != 0)
 //                logger.debug("Controller read: " + Common.byteToHex(res, true));
+            }
         }
 
         cycles ++;
@@ -367,7 +379,7 @@ public class CPU {
                 exec_tax();
                 break;
             case CPX:
-                exec_cmp(addrmode, registers.X);
+                exec_cmp(registers.X);
                 break;
             case CLV:
                 registers.setFlag(OVERFLOW, false);
@@ -376,7 +388,7 @@ public class CPU {
                 exec_tay();
                 break;
             case CPY:
-                exec_cmp(addrmode, registers.Y);
+                exec_cmp(registers.Y);
                 break;
             case STX:
                 write_memory(fetched_addr, registers.X);
@@ -400,7 +412,7 @@ public class CPU {
                 exec_lsr(addrmode == AddressingMode.ACCUMULATOR);
                 break;
             case CMP:
-                exec_cmp(addrmode, registers.A);
+                exec_cmp(registers.A);
                 break;
             case ROL:
                 exec_rol_or_ror(addrmode == AddressingMode.ACCUMULATOR, true);
@@ -562,7 +574,7 @@ public class CPU {
 //            case ISB:
             case DCP:
                 //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
-                // SLO, SRE, RLA, RRA, ISB, DCP
+                // SLO, SRE, RLA, RRA, ISB
 
                 // fetch pointer address, increment PC
                 pointer_addr = read_memory(registers.PC);
@@ -582,11 +594,15 @@ public class CPU {
                 // read from effective address
                 fetched_data = read_memory(Common.makeShort(effective_addr_low, effective_addr_high));
 
-                // write the value back to effective address, and do the operation on it
-                write_memory(Common.makeShort(effective_addr_low, effective_addr_high), fetched_data);
+                fetched_addr = Common.makeShort(effective_addr_low, effective_addr_high);
 
-                // write the new value to effective address
-                write_memory(Common.makeShort(effective_addr_low, effective_addr_high), fetched_data);
+                // write the value back to effective address, and do the operation on it
+                write_memory(fetched_addr, fetched_data);
+
+                // This is done in the instruction implementations.
+//                // write the new value to effective address
+//                write_memory(Common.makeShort(effective_addr_low, effective_addr_high), fetched_data);
+
 
                 break;
             // Write instructions (STA, SAX)
@@ -666,10 +682,45 @@ public class CPU {
 //            case RLA:
 //            case RRA:
 //            case ISB:
-//            case DCP:
+            case DCP:
                 //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
-                // SLO, SRE, RLA, RRA, ISB, DCP
-//                throw new RuntimeException("Instruction not implemented: " + instr);
+                // SLO, SRE, RLA, RRA, ISB
+
+                // fetch pointer address, increment PC
+                pointer_addr = read_memory(registers.PC);
+                registers.PC ++;
+
+                // fetch effective address low
+                effective_addr_low = read_memory((short) (pointer_addr & 0xFF));
+
+                // fetch effective address high, add Y to low byte of effective address
+                effective_addr_high = read_memory((short) ((pointer_addr +1) & 0xFF));
+                new_effective_addr_low = (byte) (effective_addr_low + register);
+
+                // read from effective address, fix high byte of effective address
+                effective_addr = Common.makeShort(new_effective_addr_low, effective_addr_high);
+                fetched_data = read_memory(effective_addr);
+
+                // Check page crossing
+                if (Common.isAdditionCarry(effective_addr_low, register)) {
+                    effective_addr += 0x100;
+
+                    // This cycle will be executed only if the effective address was invalid during cycle #5, i.e. page boundary was crossed.
+                    //cycles ++;
+                }
+
+                // read from effective address
+                fetched_data = read_memory(effective_addr); // TODO: Problem here
+
+                fetched_addr = effective_addr;
+
+                // write the value back to effective address, and do the operation on it
+                write_memory(effective_addr, fetched_data);
+
+                // This is done in the instruction implementations.
+
+                // write the new value to effective address
+                break;
             // Write instructions (STA, SHA)
             case STA:
                 //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
@@ -695,6 +746,8 @@ public class CPU {
 
                 fetched_addr = effective_addr;
                 break;
+            default:
+                throw new RuntimeException("Instruction not implemented: " + instr);
         }
     }
 
@@ -750,8 +803,9 @@ public class CPU {
             case ROR:
             case INC:
             case DEC:
+            case DCP:
                 //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
-                // SLO, SRE, RLA, RRA, ISB, DCP
+                // SLO, SRE, RLA, RRA, ISB
 
                 // fetch low byte of address, increment PC
                 low_byte = read_memory(registers.PC);
@@ -808,6 +862,8 @@ public class CPU {
                 fetched_addr = effective_addr;
 
                 break;
+            default:
+                throw new IllegalArgumentException("Invalid absolute addressing, instruction: " + instr);
         }
     }
 
@@ -866,7 +922,7 @@ public class CPU {
             case DEC:
             case DCP:
                 //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
-                // SLO, SRE, RLA, RRA, ISB, DCP
+                // SLO, SRE, RLA, RRA, ISB
 
                 // fetch address, increment PC
                 addr_low = read_memory(registers.PC);
@@ -1149,33 +1205,38 @@ public class CPU {
 //        logger.debug("Writing memory: ["+addr + " (" + Common.shortToHex(addr, true)+")] = "
 //                +value + " ("+Common.byteToHex(value, true)+")");
         cycles ++;
-        // Mirror PPU registers
-        // From NESDEV wiki: "they're mirrored in every 8 bytes from $2008 through $3FFF, so a write to $3456 is the same as a write to $2006."
-        if (addr >= 0x2000 && addr <= 0x3FFF) {
-            addr = (short) (0x2000 + (addr % 8));
-        }
 
-        // Check PPU writes. If so, write to PPU registers and return.
-        if ((addr >= 0x2000 && addr <= 0x2007) || addr == 0x4014) {
-            switch (addr) {
-                case 0x2000 -> ppuRegisters.writePPUCTRL(value);
-                case 0x2001 -> ppuRegisters.writePPUMASK(value);
-                case 0x2002 -> {} // ignore - read only
-                case 0x2003 -> ppuRegisters.writeOAMADDR(value);
-                case 0x2004 -> ppuRegisters.writeOAMDATA(value);
-                case 0x2005 -> ppuRegisters.writePPUSCROLL(value);
-                case 0x2006 -> ppuRegisters.writePPUADDR(value);
-                case 0x2007 -> ppuRegisters.writePPUDATA(value);
-                case 0x4014 -> ppuRegisters.writeOAMDMA(value);
-            }
-        } else {
-            // Not PPU address, so write to internal memory.
+        if (is_testing_mode) {
             memory[addr & 0xFFFF] = value;
-        }
+        } else {
+            // Mirror PPU registers
+            // From NESDEV wiki: "they're mirrored in every 8 bytes from $2008 through $3FFF, so a write to $3456 is the same as a write to $2006."
+            if (addr >= 0x2000 && addr <= 0x3FFF) {
+                addr = (short) (0x2000 + (addr % 8));
+            }
 
-        // Check controller writes. If so, write to controller registers and return.
-        if (addr == 0x4016 || addr == 0x4017) {
-            bus.cpu_write(addr, value);
+            // Check PPU writes. If so, write to PPU registers and return.
+            if ((addr >= 0x2000 && addr <= 0x2007) || addr == 0x4014) {
+                switch (addr) {
+                    case 0x2000 -> bus.ppuRegisters.writePPUCTRL(value);
+                    case 0x2001 -> bus.ppuRegisters.writePPUMASK(value);
+                    case 0x2002 -> {} // ignore - read only
+                    case 0x2003 -> bus.ppuRegisters.writeOAMADDR(value);
+                    case 0x2004 -> bus.ppuRegisters.writeOAMDATA(value);
+                    case 0x2005 -> bus.ppuRegisters.writePPUSCROLL(value);
+                    case 0x2006 -> bus.ppuRegisters.writePPUADDR(value);
+                    case 0x2007 -> bus.ppuRegisters.writePPUDATA(value);
+                    case 0x4014 -> bus.ppuRegisters.writeOAMDMA(value);
+                }
+            } else {
+                // Not PPU address, so write to internal memory.
+                memory[addr & 0xFFFF] = value;
+            }
+
+            // Check controller writes. If so, write to controller registers and return.
+            if (addr == 0x4016 || addr == 0x4017) {
+                bus.cpu_write(addr, value);
+            }
         }
 
         if (is_record_memory)
@@ -1209,7 +1270,7 @@ public class CPU {
     /**
      * Execute cmp instruction
      */
-    private void exec_cmp(AddressingMode addrmode, byte register) {
+    private void exec_cmp(byte register) {
 		/*
 		Link: http://www.6502.org/tutorials/compare_instructions.html
 		Compare Results | N | Z | C
@@ -1523,21 +1584,23 @@ public class CPU {
     }
 
     private void exec_dcp() {
-        // Decrement the value at the specified memory address
-        byte value = read_memory(fetched_addr);
-        value = (byte) ((value - 1) & 0xFF); // Decrement and wrap around to 0xFF if necessary
-        write_memory(fetched_addr, value);
+//        // Decrement the value at the specified memory address
+//        fetched_data = (byte) ((fetched_data - 1) & 0xFF); // Decrement and wrap around to 0xFF if necessary
+//        write_memory(fetched_addr, fetched_data);
+//
+//        // Compare the updated value with the accumulator
+//        int result = registers.A - fetched_data;
+//
+//        boolean carry = (registers.A & 0xFF) > (fetched_data & 0xFF);
+//
+//        // Set the processor flags accordingly
+//        registers.modify_n((byte) result);
+//        registers.modify_z((byte) result);
+//        registers.setFlag(CARRY, carry);
 
-        // Compare the updated value with the accumulator
-        int accumulator = registers.A & 0xFF;
-        int result = accumulator - value;
-
-        boolean carry = (accumulator & 0xFF) > (value & 0xFF);
-
-        // Set the processor flags accordingly
-        registers.modify_n((byte) result);
-        registers.modify_z((byte) result);
-        registers.setFlag(CARRY, carry);
+        fetched_data -= 1;
+        write_memory(fetched_addr, fetched_data);
+        exec_cmp(registers.A);
     }
 
     private void setFlag(Flags flag, boolean value) {

@@ -1,5 +1,6 @@
 package PPU;
 
+import NES.Bus.Bus;
 import NES.Cartridge.Mirroring;
 import NES.PPU.PPU;
 import org.junit.Before;
@@ -10,11 +11,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class TestPPURegisters {
 
     private PPU ppu;
+    private Bus bus;
     private final byte[] chr_rom = new byte[1024 * 8];
 
     @Before
     public void setUp() {
-        ppu = new PPU(Mirroring.HORIZONTAL, chr_rom);
+        bus = new Bus();
+        ppu = new PPU(bus, Mirroring.HORIZONTAL, chr_rom);
     }
 
     @Test

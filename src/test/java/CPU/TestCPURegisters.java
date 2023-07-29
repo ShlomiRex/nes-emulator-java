@@ -3,6 +3,9 @@ package CPU;
 import NES.CPU.Registers.CPURegisters;
 import NES.Common;
 import org.junit.Test;
+
+import static NES.CPU.Registers.Flags.NEGATIVE;
+import static NES.CPU.Registers.Flags.ZERO;
 import static org.junit.Assert.*;
 
 public class TestCPURegisters {
@@ -11,13 +14,13 @@ public class TestCPURegisters {
         CPURegisters cpuRegisters = new CPURegisters();
 
         cpuRegisters.modify_z((byte) 0);
-        assertEquals(cpuregisters.getFlag(ZERO), true);
+        assertEquals(cpuRegisters.getFlag(ZERO), true);
 
         cpuRegisters.modify_z((byte) 0xFF);
-        assertEquals(cpuregisters.getFlag(ZERO), false);
+        assertEquals(cpuRegisters.getFlag(ZERO), false);
 
         cpuRegisters.modify_z((byte) 0);
-        assertEquals(cpuregisters.getFlag(ZERO), true);
+        assertEquals(cpuRegisters.getFlag(ZERO), true);
     }
 
     @Test
@@ -25,21 +28,21 @@ public class TestCPURegisters {
         CPURegisters cpuRegisters = new CPURegisters();
 
         cpuRegisters.modify_n((byte) 0);
-        assertEquals(cpuregisters.getFlag(NEGATIVE), false);
+        assertEquals(cpuRegisters.getFlag(NEGATIVE), false);
 
         cpuRegisters.modify_n((byte) 0xAA);
-        assertEquals(cpuregisters.getFlag(NEGATIVE), true);
+        assertEquals(cpuRegisters.getFlag(NEGATIVE), true);
 
         cpuRegisters.modify_n((byte) 0x56);
-        assertEquals(cpuregisters.getFlag(NEGATIVE), false);
+        assertEquals(cpuRegisters.getFlag(NEGATIVE), false);
 
         cpuRegisters.modify_n((byte) 0xFF);
-        assertEquals(cpuregisters.getFlag(NEGATIVE), true);
+        assertEquals(cpuRegisters.getFlag(NEGATIVE), true);
 
         cpuRegisters.modify_n((byte) 0x7F);
-        assertEquals(cpuregisters.getFlag(NEGATIVE), false);
+        assertEquals(cpuRegisters.getFlag(NEGATIVE), false);
 
         cpuRegisters.modify_n((byte) 0x80);
-        assertEquals(cpuregisters.getFlag(NEGATIVE), true);
+        assertEquals(cpuRegisters.getFlag(NEGATIVE), true);
     }
 }

@@ -32,9 +32,9 @@ public class TestCPU_Nestest {
         nes = new NES(rom_parser);
 
         // We have special mode of operation, we ignore RESET vector. Only for this test.
-        nes.cpu.registers.setPC((short) 0xC000);
+        nes.cpu.registers.PC = (short) 0xC000;
         nes.cpu.registers.setFlag(Flags.INTERRUPT, true); // Only for the first instruction to pass test.
-        nes.cpu.registers.setS((byte) 0xFD); // Only for the first instruction to pass test.
+        nes.cpu.registers.S = (byte) 0xFD; // Only for the first instruction to pass test.
     }
 
     @Test

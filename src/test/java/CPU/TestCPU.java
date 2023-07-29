@@ -1,9 +1,13 @@
 package CPU;
 
+import NES.Bus.Bus;
 import NES.CPU.CPU;
 import NES.CPU.Decoder.Decoder;
 import NES.CPU.Decoder.InstructionInfo;
+import NES.Cartridge.Mirroring;
 import NES.Common;
+import NES.PPU.PPU;
+import NES.PPU.PPURegisters;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
@@ -35,6 +39,7 @@ public class TestCPU {
     private static final Logger logger = LoggerFactory.getLogger(TestCPU.class);
 
     private static CPU cpu;
+    private static Bus bus;
     private static byte[] cpu_memory;
 
     @BeforeAll
@@ -45,8 +50,11 @@ public class TestCPU {
             logger.error("ProcessorTests repo not found (https://github.com/TomHarte/ProcessorTests), skipping tests");
         assumeTrue(processor_tests_repo_exist);
 
+
+
+        bus = new Bus();
         cpu_memory = new byte[64 * 1024];
-        cpu = new CPU(cpu_memory, null);
+        cpu = new CPU(bus, cpu_memory, true);
         cpu.set_debugger_record_memory(true);
     }
 
@@ -347,12 +355,12 @@ public class TestCPU {
         JSONArray ram = (JSONArray) init.get("ram");
 
         // Init CPU registers
-        cpu.registers.setPC(pc.shortValue());
-        cpu.registers.setA(a.byteValue());
-        cpu.registers.setX(x.byteValue());
-        cpu.registers.setY(y.byteValue());
+        cpu.registers.PC = pc.shortValue();
+        cpu.registers.A = a.byteValue();
+        cpu.registers.X = x.byteValue();
+        cpu.registers.Y = y.byteValue();
         cpu.registers.P = (byte) p.intValue();
-        cpu.registers.setS(s.byteValue());
+        cpu.registers.S = s.byteValue();
 
         // Init the RAM
         for (int i = 0; i < ram.length(); i++) {

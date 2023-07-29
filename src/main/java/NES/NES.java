@@ -40,8 +40,11 @@ public class NES {
         }
 
         bus = new Bus();
+
         ppu = new PPU(bus, header.getMirrorType(), chr_rom);
-        cpu = new CPU(bus, cpu_memory, ppu.registers);
+        bus.attachPPU(ppu);
+
+        cpu = new CPU(bus, cpu_memory);
 
         cpu.reset();
     }

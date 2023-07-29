@@ -4,11 +4,15 @@ This is my attempt to create basic NES emulator in Java.
 
 My goal is to not to look at other's code, but to understand on the high-level the NES architecture and create it in Java.
 
-# Screenshots
+# Progress Screenshots
 
-First pattern tile render
+While developing the NES, not everything goes according to plan.
 
-Notice I already added CPU debugger (everything works except the stack, which for now is just for show)
+This section is to show the fun and weird experiences I had.
+
+----------------
+
+First pattern tile render (notice I already added CPU debugger (everything works except the stack, which for now is just for show):
 ![](README-resources/Screenshot2023-05-10%20031001.png)
 
 Added pattern tables, added system palette, added run/stop buttons

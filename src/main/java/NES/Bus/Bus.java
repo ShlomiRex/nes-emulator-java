@@ -1,5 +1,8 @@
 package NES.Bus;
 
+import NES.PPU.PPU;
+import NES.PPU.PPURegisters;
+
 public class Bus {
 
     /**
@@ -13,6 +16,12 @@ public class Bus {
 
     // The state of the controllers (when the CPU writes to $4016).
     public byte[] controllers_state = new byte[2];
+
+    public PPURegisters ppuRegisters;
+
+    public void attachPPU(PPU ppu) {
+        this.ppuRegisters = ppu.registers;
+    }
 
     // TODO: Need to fill this up most of my code is inside CPU class but I need mappers (which will be implemented in the Bus class)
     public void cpu_write(short addr, byte data) {
