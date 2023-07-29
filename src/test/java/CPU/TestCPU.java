@@ -269,15 +269,27 @@ public class TestCPU {
 //        test_by_type_of_instruction("ASL", (byte) 0x16);
 //        test_by_type_of_instruction("ASL", (byte) 0x0E);
 //        test_by_type_of_instruction("ASL", (byte) 0x1E);
+//
+//        // All DCP tests
+//        test_by_type_of_instruction("DCP", (byte) 0xC7);
+//        test_by_type_of_instruction("DCP", (byte) 0xD7);
+//        test_by_type_of_instruction("DCP", (byte) 0xCF);
+//        test_by_type_of_instruction("DCP", (byte) 0xDF);
+//        test_by_type_of_instruction("DCP", (byte) 0xDB);
+//        test_by_type_of_instruction("DCP", (byte) 0xC3);
+//        test_by_type_of_instruction("DCP", (byte) 0xD3);
 
-        // All DCP tests
-        test_by_type_of_instruction("DCP", (byte) 0xC7);
-        test_by_type_of_instruction("DCP", (byte) 0xD7);
-        test_by_type_of_instruction("DCP", (byte) 0xCF);
-        test_by_type_of_instruction("DCP", (byte) 0xDF);
-        test_by_type_of_instruction("DCP", (byte) 0xDB);
-        test_by_type_of_instruction("DCP", (byte) 0xC3);
-        test_by_type_of_instruction("DCP", (byte) 0xD3);
+
+        // All ISB tests
+        test_by_type_of_instruction("ISB", (byte) 0xE7);
+        test_by_type_of_instruction("ISB", (byte) 0xF7);
+        test_by_type_of_instruction("ISB", (byte) 0xEF);
+        test_by_type_of_instruction("ISB", (byte) 0xFF);
+        test_by_type_of_instruction("ISB", (byte) 0xFB);
+        test_by_type_of_instruction("ISB", (byte) 0xE3);
+        test_by_type_of_instruction("ISB", (byte) 0xF3);
+
+
 
 
     }

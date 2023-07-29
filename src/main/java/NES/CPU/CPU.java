@@ -6,7 +6,6 @@ import NES.CPU.Decoder.InstructionInfo;
 import NES.CPU.Registers.CPURegisters;
 import NES.CPU.Registers.Flags;
 import NES.Common;
-import NES.PPU.PPURegisters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -498,8 +497,8 @@ public class CPU {
             case DCP:
                 exec_dcp();
                 break;
-            case ISC:
-                exec_isc();
+            case ISB:
+                exec_isb();
                 break;
             case JAM:
                 exec_jam();
@@ -571,10 +570,10 @@ public class CPU {
 //            case SRE:
 //            case RLA:
 //            case RRA:
-//            case ISB:
+            case ISB:
             case DCP:
                 //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
-                // SLO, SRE, RLA, RRA, ISB
+                // SLO, SRE, RLA, RRA
 
                 // fetch pointer address, increment PC
                 pointer_addr = read_memory(registers.PC);
@@ -677,15 +676,12 @@ public class CPU {
 
                 break;
             // Read-Modify-Write instructions (SLO, SRE, RLA, RRA, ISB, DCP)
-//            case SLO:
-//            case SRE:
-//            case RLA:
-//            case RRA:
-//            case ISB:
+            case SLO:
+            case SRE:
+            case RLA:
+            case RRA:
+            case ISB:
             case DCP:
-                //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
-                // SLO, SRE, RLA, RRA, ISB
-
                 // fetch pointer address, increment PC
                 pointer_addr = read_memory(registers.PC);
                 registers.PC ++;
@@ -723,8 +719,7 @@ public class CPU {
                 break;
             // Write instructions (STA, SHA)
             case STA:
-                //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
-                // SHA
+            case SHA:
 
                 // fetch pointer address, increment PC
                 pointer_addr = read_memory(registers.PC);
@@ -772,9 +767,8 @@ public class CPU {
             case BIT:
             case NOP:
             case LAX:
-                //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
-                // LAE, SHS
-
+            case LAE:
+            case SHS:
                 // fetch low byte of address, increment PC
                 byte low_byte = read_memory(registers.PC);
                 registers.PC ++;
@@ -804,9 +798,11 @@ public class CPU {
             case INC:
             case DEC:
             case DCP:
-                //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
-                // SLO, SRE, RLA, RRA, ISB
-
+            case ISB:
+            case RRA:
+            case RLA:
+            case SRE:
+            case SLO:
                 // fetch low byte of address, increment PC
                 low_byte = read_memory(registers.PC);
                 registers.PC ++;
@@ -837,9 +833,9 @@ public class CPU {
             case STA:
             case STX:
             case STY:
-                //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
-                // SHA, SHX, SHY
-
+            case SHA:
+            case SHX:
+            case SHY:
                 // fetch low byte of address, increment PC
                 low_byte = read_memory(registers.PC);
                 registers.PC ++;
@@ -921,9 +917,11 @@ public class CPU {
             case INC:
             case DEC:
             case DCP:
-                //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
-                // SLO, SRE, RLA, RRA, ISB
-
+            case ISB:
+            case SLO:
+            case SRE:
+            case RLA:
+            case RRA:
                 // fetch address, increment PC
                 addr_low = read_memory(registers.PC);
                 registers.PC ++;
@@ -1005,8 +1003,9 @@ public class CPU {
             case INC:
             case DEC:
             case DCP:
+            case ISB:
                 //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
-                // SLO, SRE, RLA, RRA, ISB
+                // SLO, SRE, RLA, RRA
 
                 // fetch address, increment PC
                 addr_low = read_memory(registers.PC);
@@ -1089,9 +1088,11 @@ public class CPU {
            case INC:
            case DEC:
            case DCP:
-               //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
-               // SLO, SRE, RLA, RRA, ISB, DCP
-
+           case ISB:
+           case RRA:
+           case RLA:
+           case SRE:
+           case SLO:
                //fetch low byte of address, increment PC
                addr_low = read_memory(registers.PC);
                registers.PC ++;
@@ -1607,7 +1608,7 @@ public class CPU {
         registers.setFlag(flag, value);
     }
 
-    private void exec_isc() {
+    private void exec_isb() {
         // Increment the value at the specified memory address
         byte value = read_memory(fetched_addr);
         value = (byte) ((value + 1) & 0xFF); // Increment and wrap around to 0x00 if necessary
