@@ -1,5 +1,6 @@
 package NES.UI.Debugger.CPUDebugger;
 
+import NES.Bus.Bus;
 import NES.CPU.CPU;
 
 import javax.swing.*;
@@ -11,8 +12,12 @@ public class StackPanel extends JPanel {
 
     private final DefaultListModel model;
     private final CPU cpu;
-    public StackPanel(CPU cpu) {
+    private final Bus bus;
+
+    public StackPanel(CPU cpu, Bus bus) {
         this.cpu = cpu;
+        this.bus = bus;
+
         this.model = new DefaultListModel();
 
         setBorder(new TitledBorder("Stack"));
@@ -38,7 +43,7 @@ public class StackPanel extends JPanel {
         model.clear(); // Clear the list, we add elements again
         for(int i = 0xFF; i > stack_pointer; i--) {
             short addr = (short) (0x100 + i);
-            byte mem = cpu.get_memory(addr);
+            byte mem = bus.get_cpu_memory(addr);
             model.addElement(String.format("%02X: %02X", i, mem));
         }
     }

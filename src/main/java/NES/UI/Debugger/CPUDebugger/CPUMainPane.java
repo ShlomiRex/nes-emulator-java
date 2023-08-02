@@ -1,5 +1,7 @@
 package NES.UI.Debugger.CPUDebugger;
 
+import NES.Bus.Bus;
+import NES.NES;
 import NES.CPU.CPU;
 import NES.UI.Debugger.AssemblyDebugger.AssemblyTextPane;
 import NES.UI.Debugger.AssemblyDebugger.AssemnlyMainPane;
@@ -12,12 +14,15 @@ public class CPUMainPane extends JPanel {
 
     public final JPanel stack_pane;
 
-    public CPUMainPane(CPU cpu, AssemblyTextPane assembly_text_pane) {
+    public CPUMainPane(NES nes, AssemblyTextPane assembly_text_pane) {
         setBorder(BorderFactory.createTitledBorder("CPU"));
         //setPreferredSize(new Dimension(400, 250));
 
+        CPU cpu = nes.cpu;
+        Bus bus = nes.bus;
+
         JPanel reg_pane = new RegistersPanel(cpu.registers);
-        stack_pane = new StackPanel(cpu);
+        stack_pane = new StackPanel(cpu, bus);
         button_pane = new CPUButtonPane(cpu, this, assembly_text_pane);
         JPanel cycles_pane = new CyclesPane(cpu);
         JPanel num_instr_pane = new NumInstructionsPane(cpu);

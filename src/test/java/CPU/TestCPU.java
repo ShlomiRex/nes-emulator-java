@@ -334,6 +334,8 @@ public class TestCPU {
 
             JSONObject initial = (JSONObject) test_obj.get("initial");
             init_cpu(cpu, cpu_memory, initial);
+            // Clear memory access records for next test
+            bus.recorded_memory.clear();
 
             cpu.clock_tick(); // Single tick
 
@@ -352,9 +354,6 @@ public class TestCPU {
     }
 
     private void init_cpu(CPU cpu, byte[] cpu_memory, JSONObject init) {
-        // Clear memory access records for next test
-        cpu.clear_debugger_memory_records();
-
         Integer pc = (Integer) init.get("pc");
         Integer a = (Integer) init.get("a");
         Integer x = (Integer) init.get("x");
@@ -440,11 +439,11 @@ public class TestCPU {
 
         // Test cycles (Note: order of memory access records is important).
         // This shows that my emulator is cycle accurate.
-        List<CPU.MemoryAccessRecord> records = cpu.get_debugger_memory_records();
+        List<Bus.MemoryAccessRecord> records = bus.recorded_memory;
         assertEquals(cycles.length(), records.size());
         for (int i = 0; i < cycles.length(); i++) {
             JSONArray cycle_record = (JSONArray) cycles.get(i);
-            CPU.MemoryAccessRecord cpu_record = records.get(i);
+            Bus.MemoryAccessRecord cpu_record = records.get(i);
 
             Integer cycle_address = (Integer) cycle_record.get(0);
             Integer cycle_value = (Integer) cycle_record.get(1);

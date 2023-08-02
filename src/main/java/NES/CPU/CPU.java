@@ -91,16 +91,6 @@ public class CPU {
 //        logger.debug("End of tick");
     }
 
-    /**
-     * Used only in debugging or testing or GUI.
-     * Do not use in any other case.
-     * @param addr
-     * @return
-     */
-    public byte get_memory(short addr) {
-        return memory[addr & 0xFFFF];
-    }
-
     private byte read_memory(short addr) {
         cycles ++;
         return bus.cpu_read(addr);
@@ -116,10 +106,9 @@ public class CPU {
 
         registers.reset();
 
-        short new_pc = read_address_from_memory((short) 0xFFFC);
         //logger.debug("Jumping to interrupt address: " + Common.shortToHex(new_pc, true));
 
-        registers.PC = new_pc;
+        registers.PC = read_address_from_memory((short) 0xFFFC);
         cycles = 7; // TODO: Is it 7 or 8 cycles?
     }
 

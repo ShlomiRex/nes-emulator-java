@@ -40,7 +40,7 @@ public class Bus {
     /**
      * Only used in testing. If record_memory is true, this will contain all the memory reads and writes.
      */
-    private List<MemoryAccessRecord> recorded_memory;
+    public List<MemoryAccessRecord> recorded_memory;
 
     public Bus(boolean is_testing_mode, boolean is_record_memory, byte[] cpu_memory) {
         this.is_testing_mode = is_testing_mode;
@@ -136,6 +136,16 @@ public class Bus {
             recorded_memory.add(new MemoryAccessRecord(addr, res, true));
 
         return res;
+    }
+
+    /**
+     * Used only in debugging or testing or GUI.
+     * Do not use in any other case.
+     * @param addr
+     * @return
+     */
+    public byte get_cpu_memory(short addr) {
+        return cpu_memory[addr & 0xFFFF];
     }
 
     public record MemoryAccessRecord(short addr, byte value, boolean is_read) {
