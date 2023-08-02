@@ -105,11 +105,6 @@ public class PPU {
         this.indexColorModel = new IndexColorModel(2, 64, red, green, blue);
         this.bufferedImage = new BufferedImage(256, 240, BufferedImage.TYPE_BYTE_INDEXED, indexColorModel);
 
-        int r = indexColorModel.getRed(0); // 84
-        int g = indexColorModel.getGreen(0); // 84
-        int b = indexColorModel.getBlue(0); // 84
-        logger.debug("Color index 0: r={}, g={}, b={}", r, g, b);
-
         reset();
     }
 
