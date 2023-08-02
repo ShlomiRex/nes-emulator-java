@@ -1,6 +1,6 @@
 package NES.UI.Debugger.AssemblyDebugger;
 
-import NES.CPU.CPU;
+import NES.NES;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,11 +9,11 @@ public class AssemnlyMainPane extends JPanel {
 
     public final AssemblyTextPane assembly_text_area;
 
-    public AssemnlyMainPane(CPU cpu, byte[] cpu_memory) {
+    public AssemnlyMainPane(NES nes) {
 
         setBorder(BorderFactory.createLoweredBevelBorder());
 
-        assembly_text_area = new AssemblyTextPane(cpu, cpu_memory);
+        assembly_text_area = new AssemblyTextPane(nes);
 
         // Highlight first instruction
         assembly_text_area.highlight_current_instruction();

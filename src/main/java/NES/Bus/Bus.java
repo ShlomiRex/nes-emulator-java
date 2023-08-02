@@ -1,9 +1,10 @@
 package NES.Bus;
 
-import NES.CPU.CPU;
 import NES.PPU.PPU;
 import NES.PPU.PPURegisters;
+import NES.PPU.SystemPallete;
 
+import java.awt.*;
 import java.util.List;
 
 public class Bus {
@@ -41,6 +42,11 @@ public class Bus {
      * Only used in testing. If record_memory is true, this will contain all the memory reads and writes.
      */
     public List<MemoryAccessRecord> recorded_memory;
+
+    /**
+     *  System palette is hard-wired into the NES.
+     */
+    public static final Color[][] SYSTEM_PALETTE = SystemPallete.getSystemPallete();
 
     public Bus(boolean is_testing_mode, boolean is_record_memory, byte[] cpu_memory) {
         this.is_testing_mode = is_testing_mode;

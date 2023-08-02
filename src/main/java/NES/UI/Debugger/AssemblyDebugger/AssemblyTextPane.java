@@ -1,6 +1,6 @@
 package NES.UI.Debugger.AssemblyDebugger;
 
-import NES.CPU.CPU;
+import NES.NES;
 import NES.CPU.Registers.CPURegisters;
 import NES.Common;
 import org.slf4j.Logger;
@@ -22,13 +22,13 @@ public class AssemblyTextPane extends JTextPane {
     private final Highlighter highlighter;
     private final AssemblyStyledDocument styledDocument;
 
-    public AssemblyTextPane(CPU cpu, byte[] cpu_memory) {
-        this.cpuRegisters = cpu.registers;
+    public AssemblyTextPane(NES nes) {
+        this.cpuRegisters = nes.cpu.registers;
 
         this.highlighter = getHighlighter();
         this.highlightPainter = new DefaultHighlighter.DefaultHighlightPainter(Color.YELLOW);
         this.styledDocument = new AssemblyStyledDocument(
-                this, cpu_memory, true, 1024 * 16);
+                this, nes.cpu_memory, true, 1024 * 16);
 
         setEditable(false);
         setFont(new Font("monospaced", Font.PLAIN, 12));

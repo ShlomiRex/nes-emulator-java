@@ -16,7 +16,7 @@ public class TestPPURegisters {
 
     @Before
     public void setUp() {
-        bus = new Bus();
+        bus = new Bus(true, true, new byte[0x10000]);
         ppu = new PPU(bus, Mirroring.HORIZONTAL, chr_rom);
     }
 
