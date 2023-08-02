@@ -72,6 +72,8 @@ public class PPU {
      */
     private final BufferedImage bufferedImage;
 
+    private final int[] buffered_pixel_color;
+
     public PPU(Bus bus, Mirroring mirroring, byte[] chr_rom) {
 //        if (chr_rom.length != 1024 * 8)
 //            throw new IllegalArgumentException("Unexpected CHR ROM / pattern table size");
@@ -104,6 +106,10 @@ public class PPU {
          */
         this.indexColorModel = new IndexColorModel(2, 64, red, green, blue);
         this.bufferedImage = new BufferedImage(256, 240, BufferedImage.TYPE_BYTE_INDEXED, indexColorModel);
+        /*
+         * Each pixel's final color is a single index (0-63) from the system palette.
+         */
+        this.buffered_pixel_color = new int[1];
 
         reset();
     }
@@ -281,14 +287,16 @@ public class PPU {
                 // Now we have the pixel value, we can get the color from the palette
                 // Read pixel color from palette RAM
                 byte pixelColor = read((short) (0x3F00 + paletteIndex * 4 + colorIndex));
+
                 int color_row = pixelColor / 16;
                 int color_col = pixelColor % 16;
-                Color c = Bus.SYSTEM_PALETTE[color_row * 16 + color_col];
+                int pixel_x = tile_col * 8 + (7- pixel_col);
+                int pixel_y = tile_row * 8 + pixel_row;
 
-                bufferedImage.setRGB(
-                        (tile_col * 8 + (7- pixel_col)),
-                        (tile_row * 8 + pixel_row),
-                        c.getRGB());
+                int color_index_in_system_palette = color_row * 16 + color_col;
+
+                buffered_pixel_color[0] = color_index_in_system_palette;
+                bufferedImage.getRaster().setPixel(pixel_x, pixel_y, buffered_pixel_color);
             }
         }
     }
