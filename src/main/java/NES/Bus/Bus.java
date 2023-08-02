@@ -40,7 +40,7 @@ public class Bus {
     /**
      * Only used in testing. If record_memory is true, this will contain all the memory reads and writes.
      */
-    private List<CPU.MemoryAccessRecord> recorded_memory;
+    private List<MemoryAccessRecord> recorded_memory;
 
     public Bus(boolean is_testing_mode, boolean is_record_memory, byte[] cpu_memory) {
         this.is_testing_mode = is_testing_mode;
@@ -58,9 +58,42 @@ public class Bus {
 
     // TODO: Need to fill this up most of my code is inside CPU class but I need mappers (which will be implemented in the Bus class)
     public void cpu_write(short addr, byte data) {
-        if (addr == 0x4016 || addr == 0x4017) {
-            controllers_state[addr & 1] = controllers[addr & 1];
+        //        logger.debug("Writing memory: ["+addr + " (" + Common.shortToHex(addr, true)+")] = "
+//                +value + " ("+Common.byteToHex(value, true)+")");
+
+        if (is_testing_mode) {
+            cpu_memory[addr & 0xFFFF] = data;
+        } else {
+            // Mirror PPU registers
+            // From NESDEV wiki: "they're mirrored in every 8 bytes from $2008 through $3FFF, so a write to $3456 is the same as a write to $2006."
+            if (addr >= 0x2000 && addr <= 0x3FFF) {
+                addr = (short) (0x2000 + (addr % 8));
+            }
+
+            // Check PPU writes. If so, write to PPU registers and return.
+            if ((addr >= 0x2000 && addr <= 0x2007) || addr == 0x4014) {
+                switch (addr) {
+                    case 0x2000 -> ppuRegisters.writePPUCTRL(data);
+                    case 0x2001 -> ppuRegisters.writePPUMASK(data);
+                    case 0x2002 -> {} // ignore - read only
+                    case 0x2003 -> ppuRegisters.writeOAMADDR(data);
+                    case 0x2004 -> ppuRegisters.writeOAMDATA(data);
+                    case 0x2005 -> ppuRegisters.writePPUSCROLL(data);
+                    case 0x2006 -> ppuRegisters.writePPUADDR(data);
+                    case 0x2007 -> ppuRegisters.writePPUDATA(data);
+                    case 0x4014 -> ppuRegisters.writeOAMDMA(data);
+                }
+            }
+            // Check controller writes. If so, write to controller registers and return.
+            else if (addr == 0x4016 || addr == 0x4017) {
+                controllers_state[addr & 1] = controllers[addr & 1];
+            } else {
+                cpu_memory[addr & 0xFFFF] = data;
+            }
         }
+
+        if (is_record_memory)
+            recorded_memory.add(new MemoryAccessRecord(addr, data, false));
     }
 
     public byte cpu_read(short addr) {
@@ -100,8 +133,16 @@ public class Bus {
         }
 
         if (is_record_memory)
-            recorded_memory.add(new CPU.MemoryAccessRecord(addr, res, true));
+            recorded_memory.add(new MemoryAccessRecord(addr, res, true));
 
         return res;
+    }
+
+    public record MemoryAccessRecord(short addr, byte value, boolean is_read) {
+        @Override
+        public String toString() {
+            String read_write = is_read ? "read" : "write";
+            return "["+(addr & 0xFFFF)+","+(value & 0xFF)+","+read_write+"]";
+        }
     }
 }

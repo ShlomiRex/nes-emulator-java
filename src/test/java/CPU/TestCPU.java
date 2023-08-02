@@ -50,12 +50,9 @@ public class TestCPU {
             logger.error("ProcessorTests repo not found (https://github.com/TomHarte/ProcessorTests), skipping tests");
         assumeTrue(processor_tests_repo_exist);
 
-
-
-        bus = new Bus();
+        bus = new Bus(true, true, cpu_memory);
         cpu_memory = new byte[64 * 1024];
-        cpu = new CPU(bus, cpu_memory, true);
-        cpu.set_debugger_record_memory(true);
+        cpu = new CPU(bus, cpu_memory);
     }
 
     @ParameterizedTest(name = "{0}")

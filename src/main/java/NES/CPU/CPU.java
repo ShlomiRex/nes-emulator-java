@@ -29,27 +29,20 @@ public class CPU {
     private byte fetched_data; // Set in addressing modes, used afterwards.
     private short fetched_addr; // Set in addressing modes, used afterwards.
     private final Bus bus;
-    private final boolean is_testing_mode;
 
     /**
      *
      * @param bus
      * @param cpu_memory
-     * @param is_testing_mode Only for testing purposes. If true, the CPU will record when memory is read and written. It will also ignore mappings.
      */
-    public CPU(Bus bus, byte[] cpu_memory, boolean is_testing_mode) {
+    public CPU(Bus bus, byte[] cpu_memory) {
         if (cpu_memory.length != 1024 * 64)
             throw new RuntimeException("Unexpected CPU memory address space size");
 
         this.bus = bus;
         this.memory = cpu_memory;
-        this.is_testing_mode = is_testing_mode;
 
         this.registers = new CPURegisters();
-    }
-
-    public CPU(Bus bus, byte[] cpu_memory) {
-        this(bus, cpu_memory, false);
     }
 
     public void clock_tick() {
@@ -109,7 +102,13 @@ public class CPU {
     }
 
     private byte read_memory(short addr) {
+        cycles ++;
         return bus.cpu_read(addr);
+    }
+
+    private void write_memory(short addr, byte value) {
+        cycles ++;
+        bus.cpu_write(addr, value);
     }
 
     public void reset() {
@@ -1158,48 +1157,6 @@ public class CPU {
         }
     }
 
-    private void write_memory(short addr, byte value) {
-//        logger.debug("Writing memory: ["+addr + " (" + Common.shortToHex(addr, true)+")] = "
-//                +value + " ("+Common.byteToHex(value, true)+")");
-        cycles ++;
-
-        if (is_testing_mode) {
-            memory[addr & 0xFFFF] = value;
-        } else {
-            // Mirror PPU registers
-            // From NESDEV wiki: "they're mirrored in every 8 bytes from $2008 through $3FFF, so a write to $3456 is the same as a write to $2006."
-            if (addr >= 0x2000 && addr <= 0x3FFF) {
-                addr = (short) (0x2000 + (addr % 8));
-            }
-
-            // Check PPU writes. If so, write to PPU registers and return.
-            if ((addr >= 0x2000 && addr <= 0x2007) || addr == 0x4014) {
-                switch (addr) {
-                    case 0x2000 -> bus.ppuRegisters.writePPUCTRL(value);
-                    case 0x2001 -> bus.ppuRegisters.writePPUMASK(value);
-                    case 0x2002 -> {} // ignore - read only
-                    case 0x2003 -> bus.ppuRegisters.writeOAMADDR(value);
-                    case 0x2004 -> bus.ppuRegisters.writeOAMDATA(value);
-                    case 0x2005 -> bus.ppuRegisters.writePPUSCROLL(value);
-                    case 0x2006 -> bus.ppuRegisters.writePPUADDR(value);
-                    case 0x2007 -> bus.ppuRegisters.writePPUDATA(value);
-                    case 0x4014 -> bus.ppuRegisters.writeOAMDMA(value);
-                }
-            } else {
-                // Not PPU address, so write to internal memory.
-                memory[addr & 0xFFFF] = value;
-            }
-
-            // Check controller writes. If so, write to controller registers and return.
-            if (addr == 0x4016 || addr == 0x4017) {
-                bus.cpu_write(addr, value);
-            }
-        }
-
-//        if (is_record_memory)
-//            recorded_memory.add(new MemoryAccessRecord(addr, value, false));
-    }
-
     private void push_stack(byte data) {
 //        logger.debug("Pushing to stack: " +
 //                Common.byteToHex(data, true) +
@@ -1291,32 +1248,6 @@ public class CPU {
             registers.PC = new_pc;
 
             cycles += 7; // TODO: IDK why
-        }
-    }
-//
-//    /**
-//     * Only use in tests. Starts to record memory reads and writes.
-//     * @param is_record
-//     */
-//    public void set_debugger_record_memory(boolean is_record) {
-//        if (is_record && this.recorded_memory == null)
-//            this.recorded_memory = new ArrayList<>();
-//        this.is_record_memory = is_record;
-//    }
-//
-//    public List<MemoryAccessRecord> get_debugger_memory_records() {
-//        return this.recorded_memory;
-//    }
-//
-//    public void clear_debugger_memory_records() {
-//        this.recorded_memory.clear();
-//    }
-
-    public record MemoryAccessRecord(short addr, byte value, boolean is_read) {
-        @Override
-        public String toString() {
-            String read_write = is_read ? "read" : "write";
-            return "["+(addr & 0xFFFF)+","+(value & 0xFF)+","+read_write+"]";
         }
     }
 
