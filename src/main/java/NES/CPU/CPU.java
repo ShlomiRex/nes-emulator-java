@@ -1585,20 +1585,6 @@ public class CPU {
     }
 
     private void exec_dcp() {
-//        // Decrement the value at the specified memory address
-//        fetched_data = (byte) ((fetched_data - 1) & 0xFF); // Decrement and wrap around to 0xFF if necessary
-//        write_memory(fetched_addr, fetched_data);
-//
-//        // Compare the updated value with the accumulator
-//        int result = registers.A - fetched_data;
-//
-//        boolean carry = (registers.A & 0xFF) > (fetched_data & 0xFF);
-//
-//        // Set the processor flags accordingly
-//        registers.modify_n((byte) result);
-//        registers.modify_z((byte) result);
-//        registers.setFlag(CARRY, carry);
-
         fetched_data -= 1;
         write_memory(fetched_addr, fetched_data);
         exec_cmp(registers.A);
@@ -1609,22 +1595,47 @@ public class CPU {
     }
 
     private void exec_isb() {
-        // Increment the value at the specified memory address
-        byte value = read_memory(fetched_addr);
-        value = (byte) ((value + 1) & 0xFF); // Increment and wrap around to 0x00 if necessary
-        write_memory(fetched_addr, value);
+        fetched_data += 1;
+        write_memory(fetched_addr, fetched_data);
 
-        // Subtract the updated value from the accumulator
-        int accumulator = registers.A & 0xFF;
-        int result = accumulator - value - (registers.getFlag(CARRY) ? 0 : 1);
+        int not_carry = (registers.getFlag(CARRY) ? 0 : 1);
 
-        boolean carry = (accumulator & 0xFF) >= (value & 0xFF);
+        byte result = (byte) (registers.A - fetched_data - not_carry);
 
-        // Set the processor flags accordingly
-        registers.modify_n((byte) result);
-        registers.modify_z((byte) result);
-        registers.setFlag(CARRY, carry);
-        registers.setFlag(OVERFLOW, ((accumulator ^ value) & 0x80) != 0 && ((accumulator ^ result) & 0x80) != 0);
+        byte a_minus_m = (byte) (registers.A - fetched_data);
+        byte a_minus_m_minus_c_tag = (byte) (a_minus_m - not_carry);
+
+        boolean borrowOut = (a_minus_m & 0x100) != 0; // Check if bit 8 (0x100) is set.
+        boolean borrowOut2 = (a_minus_m_minus_c_tag & 0x100) != 0; // Check if bit 8 (0x100) is set.
+
+        boolean negative_flag_set = ((registers.A ^ result) & (fetched_data ^ result) & 0x80) != 0;
+
+        registers.modify_n(result);
+        registers.modify_z(result);
+        registers.setFlag(CARRY, borrowOut || borrowOut2);
+        registers.setFlag(OVERFLOW, negative_flag_set);
+        registers.A = result;
+
+
+        /*
+
+        fetched_data = (byte) (fetched_data ^ 0xFF);
+
+        byte result = (byte) (registers.A + fetched_data + (registers.getFlag(CARRY) ? 1 : 0));
+
+        byte m_plus_a = (byte) (fetched_data + registers.A);
+        boolean is_carry = Common.isAdditionCarry(fetched_data, registers.A);
+        boolean is_carry2 = Common.isAdditionCarry(m_plus_a, (byte) (registers.getFlag(CARRY) ? 1 : 0));
+        boolean negative_flag_set = ((registers.A ^ result) & (fetched_data ^ result) & 0x80) != 0;
+
+        registers.modify_n(result);
+        registers.modify_z(result);
+        registers.setFlag(CARRY, is_carry || is_carry2);
+        registers.setFlag(OVERFLOW, negative_flag_set);
+        registers.A = result;
+
+         */
+
     }
 
     private void exec_jam() {

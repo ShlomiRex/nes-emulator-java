@@ -7,6 +7,10 @@ import NES.Cartridge.ROMParser;
 import NES.Cartridge.iNESHeader;
 import NES.PPU.PPU;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 public class NES {
 
     public final CPU cpu;
@@ -51,12 +55,14 @@ public class NES {
 
     public void run() {
         is_running = true;
-        while (is_running) {
+
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+        executor.scheduleAtFixedRate(() -> {
             cpu.clock_tick();
             ppu.clock_tick();
             ppu.clock_tick();
             ppu.clock_tick();
-        }
+        }, 0, 559, TimeUnit.NANOSECONDS);
     }
 
     public void stop() {
