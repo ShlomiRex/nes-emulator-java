@@ -6,6 +6,8 @@ import NES.CPU.CPU;
 import NES.Cartridge.ROMParser;
 import NES.Cartridge.iNESHeader;
 import NES.PPU.PPU;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -13,9 +15,11 @@ import java.util.concurrent.TimeUnit;
 
 public class NES {
 
+    private final Logger logger = LoggerFactory.getLogger(NES.class);
     public final CPU cpu;
     public PPU ppu;
     private boolean is_running;
+
 
     public final byte[] cpu_memory; // All 64KB addressable memory
     public final iNESHeader header;
@@ -58,6 +62,9 @@ public class NES {
 
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
         executor.scheduleAtFixedRate(() -> {
+            if(!is_running)
+                executor.shutdown();
+
             cpu.clock_tick();
             ppu.clock_tick();
             ppu.clock_tick();

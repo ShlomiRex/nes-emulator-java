@@ -49,7 +49,5 @@ public class Main {
         Runnable redrawRunnable = gameWindow::repaint;
         nes.ppu.addGameCanvasRepaintRunnable(redrawRunnable);
         nes.run();
-
-        logger.info("Finished running");
     }
 }
