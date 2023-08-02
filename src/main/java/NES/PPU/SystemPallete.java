@@ -3,9 +3,9 @@ package NES.PPU;
 import java.awt.*;
 
 public class SystemPallete {
-    private static Color[][] system_palette;
+    private static Color[] system_palette;
 
-    public static Color[][] getSystemPallete() {
+    public static Color[] getSystemPalette() {
         if (system_palette == null) {
             int[][] palette = new int[][]{
                     {84, 84, 84}, {0, 30, 116}, {8, 16, 144}, {48, 0, 136},
@@ -29,7 +29,7 @@ public class SystemPallete {
                     {160, 214, 228}, {160, 162, 160}, {0, 0, 0}, {0, 0, 0}
             };
 
-            system_palette = new Color[4][16];
+            system_palette = new Color[64];
 
             for (int row = 0; row < 4; row++) {
                 for (int col = 0; col < 16; col++) {
@@ -39,7 +39,7 @@ public class SystemPallete {
                     int green = colors[1];
                     int blue = colors[2];
                     Color color = new Color(red & 0xFF, green & 0xFF, blue & 0xFF);
-                    system_palette[row][col] = color;
+                    system_palette[row * 16 + col] = color;
                 }
             }
         }

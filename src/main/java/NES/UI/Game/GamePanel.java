@@ -8,8 +8,6 @@ import javax.swing.*;
 import java.awt.*;
 
 public class GamePanel extends JPanel {
-    private static final Logger logger = LoggerFactory.getLogger(GamePanel.class);
-
     // Scale the game by this factor, including screen size
     public static final int SCALE = 4;
 
@@ -24,9 +22,5 @@ public class GamePanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         ppu.draw_frame(g, getWidth(), getHeight());
-
-//        // Draw controllers
-//        g.setColor(Color.BLUE);
-//        g.fillRect(0, 0, 64, 64);
     }
 }

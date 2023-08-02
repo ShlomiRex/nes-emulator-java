@@ -2,13 +2,14 @@ package NES.PPU;
 
 import NES.Bus.Bus;
 import NES.Cartridge.Mirroring;
-import NES.Cartridge.iNESHeader;
 import NES.Common;
-import NES.UI.Game.GamePanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.IndexColorModel;
+import java.awt.image.Raster;
 
 public class PPU {
     private final Logger logger = LoggerFactory.getLogger(PPU.class);
@@ -59,6 +60,18 @@ public class PPU {
     private final Mirroring mirroring;
     private final Bus bus;
 
+    /**
+     * The index color model is used in buffered image to map the color index to the actual color.
+     * This is an optimization. Instead of directly drawing pixels with 'g.fillRect'.
+     */
+    private final IndexColorModel indexColorModel;
+
+    /**
+     * The buffered image that will be drawn each frame.
+     * This is an optimization. Instead of directly drawing pixels with 'g.fillRect'.
+     */
+    private final BufferedImage bufferedImage;
+
     public PPU(Bus bus, Mirroring mirroring, byte[] chr_rom) {
 //        if (chr_rom.length != 1024 * 8)
 //            throw new IllegalArgumentException("Unexpected CHR ROM / pattern table size");
@@ -71,6 +84,26 @@ public class PPU {
         this.oam = new byte[256];
         this.vram = new byte[1024 * 2];
         this.registers = new PPURegisters(this);
+
+        byte[] red = new byte[64];
+        byte[] green = new byte[64];
+        byte[] blue = new byte[64];
+
+        int paletteIndex = 0;
+        for (Color c : Bus.SYSTEM_PALETTE) {
+            red[paletteIndex] = (byte) c.getRed();
+            green[paletteIndex] = (byte) c.getGreen();
+            blue[paletteIndex] = (byte) c.getBlue();
+            paletteIndex++;
+        }
+
+        /*
+        Each pixel color is 2 bits (0, 1, 2 or 3), which is index inside specific palette.
+        There are 64 colors in total.
+        Each color is represented by 3 bytes (red, green, blue).
+         */
+        this.indexColorModel = new IndexColorModel(2, 64, red, green, blue);
+        this.bufferedImage = new BufferedImage(256, 240, BufferedImage.TYPE_BYTE_INDEXED, indexColorModel);
 
         reset();
     }
@@ -198,20 +231,15 @@ public class PPU {
      * @param height The container height
      */
     public void draw_frame(Graphics g, int width, int height) {
-        g.setColor(Color.BLACK);
-        g.fillRect(0, 0, width, height);
-
-        int pixel_width = width / 256;
-        int pixel_height = height / 240;
-
         for (int tile_row = 0; tile_row < 30; tile_row++) {
             for (int tile_col = 0; tile_col < 32; tile_col++) {
-                draw_tile(g, pixel_width, pixel_height, tile_row, tile_col);
+                draw_tile(tile_row, tile_col);
             }
         }
+        g.drawImage(bufferedImage, 0, 0, width, height, null);
     }
 
-    private void draw_tile(Graphics g, int pixel_width, int pixel_height, int tile_row, int tile_col) {
+    private void draw_tile(int tile_row, int tile_col) {
         // Determine base addresses
         int nametable_addr = (registers.PPUCTRL & 0b11) == 0 ? 0x2000 : 0x2400;
         short attributetable_addr = (short) (nametable_addr + 0x3C0);
@@ -255,15 +283,12 @@ public class PPU {
                 byte pixelColor = read((short) (0x3F00 + paletteIndex * 4 + colorIndex));
                 int color_row = pixelColor / 16;
                 int color_col = pixelColor % 16;
-                Color c = Bus.SYSTEM_PALETTE[color_row][color_col];
-                g.setColor(c);
+                Color c = Bus.SYSTEM_PALETTE[color_row * 16 + color_col];
 
-                // Draw pixel
-                g.fillRect(
-                        (tile_col * 8 + (7- pixel_col)) * pixel_width,
-                        (tile_row * 8 + pixel_row) * pixel_height,
-                        pixel_width,
-                        pixel_height);
+                bufferedImage.setRGB(
+                        (tile_col * 8 + (7- pixel_col)),
+                        (tile_row * 8 + pixel_row),
+                        c.getRGB());
             }
         }
     }
@@ -343,14 +368,14 @@ public class PPU {
             throw new IllegalArgumentException("Invalid palette index: " + palette_index);
         }
 
-        Color[][] system_palette = SystemPallete.getSystemPallete();
+        Color[] system_palette = SystemPallete.getSystemPalette();
 
         int color_index = palette_ram[palette_index];
 
         int row = color_index / 16;
         int col = color_index % 16;
 
-        return new Common.Pair<>(color_index, system_palette[row][col]);
+        return new Common.Pair<>(color_index, system_palette[row * 16 + col]);
     }
 
     public void addGameCanvasRepaintRunnable(Runnable runnable) {
