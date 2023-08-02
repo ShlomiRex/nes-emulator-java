@@ -24,7 +24,7 @@ public class CPU {
     public long instructions = 0; // counter number of instructions executed
 
     private boolean is_record_memory; // Only used in testing. If true, the CPU will record when memory is read and written.
-    private List<MemoryAccessRecord> recorded_memory; // Only used in testing. If record_memory is true, this will contain all the memory reads and writes.
+
 
     private byte fetched_data; // Set in addressing modes, used afterwards.
     private short fetched_addr; // Set in addressing modes, used afterwards.
@@ -109,51 +109,7 @@ public class CPU {
     }
 
     private byte read_memory(short addr) {
-        //TODO: Add mapping here. For now I only support mapper 0.
-
-        byte res = 0;
-
-        if (is_testing_mode) {
-            res = memory[addr & 0xFFFF];
-        } else {
-            // Mirror PPU registers
-            // From NESDEV wiki: "they're mirrored in every 8 bytes from $2008 through $3FFF, so a write to $3456 is the same as a write to $2006."
-            if (addr >= 0x2000 && addr <= 0x3FFF) {
-                addr = (short) (0x2000 + (addr % 8));
-            }
-
-            // Check PPU address space
-            if (addr >= 0x2000 && addr <= 0x2007) {
-                switch (addr) {
-                    case 0x2000 -> throw new RuntimeException("Can't read from write-only register: PPUCTRL");
-                    case 0x2001 -> throw new RuntimeException("Can't read from write-only register: PPUMASK");
-                    case 0x2002 -> res = bus.ppuRegisters.readPPUSTATUS();
-                    case 0x2003 -> throw new RuntimeException("Can't read from write-only register: OAMADDR");
-                    case 0x2004 -> res = bus.ppuRegisters.readOamData();
-                    case 0x2005 -> throw new RuntimeException("Can't read from write-only register: PPUSCROLL");
-                    case 0x2006 -> throw new RuntimeException("Can't read from write-only register: PPUADDR");
-                    case 0x2007 -> res = bus.ppuRegisters.readPPUDATA();
-                }
-            } else {
-                // Not PPU mapping, read from internal memory
-                res = memory[addr & 0xFFFF];
-            }
-
-            // Check for memory mapped registers
-            if (addr == 0x4016 || addr == 0x4017) {
-                res = bus.cpu_read(addr);
-//            if (res != 0)
-//                logger.debug("Controller read: " + Common.byteToHex(res, true));
-            }
-        }
-
-        cycles ++;
-        if (is_record_memory)
-            recorded_memory.add(new MemoryAccessRecord(addr, res, true));
-//        logger.debug("Reading memory: [" +
-//                (addr & 0xFFFF) + " (" + Common.shortToHex(addr, true) + ")] = " + (res & 0xFF) +" ("+
-//                Common.byteToHex(res, true) + ")");
-        return res;
+        return bus.cpu_read(addr);
     }
 
     public void reset() {
@@ -1240,8 +1196,8 @@ public class CPU {
             }
         }
 
-        if (is_record_memory)
-            recorded_memory.add(new MemoryAccessRecord(addr, value, false));
+//        if (is_record_memory)
+//            recorded_memory.add(new MemoryAccessRecord(addr, value, false));
     }
 
     private void push_stack(byte data) {
@@ -1337,24 +1293,24 @@ public class CPU {
             cycles += 7; // TODO: IDK why
         }
     }
-
-    /**
-     * Only use in tests. Starts to record memory reads and writes.
-     * @param is_record
-     */
-    public void set_debugger_record_memory(boolean is_record) {
-        if (is_record && this.recorded_memory == null)
-            this.recorded_memory = new ArrayList<>();
-        this.is_record_memory = is_record;
-    }
-
-    public List<MemoryAccessRecord> get_debugger_memory_records() {
-        return this.recorded_memory;
-    }
-
-    public void clear_debugger_memory_records() {
-        this.recorded_memory.clear();
-    }
+//
+//    /**
+//     * Only use in tests. Starts to record memory reads and writes.
+//     * @param is_record
+//     */
+//    public void set_debugger_record_memory(boolean is_record) {
+//        if (is_record && this.recorded_memory == null)
+//            this.recorded_memory = new ArrayList<>();
+//        this.is_record_memory = is_record;
+//    }
+//
+//    public List<MemoryAccessRecord> get_debugger_memory_records() {
+//        return this.recorded_memory;
+//    }
+//
+//    public void clear_debugger_memory_records() {
+//        this.recorded_memory.clear();
+//    }
 
     public record MemoryAccessRecord(short addr, byte value, boolean is_read) {
         @Override

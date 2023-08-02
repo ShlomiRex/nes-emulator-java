@@ -47,7 +47,7 @@ public class NES {
             System.arraycopy(prg_rom, 0, this.cpu_memory, 0x8000, 1024*32);
         }
 
-        bus = new Bus();
+        bus = new Bus(cpu_memory);
 
         ppu = new PPU(bus, header.getMirrorType(), chr_rom);
         bus.attachPPU(ppu);
