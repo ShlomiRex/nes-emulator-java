@@ -85,66 +85,18 @@ public class PPU {
         this.vram = new byte[1024 * 2];
         this.registers = new PPURegisters(this);
 
-        byte[] red = {
-                (byte) 0x7C, (byte) 0x00, (byte) 0x00, (byte) 0x84,
-                (byte) 0x00, (byte) 0x00, (byte) 0x9C, (byte) 0x40,
-                (byte) 0x00, (byte) 0x88, (byte) 0x00, (byte) 0x40,
-                (byte) 0xAC, (byte) 0x00, (byte) 0x7C, (byte) 0x00,
-                (byte) 0xA4, (byte) 0x20, (byte) 0x00, (byte) 0x8C,
-                (byte) 0x0C, (byte) 0x00, (byte) 0x78, (byte) 0x00,
-                (byte) 0x58, (byte) 0x00, (byte) 0x00, (byte) 0xA0,
-                (byte) 0x00, (byte) 0x00, (byte) 0x8C, (byte) 0x00,
-                (byte) 0x00, (byte) 0x78, (byte) 0x24, (byte) 0x00,
-                (byte) 0x58, (byte) 0x44, (byte) 0x00, (byte) 0x34,
-                (byte) 0x5C, (byte) 0x00, (byte) 0x10, (byte) 0x6C,
-                (byte) 0x00, (byte) 0x00, (byte) 0x70, (byte) 0x00,
-                (byte) 0x00, (byte) 0x64, (byte) 0x18, (byte) 0x00,
-                (byte) 0x48, (byte) 0x38, (byte) 0x00, (byte) 0x30,
-                (byte) 0x48, (byte) 0x00, (byte) 0x00, (byte) 0x58,
-                (byte) 0x00, (byte) 0x00, (byte) 0x40, (byte) 0x58,
-                (byte) 0x00, (byte) 0x58, (byte) 0x00, (byte) 0x00,
-                (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
-        };
+        byte[] red = new byte[64];
+        byte[] green = new byte[64];
+        byte[] blue = new byte[64];
 
-        byte[] green = {
-                (byte) 0x7C, (byte) 0x00, (byte) 0x00, (byte) 0x00,
-                (byte) 0x00, (byte) 0x7C, (byte) 0x00, (byte) 0x00,
-                (byte) 0x7C, (byte) 0x00, (byte) 0x7C, (byte) 0x00,
-                (byte) 0x00, (byte) 0x7C, (byte) 0x00, (byte) 0x7C,
-                (byte) 0x7C, (byte) 0x7C, (byte) 0x00, (byte) 0x7C,
-                (byte) 0x00, (byte) 0x7C, (byte) 0x00, (byte) 0x7C,
-                (byte) 0x7C, (byte) 0x7C, (byte) 0x7C, (byte) 0x00,
-                (byte) 0x7C, (byte) 0x00, (byte) 0x7C, (byte) 0x7C,
-                (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x7C,
-                (byte) 0x7C, (byte) 0x7C, (byte) 0x00, (byte) 0x7C,
-                (byte) 0x7C, (byte) 0x00, (byte) 0x7C, (byte) 0x00,
-                (byte) 0x7C, (byte) 0x00, (byte) 0x00, (byte) 0x7C,
-                (byte) 0x00, (byte) 0x7C, (byte) 0x00, (byte) 0x7C,
-                (byte) 0x7C, (byte) 0x7C, (byte) 0x00, (byte) 0x7C,
-                (byte) 0x7C, (byte) 0x7C, (byte) 0x7C, (byte) 0x00,
-                (byte) 0x7C, (byte) 0x00, (byte) 0x00, (byte) 0x7C,
-        };
+        int paletteIndex = 0;
+        for (Color c : Bus.SYSTEM_PALETTE) {
+            red[paletteIndex] = (byte) c.getRed();
+            green[paletteIndex] = (byte) c.getGreen();
+            blue[paletteIndex] = (byte) c.getBlue();
+            paletteIndex++;
+        }
 
-        byte[] blue = {
-                (byte) 0x7C, (byte) 0x00, (byte) 0x00, (byte) 0x00,
-                (byte) 0x00, (byte) 0x00, (byte) 0x7C, (byte) 0x00,
-                (byte) 0x7C, (byte) 0x00, (byte) 0x00, (byte) 0x7C,
-                (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x7C,
-                (byte) 0x7C, (byte) 0x00, (byte) 0x7C, (byte) 0x7C,
-                (byte) 0x7C, (byte) 0x00, (byte) 0x7C, (byte) 0x7C,
-                (byte) 0x00, (byte) 0x7C, (byte) 0x00, (byte) 0x7C,
-                (byte) 0x00, (byte) 0x7C, (byte) 0x7C, (byte) 0x7C,
-                (byte) 0x00, (byte) 0x7C, (byte) 0x7C, (byte) 0x7C,
-                (byte) 0x7C, (byte) 0x00, (byte) 0x7C, (byte) 0x00,
-                (byte) 0x00, (byte) 0x7C, (byte) 0x7C, (byte) 0x7C,
-                (byte) 0x00, (byte) 0x7C, (byte) 0x00, (byte) 0x7C,
-                (byte) 0x00, (byte) 0x7C, (byte) 0x7C, (byte) 0x7C,
-                (byte) 0x00, (byte) 0x7C, (byte) 0x00, (byte) 0x00,
-                (byte) 0x00, (byte) 0x7C, (byte) 0x7C, (byte) 0x7C,
-                (byte) 0x00, (byte) 0x7C, (byte) 0x00, (byte) 0x7C,
-        };
-
-        int scale = 4;
         /*
         Each pixel color is 2 bits (0, 1, 2 or 3), which is index inside specific palette.
         There are 64 colors in total.
@@ -152,6 +104,13 @@ public class PPU {
          */
         this.indexColorModel = new IndexColorModel(2, 64, red, green, blue);
         this.bufferedImage = new BufferedImage(256, 240, BufferedImage.TYPE_BYTE_INDEXED, indexColorModel);
+
+        for (int i = 0; i < 4; i++) {
+            int r = indexColorModel.getRed(0); // 84
+            int g = indexColorModel.getGreen(0); // 84
+            int b = indexColorModel.getBlue(0); // 84
+            logger.debug("Color index 0: r={}, g={}, b={}", r, g, b);
+        }
 
         reset();
     }
@@ -279,22 +238,16 @@ public class PPU {
      * @param height The container height
      */
     public void draw_frame(Graphics g, int width, int height) {
-//        g.setColor(Color.BLACK);
-//        g.fillRect(0, 0, width, height);
-
-        int pixel_width = width / 256;
-        int pixel_height = height / 240;
-
         for (int tile_row = 0; tile_row < 30; tile_row++) {
             for (int tile_col = 0; tile_col < 32; tile_col++) {
-                draw_tile(g, pixel_width, pixel_height, tile_row, tile_col);
+                draw_tile(tile_row, tile_col);
             }
         }
         g.drawImage(bufferedImage, 0, 0, width, height, null);
 
     }
 
-    private void draw_tile(Graphics g, int pixel_width, int pixel_height, int tile_row, int tile_col) {
+    private void draw_tile(int tile_row, int tile_col) {
         // Determine base addresses
         int nametable_addr = (registers.PPUCTRL & 0b11) == 0 ? 0x2000 : 0x2400;
         short attributetable_addr = (short) (nametable_addr + 0x3C0);
@@ -338,20 +291,12 @@ public class PPU {
                 byte pixelColor = read((short) (0x3F00 + paletteIndex * 4 + colorIndex));
                 int color_row = pixelColor / 16;
                 int color_col = pixelColor % 16;
-                Color c = Bus.SYSTEM_PALETTE[color_row][color_col];
-                //g.setColor(c);
+                Color c = Bus.SYSTEM_PALETTE[color_row * 16 + color_col];
 
                 bufferedImage.setRGB(
-                        (tile_col * 8 + (7- pixel_col)) ,
-                        (tile_row * 8 + pixel_row) ,
+                        (tile_col * 8 + (7- pixel_col)),
+                        (tile_row * 8 + pixel_row),
                         c.getRGB());
-
-//                // Draw pixel
-//                g.fillRect(
-//                        (tile_col * 8 + (7- pixel_col)) * pixel_width,
-//                        (tile_row * 8 + pixel_row) * pixel_height,
-//                        pixel_width,
-//                        pixel_height);
             }
         }
     }
@@ -431,14 +376,14 @@ public class PPU {
             throw new IllegalArgumentException("Invalid palette index: " + palette_index);
         }
 
-        Color[][] system_palette = SystemPallete.getSystemPallete();
+        Color[] system_palette = SystemPallete.getSystemPalette();
 
         int color_index = palette_ram[palette_index];
 
         int row = color_index / 16;
         int col = color_index % 16;
 
-        return new Common.Pair<>(color_index, system_palette[row][col]);
+        return new Common.Pair<>(color_index, system_palette[row * 16 + col]);
     }
 
     public void addGameCanvasRepaintRunnable(Runnable runnable) {

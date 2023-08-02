@@ -46,7 +46,7 @@ public class Bus {
     /**
      *  System palette is hard-wired into the NES.
      */
-    public static final Color[][] SYSTEM_PALETTE = SystemPallete.getSystemPallete();
+    public static final Color[] SYSTEM_PALETTE = SystemPallete.getSystemPalette();
 
     public Bus(boolean is_testing_mode, boolean is_record_memory, byte[] cpu_memory) {
         this.is_testing_mode = is_testing_mode;
