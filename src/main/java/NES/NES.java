@@ -2,6 +2,7 @@ package NES;
 
 
 import NES.Bus.Bus;
+import NES.Bus.CPUBus;
 import NES.Bus.PPUBus;
 import NES.CPU.CPU;
 import NES.Cartridge.ROMParser;
@@ -25,6 +26,7 @@ public class NES {
     public final byte[] cpu_memory; // All 64KB addressable memory
     public final iNESHeader header;
     public final Bus bus;
+    public final CPUBus cpuBus;
     public final PPUBus ppuBus;
 
     // We want to deal with creating the memory here, so its more manageable, and each component can take modular memory.
@@ -49,13 +51,17 @@ public class NES {
             System.arraycopy(prg_rom, 0, this.cpu_memory, 0x8000, 1024*32);
         }
 
-        bus = new Bus(cpu_memory);
-        ppuBus = new PPUBus(chr_rom, header.getMirrorType());
-
-        ppu = new PPU(bus, ppuBus);
-        bus.attachPPU(ppu);
-
+        bus = new Bus();
         cpu = new CPU(bus, cpu_memory);
+        ppu = new PPU();
+
+        cpuBus = new CPUBus(bus, false, false, cpu_memory);
+        ppuBus = new PPUBus(ppu.registers, chr_rom, header.getMirrorType());
+
+        bus.attachCPUBus(cpuBus);
+        bus.attachPPUBus(ppuBus);
+
+        ppu.attachBus(bus);
 
         cpu.reset();
     }

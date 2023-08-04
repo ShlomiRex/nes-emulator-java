@@ -31,7 +31,7 @@ public class PPU {
 
     private Runnable trigger_game_canvas_repaint;
 
-    private final Bus bus;
+    private Bus bus;
 
     /**
      * The index color model is used in buffered image to map the color index to the actual color.
@@ -51,14 +51,9 @@ public class PPU {
      */
     private final int[] buffered_pixel_color;
 
-    private final PPUBus ppuBus;
-
-    public PPU(Bus bus, PPUBus ppuBus) {
+    public PPU() {
 //        if (chr_rom.length != 1024 * 8)
 //            throw new IllegalArgumentException("Unexpected CHR ROM / pattern table size");
-
-        this.bus = bus;
-        this.ppuBus = ppuBus;
 
         this.registers = new PPURegisters(this);
 
@@ -282,7 +277,7 @@ public class PPU {
      * @param value
      */
     public void write(short addr, byte value) {
-        ppuBus.ppu_write(addr, value);
+        bus.ppuBus.ppu_write(addr, value);
     }
 
     /**
@@ -291,7 +286,7 @@ public class PPU {
      * @return
      */
     public byte read(short addr) {
-        return ppuBus.ppu_read(addr);
+        return bus.ppuBus.ppu_read(addr);
     }
 
     /**
@@ -318,5 +313,9 @@ public class PPU {
 
     public void addGameCanvasRepaintRunnable(Runnable runnable) {
         this.trigger_game_canvas_repaint = runnable;
+    }
+
+    public void attachBus(Bus bus) {
+        this.bus = bus;
     }
 }

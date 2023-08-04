@@ -2,9 +2,11 @@ package NES.Bus;
 
 import NES.Cartridge.Mirroring;
 import NES.Common;
+import NES.PPU.PPURegisters;
 
 public class PPUBus {
 
+    public final PPURegisters ppuRegisters;
     /**
      * Contains 2 pattern tables, each is 4KB in size.
      * This memory translates to sprites.
@@ -34,7 +36,8 @@ public class PPUBus {
 
     private final Mirroring mirroring;
 
-    public PPUBus(byte[] chr_rom, Mirroring mirroring) {
+    public PPUBus(PPURegisters ppuRegisters, byte[] chr_rom, Mirroring mirroring) {
+        this.ppuRegisters = ppuRegisters;
         this.chr_rom = chr_rom;
         this.mirroring = mirroring;
 

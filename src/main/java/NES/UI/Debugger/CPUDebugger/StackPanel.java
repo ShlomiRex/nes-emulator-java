@@ -43,7 +43,7 @@ public class StackPanel extends JPanel {
         model.clear(); // Clear the list, we add elements again
         for(int i = 0xFF; i > stack_pointer; i--) {
             short addr = (short) (0x100 + i);
-            byte mem = bus.get_cpu_memory(addr);
+            byte mem = bus.cpuBus.get_cpu_memory(addr);
             model.addElement(String.format("%02X: %02X", i, mem));
         }
     }

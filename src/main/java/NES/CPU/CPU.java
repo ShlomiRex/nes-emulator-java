@@ -20,12 +20,7 @@ public class CPU {
 
     public final CPURegisters registers;
     public long cycles;
-    private final byte[] memory; // All addressable memory (64KB)
     public long instructions = 0; // counter number of instructions executed
-
-    private boolean is_record_memory; // Only used in testing. If true, the CPU will record when memory is read and written.
-
-
     private byte fetched_data; // Set in addressing modes, used afterwards.
     private short fetched_addr; // Set in addressing modes, used afterwards.
     private final Bus bus;
@@ -40,7 +35,6 @@ public class CPU {
             throw new RuntimeException("Unexpected CPU memory address space size");
 
         this.bus = bus;
-        this.memory = cpu_memory;
 
         this.registers = new CPURegisters();
     }
@@ -93,12 +87,12 @@ public class CPU {
 
     private byte read_memory(short addr) {
         cycles ++;
-        return bus.cpu_read(addr);
+        return bus.cpuBus.cpu_read(addr);
     }
 
     private void write_memory(short addr, byte value) {
         cycles ++;
-        bus.cpu_write(addr, value);
+        bus.cpuBus.cpu_write(addr, value);
     }
 
     public void reset() {
