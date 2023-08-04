@@ -1,5 +1,6 @@
 package NES;
 
+import NES.Cartridge.Cartridge;
 import NES.Cartridge.ROMParser;
 import NES.PPU.PPU;
 import NES.UI.Debugger.DebuggerWindow;
@@ -24,9 +25,9 @@ public class Main {
 
         String program = donkey_kong_mapper0;
 
-        ROMParser romParser = new ROMParser(program);
+        Cartridge cartridge = ROMParser.parse_rom(program);
 
-        NES nes = new NES(romParser);
+        NES nes = new NES(cartridge);
 
         //TODO: Change according to my needs.
         run_without_debugger(nes);

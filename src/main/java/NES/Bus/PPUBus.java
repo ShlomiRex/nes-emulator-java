@@ -1,5 +1,6 @@
 package NES.Bus;
 
+import NES.Cartridge.Cartridge;
 import NES.Cartridge.Mirroring;
 import NES.Common;
 import NES.PPU.PPURegisters;
@@ -36,10 +37,10 @@ public class PPUBus {
 
     private final Mirroring mirroring;
 
-    public PPUBus(PPURegisters ppuRegisters, byte[] chr_rom, Mirroring mirroring) {
+    public PPUBus(PPURegisters ppuRegisters, Cartridge cartridge) {
         this.ppuRegisters = ppuRegisters;
-        this.chr_rom = chr_rom;
-        this.mirroring = mirroring;
+        this.chr_rom = cartridge.chr_rom();
+        this.mirroring = cartridge.header().getMirrorType();
 
         this.palette_ram = new byte[32];
         this.oam = new byte[256];

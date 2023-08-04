@@ -11,36 +11,34 @@ import java.util.Arrays;
 
 public class ROMParser {
 
-    private final Logger logger = LoggerFactory.getLogger(ROMParser.class);
+    private static final Logger logger = LoggerFactory.getLogger(ROMParser.class);
 
-    private final iNESHeader header;
-    private final byte[] prg_rom;
-    private final byte[] chr_rom;
-
-    public class ParsingException extends Exception {
+    public static class ParsingException extends Exception {
         public ParsingException(String message) {
             super(message);
         }
     }
 
-    public ROMParser(String path) throws IOException, ParsingException {
+    public static Cartridge parse_rom(String path) throws IOException, ParsingException {
         File file = new File(path);
         FileInputStream fileInputStream = new FileInputStream(file);
         logger.info("Reading ROM: " + file.getAbsolutePath());
 
-        header = parseHeader(fileInputStream);
-        prg_rom = parse_prg_rom(fileInputStream);
-        chr_rom = parse_chr_rom(fileInputStream);
+        iNESHeader header = parseHeader(fileInputStream);
+        byte[] prg_rom = parse_prg_rom(header, fileInputStream);
+        byte[] chr_rom = parse_chr_rom(header, fileInputStream);
 
         // Here we read the rest of the file, and check that we read all the bytes.
         // We should have read all the bytes before, in parseHeader, parse_prg_rom and parse_chr_rom.
         byte[] bytes_left = fileInputStream.readAllBytes();
         if (bytes_left.length > 0)
             throw new ParsingException("Expected that I read all the bytes, however there are " +
-                    bytes_left.length +" bytes left");
+                    bytes_left.length + " bytes left");
+
+        return new Cartridge(header, prg_rom, chr_rom);
     }
 
-    private iNESHeader parseHeader(FileInputStream fileInputStream) throws ParsingException, IOException {
+    private static iNESHeader parseHeader(FileInputStream fileInputStream) throws ParsingException, IOException {
         byte[] header_bytes = fileInputStream.readNBytes(16);
         logger.debug("Read 16 header bytes");
 
@@ -125,7 +123,7 @@ public class ROMParser {
         return iNESHeader;
     }
 
-    private byte[] parse_prg_rom(FileInputStream fileInputStream) throws IOException, ParsingException {
+    private static byte[] parse_prg_rom(iNESHeader header, FileInputStream fileInputStream) throws IOException, ParsingException {
         int prg_rom_size_bytes = 1024 * 16 * header.prg_rom_size;
 
         byte[] prg_rom = fileInputStream.readNBytes(prg_rom_size_bytes);
@@ -147,7 +145,7 @@ public class ROMParser {
         return prg_rom;
     }
 
-    private byte[] parse_chr_rom(FileInputStream fileInputStream) throws ParsingException, IOException {
+    private static byte[] parse_chr_rom(iNESHeader header, FileInputStream fileInputStream) throws ParsingException, IOException {
         int chr_rom_bytes = 1024 * 8 * header.chr_rom_size;
         logger.debug("CHR ROM size: " + chr_rom_bytes/1024 + "KB");
 
@@ -157,18 +155,6 @@ public class ROMParser {
 
         byte[] chr_rom = fileInputStream.readNBytes(chr_rom_bytes);
         logger.debug("Read " + chr_rom_bytes + " bytes of CHR ROM");
-        return chr_rom;
-    }
-
-    public byte[] getPrg_rom() {
-        return prg_rom;
-    }
-
-    public iNESHeader getHeader() {
-        return header;
-    }
-
-    public byte[] getChr_rom() {
         return chr_rom;
     }
 }
