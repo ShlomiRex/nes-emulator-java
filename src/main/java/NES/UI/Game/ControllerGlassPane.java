@@ -26,18 +26,21 @@ public class ControllerGlassPane extends JComponent {
     }
 
     private void draw_controller(Graphics g, int controller_id) {
+        // Controller width: 28 pixels
+        // Controller height: 8 pixels
+
         Graphics2D g2d = (Graphics2D) g;
 
-        int SCALE = 2;
+        int controller_pixel_scale = 2;
 
         int width = gamePanel.getWidth();
         int height = gamePanel.getHeight();
-        int pixel_width = width / 256 * SCALE;
-        int pixel_height = height / 240 * SCALE;
+        int pixel_width = width / 256 * controller_pixel_scale;
+        int pixel_height = height / 240 * controller_pixel_scale;
         int x = 0;
         if (controller_id == 1)
             x += pixel_width * 32;
-        int y = pixel_height * 112;
+        int y = height - (pixel_height * 8);
 
         byte controller_dataline = bus.controllers[0];
         if (controller_id == 1)

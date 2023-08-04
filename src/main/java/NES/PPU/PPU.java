@@ -1,6 +1,7 @@
 package NES.PPU;
 
 import NES.Bus.Bus;
+import NES.Bus.PPUBus;
 import NES.Cartridge.Mirroring;
 import NES.Common;
 import org.slf4j.Logger;
@@ -14,33 +15,6 @@ import java.awt.image.Raster;
 public class PPU {
     private final Logger logger = LoggerFactory.getLogger(PPU.class);
     public final PPURegisters registers;
-
-    /**
-     * Contains 2 pattern tables, each is 4KB in size.
-     * This memory translates to sprites.
-     * Address: 0x0000 - 0x1FFF
-     */
-    private final byte[] chr_rom;
-
-    /**
-     * Contains 4 name tables, each is 1KB in size.
-     * This memory translates to background / layout.
-     * Address: 0x2000 - 0x2FFF
-     */
-    private final byte[] vram;
-
-    /**
-     * Contains 32 bytes, each byte is a color index (0,1,2,3).
-     * This memory translates to colors.
-     * Address: 0x3F00 - 0x3F1F
-     */
-    private final byte[] palette_ram;
-
-    /**
-     * Object Attribute Memory
-     * Contains 256 bytes, each byte determines how sprites are rendered
-     */
-    private final byte[] oam;
 
     /**
      * PPU cycles. Reset to zero after 341 cycles.
@@ -57,7 +31,6 @@ public class PPU {
 
     private Runnable trigger_game_canvas_repaint;
 
-    private final Mirroring mirroring;
     private final Bus bus;
 
     /**
@@ -72,19 +45,21 @@ public class PPU {
      */
     private final BufferedImage bufferedImage;
 
+    /**
+     * The color of each pixel in the buffered image. Note: the size of this array is 1,
+     * since we use indexed color model. The value is the index of the color.
+     */
     private final int[] buffered_pixel_color;
 
-    public PPU(Bus bus, Mirroring mirroring, byte[] chr_rom) {
+    private final PPUBus ppuBus;
+
+    public PPU(Bus bus, PPUBus ppuBus) {
 //        if (chr_rom.length != 1024 * 8)
 //            throw new IllegalArgumentException("Unexpected CHR ROM / pattern table size");
 
         this.bus = bus;
-        this.mirroring = mirroring;
-        this.chr_rom = chr_rom;
+        this.ppuBus = ppuBus;
 
-        this.palette_ram = new byte[32];
-        this.oam = new byte[256];
-        this.vram = new byte[1024 * 2];
         this.registers = new PPURegisters(this);
 
         byte[] red = new byte[64];
@@ -120,20 +95,20 @@ public class PPU {
         scanline = 0;
     }
 
-    public byte[] get_pattern_tile(byte tile_index, boolean is_left_table) {
-        // Each pattern tile is 16 bytes in size. We jump by 16 bytes.
-        // The tile index can be 0x0-0xFF, but the actual bytes needed are 0xFF times 16, which fits in u16.
-        short i = (short) ((tile_index & 0xFF) * 16);
-
-        if (!is_left_table)
-            i += (16 * 0xFF);
-
-        //TODO: This can cause regression problems. A lot of copying memory, each tile, for each frame?
-        // For now I leave this as is
-        byte[] tile = new byte[16];
-        System.arraycopy(chr_rom, (i & 0xFFFF), tile, 0, 16);
-        return tile;
-    }
+//    public byte[] get_pattern_tile(byte tile_index, boolean is_left_table) {
+//        // Each pattern tile is 16 bytes in size. We jump by 16 bytes.
+//        // The tile index can be 0x0-0xFF, but the actual bytes needed are 0xFF times 16, which fits in u16.
+//        short i = (short) ((tile_index & 0xFF) * 16);
+//
+//        if (!is_left_table)
+//            i += (16 * 0xFF);
+//
+//        //TODO: This can cause regression problems. A lot of copying memory, each tile, for each frame?
+//        // For now I leave this as is
+//        byte[] tile = new byte[16];
+//        System.arraycopy(chr_rom, (i & 0xFFFF), tile, 0, 16);
+//        return tile;
+//    }
 
     /**
      *
@@ -307,39 +282,7 @@ public class PPU {
      * @param value
      */
     public void write(short addr, byte value) {
-        if (addr >= 0x0000 && addr <= 0x1FFF) {
-            // CHR ROM / pattern table
-            throw new RuntimeException("Cannot write to CHR ROM");
-        } else if ((addr >= 0x2000 && addr <= 0x2FFF) ||
-                (addr >= 0x3000 && addr <= 0x3EFF)) {
-            // Name table (second if - mirrors of 0x2000-0x2EFF)
-
-            // If mirror of 0x2000-0x2EFF
-            if (addr >= 0x3000)
-                addr -= 0x1000;
-
-            int nametable_id = 0;
-            if (addr >= 0x2400 && addr <= 0x27FF)
-                nametable_id = 1;
-            else if (addr >= 0x2800 && addr <= 0x2BFF)
-                nametable_id = 2;
-            else if (addr >= 0x2C00)
-                nametable_id = 3;
-
-            if (mirroring == Mirroring.HORIZONTAL) {
-                if (nametable_id == 1 || nametable_id == 3)
-                    addr -= 0x400;
-            } else {
-                // Vertical
-                if (nametable_id == 2 || nametable_id == 3)
-                    addr -= 0x800;
-            }
-            vram[((addr - 0x2000) % 0x400)] = value;
-            //logger.debug("Writing to name table at index: " + ((addr - 0x2000) % 0x400));
-        } else if (addr >= 0x3F00 && addr <= 0x3FFF) {
-            // Palette RAM + Mirrors of 0x3F00-0x3F1F (0x3F20-0x3FFF is mirrors of 0x3F00-0x3F1F)
-            palette_ram[(addr - 0x3F00) % 32] = value;
-        }
+        ppuBus.ppu_write(addr, value);
     }
 
     /**
@@ -348,22 +291,7 @@ public class PPU {
      * @return
      */
     public byte read(short addr) {
-        addr &= 0xFFFF;
-        if (addr >= 0x0000 && addr <= 0x1FFF) {
-            // CHR ROM / pattern table
-            return chr_rom[addr];
-        } else if (addr >= 0x2000 && addr <= 0x2FFF) {
-            // Name table
-            return vram[addr - 0x2000];
-        } else if (addr >= 0x3000 && addr <= 0x3EFF) {
-            // Mirrors of 0x2000-0x2EFF
-            return vram[addr - 0x3000];
-        } else if (addr >= 0x3F00 && addr <= 0x3FFF) {
-            // Palette RAM
-            return palette_ram[addr - 0x3F00];
-        } else {
-            throw new RuntimeException("Invalid PPU memory address: " + Common.shortToHex(addr, true));
-        }
+        return ppuBus.ppu_read(addr);
     }
 
     /**
@@ -378,7 +306,9 @@ public class PPU {
 
         Color[] system_palette = SystemPallete.getSystemPalette();
 
-        int color_index = palette_ram[palette_index];
+        short palette_ram_addr = (short) (0x3F00 + palette_index);
+
+        int color_index = read(palette_ram_addr) & 0xFF;
 
         int row = color_index / 16;
         int col = color_index % 16;
