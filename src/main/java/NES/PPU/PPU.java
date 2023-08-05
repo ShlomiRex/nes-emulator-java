@@ -106,41 +106,6 @@ public class PPU {
 //    }
 
     /**
-     *
-     * @param tile A tile (16 bytes), regular tile from CHR ROM.
-     * @return A pixel pattern (8x8=64 pixels), each byte = pixel is color index (0,1,2,3).
-     */
-    public byte[][] convert_pattern_tile_to_pixel_pattern(byte[] tile) {
-        //TODO: This may cause regression since we call this for each tile, for each frame.
-        // For now I leave this as is. I need to not create new objects for each tile.
-        byte[][] pixels = new byte[8][8]; // Each pixel is 1 byte with values 0,1,2 or 3. No more.
-
-        // Loop over bit planes (each plane = 8 bytes)
-        for(int i = 0; i < 8; i++) {
-            byte bit_plane_1_byte = tile[i];
-            byte bit_plane_2_byte = tile[8 + i];
-
-            // Loop over byte bits
-            for (int j = 0; j < 8; j++) {
-                boolean bit_plane_1 = Common.Bits.getBit(bit_plane_1_byte, j);
-                boolean bit_plane_2 = Common.Bits.getBit(bit_plane_2_byte, j);
-
-                byte pixelValue = 0; // both are on
-                if (bit_plane_1 && !bit_plane_2) {
-                    pixelValue = 1; // bit in bit plane 1 is on, bit in bit plane 2 is off
-                } else if (!bit_plane_1 && bit_plane_2) {
-                    pixelValue = 2; // bit in bit plane 1 is off, bit in bit plane 2 is on
-                } else if (bit_plane_1 && bit_plane_2) {
-                    pixelValue = 3; // both are off
-                }
-                pixels[i][7 - j] = pixelValue;
-            }
-        }
-
-        return pixels;
-    }
-
-    /**
      * Clock tick for PPU.
      */
     public void clock_tick() {

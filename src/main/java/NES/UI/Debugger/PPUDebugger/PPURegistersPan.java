@@ -109,7 +109,8 @@ public class PPURegistersPan extends JPanel {
         txt_ppu_status.setText(Common.byteToHex(ppuRegisters.getPPUSTATUS(), false));
         txt_oam_addr.setText(Common.byteToHex(ppuRegisters.getOAMADDR(), false));
         txt_oam_data.setText(Common.byteToHex(ppuRegisters.getOAMDATA(), false));
-        txt_ppu_scroll.setText(Common.shortToHex(ppuRegisters.getPPUSCROLL(), false));
+        //txt_ppu_scroll.setText(Common.shortToHex(ppuRegisters.getPPUSCROLL(), false));
+        //TODO: PPUSCROLL is not one register!
         txt_ppu_addr.setText(Common.shortToHex(ppuRegisters.getPPUADDR(), false));
         txt_ppu_data.setText(Common.byteToHex(ppuRegisters.getPPUDATA(), false));
         txt_oam_dma.setText(Common.byteToHex(ppuRegisters.getOAMDMA(), false));

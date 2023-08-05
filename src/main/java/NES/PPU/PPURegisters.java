@@ -24,20 +24,34 @@ public class PPURegisters {
 
     protected byte PPUCTRL, PPUMASK, PPUSTATUS, OAMADDR, OAMDATA, PPUDATA, OAMDMA;
 
-    private short PPUADDR, PPUSCROLL;
+    private short PPUADDR;
 
     /**
-     * This flipflop is used to determine whether to write to high byte or low byte of PPUADDR.
+     * This flipflop is used to determine whether to write to high byte or low byte of PPUADDR or PPUSCROLL.
+     * This bitflag is shared among PPUSCROLL and PPUADDR (this is what the real hardware does).
+     *
      * Since to write to PPUADDR the CPU needs to write twice (once for high byte, once for low byte),
      * we need to keep track of which byte we are writing to.
-     */
-    private boolean PPUADDR_flipflop_write_high = true;
-
-    /**
-     * This flipflop is used to determine whether to write to high byte (horizontal scroll offset)
+     *
+     * As for PPUSCROLL, This flipflop is used to determine whether to write to high byte (horizontal scroll offset)
      * or low byte (vertical scroll offset) of PPUSCROLL.
      */
-    private boolean PPUSCROLL_flipflop_write_high = true;
+    private boolean address_latch;
+
+    /**
+     * Current VRAM address (15 bits).
+     */
+    private LoopyRegister v;
+
+    /**
+     * Temporary VRAM address (15 bits).
+     */
+    private LoopyRegister t;
+
+    /**
+     * Fine X scroll (3 bits).
+     */
+    private byte fine_x_scroll;
 
     /**
      * This buffer is used to store the value of PPUDATA read from the PPU.
@@ -67,8 +81,7 @@ public class PPURegisters {
         // Clear vblank flag
         PPUSTATUS = Common.Bits.setBit(PPUSTATUS, 7, false);
 
-        PPUADDR_flipflop_write_high = true;
-        PPUSCROLL_flipflop_write_high = true;
+        address_latch = false;
         return before;
     }
 
@@ -86,33 +99,27 @@ public class PPURegisters {
     }
 
     public void writePPUSCROLL(byte value) {
-        // TODO: Test this in FCEUX
-        if (PPUSCROLL_flipflop_write_high) {
-            // Write to high byte
-            PPUSCROLL = (short) ((PPUSCROLL & 0x00FF) | ((value & 0x00FF) << 8));
+        if (address_latch) {
+            // Second write (w=1)
+
         } else {
-            // Write to low byte
-            PPUSCROLL = (short) ((PPUSCROLL & 0xFF00) | (value & 0x00FF));
+            // First write (w=0)
+
         }
 
-        PPUSCROLL_flipflop_write_high = !PPUSCROLL_flipflop_write_high;
+        address_latch = !address_latch;
     }
 
     public void writePPUADDR(byte value) {
-        if (PPUADDR_flipflop_write_high) {
-            // Write to high byte
-            PPUADDR = (short) ((PPUADDR & 0x00FF) | ((value & 0x00FF) << 8));
-        } else {
+        if (address_latch) {
             // Write to low byte
             PPUADDR = (short) ((PPUADDR & 0xFF00) | (value & 0x00FF));
-
-            // Mirror down to 14 bits (0x3FFF): https://www.nesdev.org/wiki/PPU_registers#Address_($2006)_%3E%3E_write_x2
-            // TODO: Not sure if mirroring is done here or if it should be done in both high byte and low byte.
-            // TODO: Do something about mirroring
-            //PPUADDR &= 0x3FFF;
+        } else {
+            // Write to high byte
+            PPUADDR = (short) ((PPUADDR & 0x00FF) | ((value & 0x00FF) << 8));
         }
         // Flip the flipflop
-        PPUADDR_flipflop_write_high = !PPUADDR_flipflop_write_high;
+        address_latch = !address_latch;
     }
 
     public void writePPUDATA(byte value) {
@@ -201,12 +208,13 @@ public class PPURegisters {
         return OAMDATA;
     }
 
-    /**
-     * Used only for testing, or debugging.
-     */
-    public short getPPUSCROLL() {
-        return PPUSCROLL;
-    }
+    //TODO: PPUSCROLL is not one register
+//    /**
+//     * Used only for testing, or debugging.
+//     */
+//    public short getPPUSCROLL() {
+//        return PPUSCROLL;
+//    }
 
     /**
      * Used only for testing, or debugging.

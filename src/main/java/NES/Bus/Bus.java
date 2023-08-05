@@ -1,7 +1,5 @@
 package NES.Bus;
 
-import NES.PPU.PPU;
-import NES.PPU.PPURegisters;
 import NES.PPU.SystemPallete;
 
 import java.awt.*;
