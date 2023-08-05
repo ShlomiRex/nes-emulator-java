@@ -12,7 +12,7 @@ public class LoopyRegister {
     /**
      * Coarse scrolling (5 bits).
      */
-    public byte coarse_x_select, coarse_y_select;
+    public byte coarse_x_scroll, coarse_y_scroll;
 
     /**
      * Base address of nametable (2 bits).

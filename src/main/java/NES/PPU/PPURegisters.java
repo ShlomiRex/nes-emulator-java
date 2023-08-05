@@ -22,6 +22,7 @@ public class PPURegisters {
      */
 
 
+    // TODO: PPUCTRL - I useed lsb 2 bits inside loopy_t.nametable_select - maybe i need to remove PPUCTRL
     protected byte PPUCTRL, PPUMASK, PPUSTATUS, OAMADDR, OAMDATA, PPUDATA, OAMDMA;
 
     private short PPUADDR;
@@ -40,13 +41,15 @@ public class PPURegisters {
 
     /**
      * Current VRAM address (15 bits).
+     * Used for scrolling.
      */
-    private LoopyRegister v;
+    public LoopyRegister loopy_v;
 
     /**
      * Temporary VRAM address (15 bits).
+     * Used for scrolling.
      */
-    private LoopyRegister t;
+    public LoopyRegister loopy_t;
 
     /**
      * Fine X scroll (3 bits).
@@ -63,6 +66,9 @@ public class PPURegisters {
 
     public PPURegisters(PPU ppu) {
         this.ppu = ppu;
+
+        loopy_v = new LoopyRegister();
+        loopy_t = new LoopyRegister();
     }
 
     public void reset() {
@@ -76,6 +82,11 @@ public class PPURegisters {
      * @return PPUSTATUS before clearing bit 7
      */
     public byte readPPUSTATUS() {
+        /*
+        $2002 read
+
+        w:                  <- 0
+         */
         byte before = PPUSTATUS;
 
         // Clear vblank flag
@@ -100,11 +111,24 @@ public class PPURegisters {
 
     public void writePPUSCROLL(byte value) {
         if (address_latch) {
-            // Second write (w=1)
+            /*
+            $2005 second write (w is 1)
 
+            t: FGH..AB CDE..... <- d: ABCDEFGH
+            w:                  <- 0
+             */
+            loopy_t.coarse_y_scroll = (byte) (value & 0b11111);
+            loopy_t.fine_y_scroll = (byte) ((value >> 3) & 0b111);
         } else {
-            // First write (w=0)
+            /*
+            $2005 first write (w is 0)
 
+            t: ....... ...ABCDE <- d: ABCDE...
+            x:              FGH <- d: .....FGH
+            w:                  <- 1
+             */
+            loopy_t.coarse_x_scroll = (byte) (value & 0b11111);
+            fine_x_scroll = (byte) ((value >> 3) & 0b111);
         }
 
         address_latch = !address_latch;
@@ -114,7 +138,19 @@ public class PPURegisters {
         if (address_latch) {
             // Write to low byte
             PPUADDR = (short) ((PPUADDR & 0xFF00) | (value & 0x00FF));
+
         } else {
+            /*
+            $2006 first write (w is 0)
+
+            t: .CDEFGH ........ <- d: ..CDEFGH
+                   <unused>     <- d: AB......
+            t: Z...... ........ <- 0 (bit Z is cleared)
+            w:                  <- 1
+             */
+            //TODO: Finish loopy
+//            loopy_t.fine_y_scroll = (byte) ((value >> 2) & 0b111);
+
             // Write to high byte
             PPUADDR = (short) ((PPUADDR & 0x00FF) | ((value & 0x00FF) << 8));
         }
@@ -238,6 +274,14 @@ public class PPURegisters {
     }
 
     public void writePPUCTRL(byte value) {
+        /*
+        $2000 write
+
+        t: ...GH.. ........ <- d: ......GH
+        <used elsewhere> <- d: ABCDEF..
+         */
         PPUCTRL = value;
+
+        loopy_t.nametable_select = (byte) (value & 0b11);
     }
 }

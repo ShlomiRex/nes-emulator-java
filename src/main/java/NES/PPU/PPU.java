@@ -182,7 +182,11 @@ public class PPU {
 
     private void draw_tile(int tile_row, int tile_col) {
         // Determine base addresses
-        int nametable_addr = (registers.PPUCTRL & 0b11) == 0 ? 0x2000 : 0x2400;
+
+        //same
+//        int nametable_addr = (registers.PPUCTRL & 0b11) == 0 ? 0x2000 : 0x2400;
+        int nametable_addr = (registers.loopy_t.nametable_select & 0b11) == 0 ? 0x2000 : 0x2400;
+
         short attributetable_addr = (short) (nametable_addr + 0x3C0);
         short pattern_table_addr = (short) ((registers.PPUCTRL & 0b10000) == 0 ? 0x0000 : 0x1000);
 
