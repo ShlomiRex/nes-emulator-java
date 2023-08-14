@@ -194,15 +194,18 @@ public class PPU {
         // Each sprite is 8x8 pixels and is 4 bytes in size.
         int sprite_y = oam[sprite_index * 4] & 0xFF;
         int tile_index = oam[sprite_index * 4 + 1] & 0xFF;
-        int attributes = oam[sprite_index * 4 + 2] & 0xFF;
+        byte attributes = oam[sprite_index * 4 + 2];
         int sprite_x = oam[sprite_index * 4 + 3] & 0xFF;
 
-        // Check offscreen - don't render this sprite
-        if (sprite_y >= 239) {
+        // Check offscreen - don't render this sprite if offscreen
+        if (sprite_y >= 239)
             return;
-        }
 
+        // Attributes - bit 2,3,4 ignored
         int palette_id = attributes & 0b11;
+        boolean priority = Common.Bits.getBit(attributes, 5); // (0: in front of background; 1: behind background)
+        boolean flip_horizontal = Common.Bits.getBit(attributes, 6);
+        boolean flip_vertical = Common.Bits.getBit(attributes, 7);
 
         short tile_base_addr = (short) ((bank? 0x1000 : 0) + tile_index * 16);
         for (int pixel_row = 0; pixel_row < 8; pixel_row++) {
@@ -213,8 +216,13 @@ public class PPU {
             for (int pixel_col = 0; pixel_col < 8; pixel_col++) {
                 // Get pixel value (color) from bitplanes (the value must be between 0-3 since we add 2 bits and each can be 0 or 1)
                 byte colorIndex = (byte) ((tile_lsb & 1) + (tile_msb & 1) * 2);
+
                 tile_lsb >>= 1;
                 tile_msb >>= 1;
+
+                // Do not draw the pixel - else, it will overwrite the background
+                if (colorIndex == 0)
+                    continue;
 
                 // Now we have the pixel value, we can get the color from the palette
                 // Read pixel color from palette RAM
@@ -223,20 +231,25 @@ public class PPU {
                 int color_row = pixelColor / 16;
                 int color_col = pixelColor % 16;
 
-                int pixel_x = sprite_x + (7- pixel_col);
-                int pixel_y = sprite_y + pixel_row;
-
-                pixel_x &= 0xFF;
-                pixel_y &= 0xFF;
 
                 int color_index_in_system_palette = color_row * 16 + color_col;
 
                 buffered_pixel_color[0] = color_index_in_system_palette;
-                try {
-                    bufferedImage.getRaster().setPixel(pixel_x, pixel_y, buffered_pixel_color);
-                } catch (Exception e) {
-                    throw e;
-                }
+
+                int pixel_x;
+                int pixel_y;
+
+                if (flip_horizontal)
+                    pixel_x = sprite_x + pixel_col;
+                else
+                    pixel_x = sprite_x + (7- pixel_col);
+
+                if (flip_vertical)
+                    pixel_y = sprite_y + (7-pixel_row);
+                else
+                    pixel_y = sprite_y + pixel_row;
+
+                bufferedImage.getRaster().setPixel(pixel_x, pixel_y, buffered_pixel_color);
             }
         }
     }

@@ -68,6 +68,9 @@ First time sprite rendering:
 Weird sprite rendering glitch:
 ![](README-resources/Screenshot%202023-08-15%20001952.png)
 
+Fixed sprite rendering glitch:
+![](README-resources/Animation5.gif)
+
 # Resources
 
 The most used resorces:
