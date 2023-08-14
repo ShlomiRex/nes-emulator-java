@@ -29,9 +29,12 @@ public class Main {
 
         NES nes = new NES(cartridge);
 
-        //TODO: Change according to my needs.
-        run_without_debugger(nes);
-        //run_with_debugger(nes);
+        boolean debugger = Boolean.parseBoolean(System.getenv().get("debugger"));
+
+        if (debugger)
+            run_with_debugger(nes);
+        else
+            run_without_debugger(nes);
     }
 
     private static void run_with_debugger(NES nes) {

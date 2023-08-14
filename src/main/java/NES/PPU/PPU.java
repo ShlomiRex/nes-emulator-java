@@ -31,7 +31,7 @@ public class PPU {
 
     private Runnable trigger_game_canvas_repaint;
 
-    private Bus bus;
+    protected Bus bus;
 
     /**
      * The index color model is used in buffered image to map the color index to the actual color.
@@ -51,11 +51,21 @@ public class PPU {
      */
     private final int[] buffered_pixel_color;
 
+    /**
+     * Object Attribute Memory
+     * Contains 256 bytes, each byte determines how sprites are rendered
+     * Contains 64 sprites, each sprite is 4 bytes in size.
+     * Address: 0x3F00 - 0x3F1F
+     */
+    protected final byte[] oam;
+
     public PPU() {
 //        if (chr_rom.length != 1024 * 8)
 //            throw new IllegalArgumentException("Unexpected CHR ROM / pattern table size");
 
         this.registers = new PPURegisters(this);
+
+        this.oam = new byte[64 * 4];
 
         byte[] red = new byte[64];
         byte[] green = new byte[64];
@@ -89,21 +99,6 @@ public class PPU {
         cycle = 0;
         scanline = 0;
     }
-
-//    public byte[] get_pattern_tile(byte tile_index, boolean is_left_table) {
-//        // Each pattern tile is 16 bytes in size. We jump by 16 bytes.
-//        // The tile index can be 0x0-0xFF, but the actual bytes needed are 0xFF times 16, which fits in u16.
-//        short i = (short) ((tile_index & 0xFF) * 16);
-//
-//        if (!is_left_table)
-//            i += (16 * 0xFF);
-//
-//        //TODO: This can cause regression problems. A lot of copying memory, each tile, for each frame?
-//        // For now I leave this as is
-//        byte[] tile = new byte[16];
-//        System.arraycopy(chr_rom, (i & 0xFFFF), tile, 0, 16);
-//        return tile;
-//    }
 
     /**
      * Clock tick for PPU.
@@ -172,12 +167,78 @@ public class PPU {
      * @param height The container height
      */
     public void draw_frame(Graphics g, int width, int height) {
+        // Draw backgrounds
         for (int tile_row = 0; tile_row < 30; tile_row++) {
             for (int tile_col = 0; tile_col < 32; tile_col++) {
                 draw_tile(tile_row, tile_col);
             }
         }
+
+        // Draw sprites
+        boolean bank = Common.Bits.getBit(registers.PPUCTRL, 3);
+        boolean sprite_size = Common.Bits.getBit(registers.PPUCTRL, 5);
+        for (int sprite_index = 0; sprite_index < 64; sprite_index++) {
+            draw_sprite(sprite_index, bank, sprite_size);
+        }
+
         g.drawImage(bufferedImage, 0, 0, width, height, null);
+    }
+
+    /**
+     *
+     * @param sprite_index Index of sprite in OAM (0-63)
+     * @param bank (0: $0000; 1: $1000; ignored in 8x16 mode)
+     * @param sprite_size (0: 8x8; 1: 8x16)
+     */
+    private void draw_sprite(int sprite_index, boolean bank, boolean sprite_size) {
+        // Each sprite is 8x8 pixels and is 4 bytes in size.
+        int sprite_y = oam[sprite_index * 4] & 0xFF;
+        int tile_index = oam[sprite_index * 4 + 1] & 0xFF;
+        int attributes = oam[sprite_index * 4 + 2] & 0xFF;
+        int sprite_x = oam[sprite_index * 4 + 3] & 0xFF;
+
+        // Check offscreen - don't render this sprite
+        if (sprite_y >= 239) {
+            return;
+        }
+
+        int palette_id = attributes & 0b11;
+
+        short tile_base_addr = (short) ((bank? 0x1000 : 0) + tile_index * 16);
+        for (int pixel_row = 0; pixel_row < 8; pixel_row++) {
+            // Read 2 bitplanes (8 bits per bitplane) from pattern table
+            byte tile_lsb = read((short) (tile_base_addr + pixel_row));
+            byte tile_msb = read((short) (tile_base_addr + pixel_row + 8));
+
+            for (int pixel_col = 0; pixel_col < 8; pixel_col++) {
+                // Get pixel value (color) from bitplanes (the value must be between 0-3 since we add 2 bits and each can be 0 or 1)
+                byte colorIndex = (byte) ((tile_lsb & 1) + (tile_msb & 1) * 2);
+                tile_lsb >>= 1;
+                tile_msb >>= 1;
+
+                // Now we have the pixel value, we can get the color from the palette
+                // Read pixel color from palette RAM
+                byte pixelColor = read((short) (0x3F10 + colorIndex));
+
+                int color_row = pixelColor / 16;
+                int color_col = pixelColor % 16;
+
+                int pixel_x = sprite_x + (7- pixel_col);
+                int pixel_y = sprite_y + pixel_row;
+
+                pixel_x &= 0xFF;
+                pixel_y &= 0xFF;
+
+                int color_index_in_system_palette = color_row * 16 + color_col;
+
+                buffered_pixel_color[0] = color_index_in_system_palette;
+                try {
+                    bufferedImage.getRaster().setPixel(pixel_x, pixel_y, buffered_pixel_color);
+                } catch (Exception e) {
+                    throw e;
+                }
+            }
+        }
     }
 
     private void draw_tile(int tile_row, int tile_col) {
@@ -211,9 +272,9 @@ public class PPU {
         // Read 16 bytes from pattern table - this will form the tile pixels, and their colors, which are chosen from the palette.
         // To avoid copying 16 bytes (for regression reasons), we can just loop over each row, and do this bitmap calculation for each row.
 
+        short tile_base_addr = (short) (pattern_table_addr + (patternIndex & 0xFF) * 16);
         for (int pixel_row = 0; pixel_row < 8; pixel_row ++) {
             // Read 2 bitplanes (8 bits per bitplane) from pattern table
-            short tile_base_addr = (short) (pattern_table_addr + (patternIndex & 0xFF) * 16);
             byte tile_lsb = read((short) (tile_base_addr + pixel_row));
             byte tile_msb = read((short) (tile_base_addr + pixel_row + 8));
 

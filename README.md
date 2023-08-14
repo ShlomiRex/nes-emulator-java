@@ -62,6 +62,11 @@ Found mario face in my debugger:
 Fixed color issues:
 ![](README-resources/Screenshot%202023-07-29%20012454.png)
 
+First time sprite rendering:
+![](README-resources/Screenshot%202023-08-15%20000121.png)
+
+Weird sprite rendering glitch:
+![](README-resources/Screenshot%202023-08-15%20001952.png)
 
 # Resources
 

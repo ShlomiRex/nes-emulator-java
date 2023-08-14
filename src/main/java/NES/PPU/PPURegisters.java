@@ -23,7 +23,7 @@ public class PPURegisters {
 
 
     // TODO: PPUCTRL - I useed lsb 2 bits inside loopy_t.nametable_select - maybe i need to remove PPUCTRL
-    protected byte PPUCTRL, PPUMASK, PPUSTATUS, OAMADDR, OAMDATA, PPUDATA, OAMDMA;
+    protected byte PPUCTRL, PPUMASK, PPUSTATUS, OAMADDR, PPUDATA;
 
     private short PPUADDR;
 
@@ -63,6 +63,7 @@ public class PPURegisters {
     private byte PPUDATA_read_buffer;
 
     private final PPU ppu;
+
 
     public PPURegisters(PPU ppu) {
         this.ppu = ppu;
@@ -105,7 +106,7 @@ public class PPURegisters {
     }
 
     public void writeOAMDATA(byte value) {
-        OAMDATA = value;
+        ppu.oam[OAMADDR] = value;
         OAMADDR++;
     }
 
@@ -201,12 +202,22 @@ public class PPURegisters {
         return ret;
     }
 
+    /**
+     * Write to $4014 - Direct Memory Access
+     * @param value
+     */
     public void writeOAMDMA(byte value) {
-        OAMDMA = value;
+        // Writing $XX will upload 256 bytes of data from CPU page $XX00–$XXFF to the internal PPU OAM.
+        short addr = (short) ((value & 0xFF) << 8); // High byte
+        for (int i = 0; i < 256; i++) {
+            ppu.oam[OAMADDR & 0xFF] = ppu.bus.cpuBus.get_cpu_memory(addr);
+            OAMADDR++;
+            addr++;
+        }
     }
 
     public byte readOamData() {
-        return OAMDATA;
+        return ppu.oam[OAMADDR];
     }
 
     /**
@@ -241,7 +252,7 @@ public class PPURegisters {
      * Used only for testing, or debugging.
      */
     public byte getOAMDATA() {
-        return OAMDATA;
+        return ppu.oam[OAMADDR];
     }
 
     //TODO: PPUSCROLL is not one register
@@ -264,13 +275,6 @@ public class PPURegisters {
      */
     public byte getPPUDATA() {
         return PPUDATA;
-    }
-
-    /**
-     * Used only for testing, or debugging.
-     */
-    public byte getOAMDMA() {
-        return OAMDMA;
     }
 
     public void writePPUCTRL(byte value) {

@@ -30,6 +30,9 @@ public class NES {
     public final CPUBus cpuBus;
     public final PPUBus ppuBus;
 
+    // TODO: Do not touch, only for debugging
+    private final double SPEED_MODIFIER = 1;
+
     // We want to deal with creating the memory here, so its more manageable, and each component can take modular memory.
     public NES(Cartridge cartridge) {
         this.header = cartridge.header();
@@ -77,7 +80,7 @@ public class NES {
             ppu.clock_tick();
             ppu.clock_tick();
             ppu.clock_tick();
-        }, 0, 559, TimeUnit.NANOSECONDS);
+        }, 0, (long)(559 * SPEED_MODIFIER), TimeUnit.NANOSECONDS);
     }
 
     public void stop() {

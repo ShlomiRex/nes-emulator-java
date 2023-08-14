@@ -89,7 +89,7 @@ public class CPUBus {
             }
 
             // Check PPU address space
-            if (addr >= 0x2000 && addr <= 0x2007) {
+            if (addr >= 0x2000 && addr <= 0x2007 || addr == 0x4014) {
                 switch (addr) {
                     case 0x2000 -> throw new RuntimeException("Can't read from write-only register: PPUCTRL");
                     case 0x2001 -> throw new RuntimeException("Can't read from write-only register: PPUMASK");
@@ -99,6 +99,7 @@ public class CPUBus {
                     case 0x2005 -> throw new RuntimeException("Can't read from write-only register: PPUSCROLL");
                     case 0x2006 -> throw new RuntimeException("Can't read from write-only register: PPUADDR");
                     case 0x2007 -> res = bus.ppuBus.ppuRegisters.readPPUDATA();
+                    case 0x4014 -> throw new RuntimeException("Can't read from write-only register: OAMDMA");
                 }
             } else if (addr == 0x4016 || addr == 0x4017) {
                 // Read most significant bit of controller state, serial shift it and return it.

@@ -29,13 +29,26 @@ public class PPUBus {
      */
     private final byte[] palette_ram;
 
-    /**
-     * Object Attribute Memory
-     * Contains 256 bytes, each byte determines how sprites are rendered
-     */
-    private final byte[] oam;
-
     private final Mirroring mirroring;
+
+
+    /**
+     * DMA_PAGE - The page of memory to copy from, when the DMA transfer is started.
+     */
+    private byte dma_page;
+
+    /**
+     * DMA_ADDR - The address of the first byte to copy, when the DMA transfer is started.
+     */
+    private byte dma_addr;
+    /**
+     * DMA_DATA - The data to write to the PPU, when the DMA transfer is started.
+     */
+    private byte dma_data;
+    /**
+     * DMA_STARTED - If the DMA transfer is in progress.
+     */
+    private boolean dma_started;
 
     public PPUBus(PPURegisters ppuRegisters, Cartridge cartridge) {
         this.ppuRegisters = ppuRegisters;
@@ -43,7 +56,6 @@ public class PPUBus {
         this.mirroring = cartridge.header().getMirrorType();
 
         this.palette_ram = new byte[32];
-        this.oam = new byte[256];
         this.vram = new byte[1024 * 2];
     }
 
