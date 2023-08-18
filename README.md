@@ -71,6 +71,9 @@ Weird sprite rendering glitch:
 Fixed sprite rendering glitch:
 ![](README-resources/Animation5.gif)
 
+Fixed palette and colors for sprites:
+![](README-resources/Screenshot%202023-08-18%20232651.png)
+
 # Resources
 
 The most used resorces:

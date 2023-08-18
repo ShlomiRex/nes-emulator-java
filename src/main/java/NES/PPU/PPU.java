@@ -224,13 +224,14 @@ public class PPU {
                 if (colorIndex == 0)
                     continue;
 
-                // Now we have the pixel value, we can get the color from the palette
-                // Read pixel color from palette RAM
-                byte pixelColor = read((short) (0x3F10 + colorIndex));
+                // We read from palettes 4 through 7 (sprite palettes). 0x3F00 is base palette address.
+                // We skip the first 4 palettes (each palette is 4 bytes).
+                // And then we select which sprite palette to use using the attribute palette_id.
+                // Then we select the color from the palette by using the colorIndex.
+                byte pixelColor = read((short) (0x3F00 + 4*4 + palette_id * 4 + colorIndex));
 
                 int color_row = pixelColor / 16;
                 int color_col = pixelColor % 16;
-
 
                 int color_index_in_system_palette = color_row * 16 + color_col;
 
