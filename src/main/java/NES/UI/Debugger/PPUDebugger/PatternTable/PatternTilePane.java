@@ -62,26 +62,24 @@ public class PatternTilePane extends JPanel {
      * @param container_height
      */
     protected void paintTile(Graphics g, int container_width, int container_height) {
-//        byte[] tile = ppu.get_pattern_tile(tile_index, is_left_pattern_table);
-//        byte[][] pixels = ppu.convert_pattern_tile_to_pixel_pattern(tile);
-//
-//        Color first_background_color = ppu.get_palette(0).getB();
-//        g.setColor(first_background_color);
-//        g.fillRect(0, 0, container_width, container_height);
-//
-//        int pixel_width = container_width / 8;
-//        int pixel_height = container_height / 8;
-//
-//        g.setColor(Color.WHITE); //TODO: Use color index instead of checking (pixel != 0)
-//        for (int row = 0; row < 8; row++) {
-//            for (int col = 0; col < 8; col++) {
-//                byte pixel = pixels[row][col];
-//                if (pixel != 0) {
-//                    g.setColor(ppu.get_palette(pixel).getB());
-//                    g.fillRect(col * pixel_width, row * pixel_height, pixel_width, pixel_height);
-//                }
-//            }
-//        }
+
+        Color[][] pixels = ppu.get_pattern_tile(tile_index, is_left_pattern_table);
+
+        Color first_background_color = ppu.get_palette(0).getB();
+        g.setColor(first_background_color);
+        g.fillRect(0, 0, container_width, container_height);
+
+        int pixel_width = container_width / 8;
+        int pixel_height = container_height / 8;
+
+        g.setColor(Color.WHITE); //TODO: Use color index instead of checking (pixel != 0)
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                Color c = pixels[row][col];
+                g.setColor(c);
+                g.fillRect(col * pixel_width, row * pixel_height, pixel_width, pixel_height);
+            }
+        }
     }
 
     @Override

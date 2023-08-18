@@ -28,7 +28,7 @@ public class AssemblyTextPane extends JTextPane {
         this.highlighter = getHighlighter();
         this.highlightPainter = new DefaultHighlighter.DefaultHighlightPainter(Color.YELLOW);
         this.styledDocument = new AssemblyStyledDocument(
-                this, nes.cpu_memory, true, 1024 * 16);
+                this, nes.cpu_memory, true, 1024 * 1);
 
         setEditable(false);
         setFont(new Font("monospaced", Font.PLAIN, 12));

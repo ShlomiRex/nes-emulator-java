@@ -13,7 +13,7 @@ public class PPUBus {
      * This memory translates to sprites.
      * Address: 0x0000 - 0x1FFF
      */
-    private final byte[] chr_rom;
+    public final byte[] chr_rom;
 
     /**
      * Contains 4 name tables, each is 1KB in size.

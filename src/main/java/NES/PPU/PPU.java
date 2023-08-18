@@ -254,6 +254,69 @@ public class PPU {
         }
     }
 
+    public void draw_tile(Graphics g, int container_width, int container_height, int tile_row, int tile_col) {
+        // Determine base addresses
+
+        //same
+//        int nametable_addr = (registers.PPUCTRL & 0b11) == 0 ? 0x2000 : 0x2400;
+        int nametable_addr = (registers.loopy_t.nametable_select & 0b11) == 0 ? 0x2000 : 0x2400;
+
+        short attributetable_addr = (short) (nametable_addr + 0x3C0);
+        short pattern_table_addr = (short) ((registers.PPUCTRL & 0b10000) == 0 ? 0x0000 : 0x1000);
+
+        // Read nametable byte - this is the index of the tile in the pattern table. This index points to 16 bytes of pattern data (2 bitmap planes).
+        byte patternIndex = read((short) (nametable_addr + tile_row * 32 + tile_col));
+
+        // Read corresponding attribute table byte - this is the palette index of 4x4 tiles.
+        byte attributeByte = read((short) (attributetable_addr + ((tile_row / 4) * 8) + (tile_col / 4)));
+
+        /*
+        Get the corresponding palette index from attribute byte - 2 bits per tile, the byte represents 4x4 tiles.
+        Bit 0,1 - top left tile, 2,3 - top right tile, 4,5 - bottom left tile, 6,7 - bottom right tile:
+        -------------
+        | 0 1 | 2 3 |
+        -------------
+        | 4 5 | 6 7 |
+        -------------
+         */
+        int bitOffset = (tile_row % 4 / 2) * 2 + (tile_col % 4 / 2);
+        int paletteIndex = (attributeByte >> (bitOffset * 2)) & 0b11;
+
+        // Read 16 bytes from pattern table - this will form the tile pixels, and their colors, which are chosen from the palette.
+        // To avoid copying 16 bytes (for regression reasons), we can just loop over each row, and do this bitmap calculation for each row.
+
+        short tile_base_addr = (short) (pattern_table_addr + (patternIndex & 0xFF) * 16);
+        for (int pixel_row = 0; pixel_row < 8; pixel_row ++) {
+            // Read 2 bitplanes (8 bits per bitplane) from pattern table
+            byte tile_lsb = read((short) (tile_base_addr + pixel_row));
+            byte tile_msb = read((short) (tile_base_addr + pixel_row + 8));
+
+            for (int pixel_col = 0; pixel_col < 8; pixel_col++) {
+                // Get pixel value (color) from bitplanes (the value must be between 0-3 since we add 2 bits and each can be 0 or 1)
+                byte colorIndex = (byte) ((tile_lsb & 1) + (tile_msb & 1) * 2);
+                tile_lsb >>= 1;
+                tile_msb >>= 1;
+
+                // Now we have the pixel value, we can get the color from the palette
+                // Read pixel color from palette RAM
+                byte pixelColor = read((short) (0x3F00 + paletteIndex * 4 + colorIndex));
+
+                int color_row = pixelColor / 16;
+                int color_col = pixelColor % 16;
+                int pixel_x = tile_col * 8 + (7- pixel_col);
+                int pixel_y = tile_row * 8 + pixel_row;
+
+                int color_index_in_system_palette = color_row * 16 + color_col;
+
+                g.setColor(Bus.SYSTEM_PALETTE[color_index_in_system_palette]);
+                g.drawRect(pixel_col, pixel_row, container_width / 8, container_height / 8);
+//
+//                buffered_pixel_color[0] = color_index_in_system_palette;
+//                bufferedImage.getRaster().setPixel(pixel_x, pixel_y, buffered_pixel_color);
+            }
+        }
+    }
+
     private void draw_tile(int tile_row, int tile_col) {
         // Determine base addresses
 
@@ -360,5 +423,49 @@ public class PPU {
 
     public void attachBus(Bus bus) {
         this.bus = bus;
+    }
+
+    public Color[][] get_pattern_tile(int tile_index, boolean is_left_nametable) {
+        // Each pattern tile is 16 bytes in size. We jump by 16 bytes.
+        // The tile index can be 0x0-0xFF, but the actual bytes needed are 0xFF times 16, which fits in u16.
+        short addr = (short) ((tile_index & 0xFF) * 16);
+        if (!is_left_nametable)
+            addr += (16 * 0xFF);
+        //TODO: This can cause regression problems. A lot of copying memory, each tile, for each frame?
+        // For now I leave this as is
+        // A tile (16 bytes), regular tile from CHR ROM.
+        byte[] tile = new byte[16];
+        System.arraycopy(bus.ppuBus.chr_rom, (addr & 0xFFFF), tile, 0, 16);
+        //TODO: This may cause regression since we call this for each tile, for each frame.
+        // For now I leave this as is. I need to not create new objects for each tile.
+        byte[][] pixels = new byte[8][8]; // Each pixel is 1 byte with values 0,1,2 or 3. No more.
+        // Loop over bit planes (each plane = 8 bytes)
+        for(int i = 0; i < 8; i++) {
+            byte bit_plane_1_byte = tile[i];
+            byte bit_plane_2_byte = tile[8 + i];
+            // Loop over byte bits
+            for (int j = 0; j < 8; j++) {
+                boolean bit_plane_1 = Common.Bits.getBit(bit_plane_1_byte, j);
+                boolean bit_plane_2 = Common.Bits.getBit(bit_plane_2_byte, j);
+                byte pixelValue = 0; // both are on
+                if (bit_plane_1 && !bit_plane_2) {
+                    pixelValue = 1; // bit in bit plane 1 is on, bit in bit plane 2 is off
+                } else if (!bit_plane_1 && bit_plane_2) {
+                    pixelValue = 2; // bit in bit plane 1 is off, bit in bit plane 2 is on
+                } else if (bit_plane_1 && bit_plane_2) {
+                    pixelValue = 3; // both are off
+                }
+                pixels[i][7 - j] = pixelValue;
+            }
+        }
+        Color[][] final_pixels = new Color[8][8];
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                byte color_index = pixels[row][col];
+                Color color = get_palette(color_index).getB();
+                final_pixels[row][col] = color;
+            }
+        }
+        return final_pixels;
     }
 }
