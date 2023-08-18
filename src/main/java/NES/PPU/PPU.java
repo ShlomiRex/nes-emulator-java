@@ -197,12 +197,13 @@ public class PPU {
         byte attributes = oam[sprite_index * 4 + 2];
         int sprite_x = oam[sprite_index * 4 + 3] & 0xFF;
 
-        // Check offscreen - don't render this sprite if offscreen
-        if (sprite_y >= 239)
-            return;
+//        // Check offscreen - don't render this sprite if offscreen
+//        if (sprite_y >= 239)
+//            return;
 
         // Attributes - bit 2,3,4 ignored
         int palette_id = attributes & 0b11;
+        // TODO: Finish sprite priority
         boolean priority = Common.Bits.getBit(attributes, 5); // (0: in front of background; 1: behind background)
         boolean flip_horizontal = Common.Bits.getBit(attributes, 6);
         boolean flip_vertical = Common.Bits.getBit(attributes, 7);
@@ -249,6 +250,10 @@ public class PPU {
                     pixel_y = sprite_y + (7-pixel_row);
                 else
                     pixel_y = sprite_y + pixel_row;
+
+                // TODO: Not sure if to put this check here
+                if (pixel_x > 255 || pixel_y > 239)
+                    continue;
 
                 bufferedImage.getRaster().setPixel(pixel_x, pixel_y, buffered_pixel_color);
             }
