@@ -18,7 +18,7 @@ public class PaletteTilePane extends JPanel {
         this.tile_index = tile_index;
         // Get color from system palette
         Color[] system_palette = SystemPallete.getSystemPalette();
-        this.color = system_palette[tile_index / 16 + tile_index % 16];
+        this.color = system_palette[tile_index];
         this.width = width;
         this.height = height;
 
