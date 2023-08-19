@@ -31,13 +31,13 @@ public class PPURegisters {
      * This flipflop is used to determine whether to write to high byte or low byte of PPUADDR or PPUSCROLL.
      * This bitflag is shared among PPUSCROLL and PPUADDR (this is what the real hardware does).
      *
-     * Since to write to PPUADDR the CPU needs to write twice (once for high byte, once for low byte),
+     * When writing to PPUADDR the CPU needs to write twice (once for high byte, once for low byte),
      * we need to keep track of which byte we are writing to.
      *
      * As for PPUSCROLL, This flipflop is used to determine whether to write to high byte (horizontal scroll offset)
      * or low byte (vertical scroll offset) of PPUSCROLL.
      */
-    private boolean address_latch;
+    private boolean w;
 
     /**
      * Current VRAM address (15 bits).
@@ -93,7 +93,7 @@ public class PPURegisters {
         // Clear vblank flag
         PPUSTATUS = Common.Bits.setBit(PPUSTATUS, 7, false);
 
-        address_latch = false;
+        w = false;
         return before;
     }
 
@@ -111,7 +111,7 @@ public class PPURegisters {
     }
 
     public void writePPUSCROLL(byte value) {
-        if (address_latch) {
+        if (w) {
             /*
             $2005 second write (w is 1)
 
@@ -132,11 +132,11 @@ public class PPURegisters {
             fine_x_scroll = (byte) ((value >> 3) & 0b111);
         }
 
-        address_latch = !address_latch;
+        w = !w;
     }
 
     public void writePPUADDR(byte value) {
-        if (address_latch) {
+        if (w) {
             // Write to low byte
             PPUADDR = (short) ((PPUADDR & 0xFF00) | (value & 0x00FF));
 
@@ -156,7 +156,7 @@ public class PPURegisters {
             PPUADDR = (short) ((PPUADDR & 0x00FF) | ((value & 0x00FF) << 8));
         }
         // Flip the flipflop
-        address_latch = !address_latch;
+        w = !w;
     }
 
     public void writePPUDATA(byte value) {
