@@ -93,12 +93,14 @@ public class PPURegisters {
 
         w:                  <- 0
          */
+        w = false;
+
+
         byte before = PPUSTATUS;
 
         // Clear vblank flag
         PPUSTATUS = Common.Bits.setBit(PPUSTATUS, 7, false);
 
-        w = false;
         return before;
     }
 
@@ -124,8 +126,8 @@ public class PPURegisters {
             t: FGH..AB CDE..... <- d: ABCDEFGH
             w:                  <- 0
              */
-            loopy_t = (short) ((loopy_t & 0b000_11_11111_11111) | ((s_value & 0b111) << 13)); // fine_y
-            loopy_t = (short) ((loopy_t & 0b111_11_00000_11111) | ((s_value & 0b11111000) << 2)); // coarse_y
+            loopy_t = (short) ((loopy_t & 0b000_11_11111_11111) | ((s_value & 0b111) << 12)); // fine_y
+            loopy_t = (short) ((loopy_t & 0b111_11_00000_11111) | ((s_value & 0b11111_000) << 2)); // coarse_y
         } else {
             /*
             $2005 first write (w is 0)
@@ -135,15 +137,23 @@ public class PPURegisters {
             w:                  <- 1
              */
             fine_x_scroll = (byte) (s_value & 0b111); // fine_x
-            loopy_t = (short) ((loopy_t & 0b111_11_11111_00000) | ((s_value & 0b11111000) >> 3)); // coarse_x
+            loopy_t = (short) ((loopy_t & 0b111_11_11111_00000) | (s_value >> 3)); // coarse_x
         }
 
         w = !w;
     }
 
     public void writePPUADDR(byte value) {
+        short s_value = value;
+
         if (w) {
-            // Write to low byte
+            /*
+            $2006 second write (w is 1)
+
+            t: ....... ABCDEFGH <- d: ABCDEFGH
+            v: <...all bits...> <- t: <...all bits...>
+            w:                  <- 0
+             */
             loopy_t = (short) ((loopy_t & 0xFF00) | (value & 0x00FF));
             loopy_v = loopy_t;
         } else {
@@ -155,13 +165,8 @@ public class PPURegisters {
             t: Z...... ........ <- 0 (bit Z is cleared)
             w:                  <- 1
              */
-            //TODO: Finish loopy
-//            loopy_t.fine_y_scroll = (byte) ((value >> 2) & 0b111);
-
-            // Write to high byte
-            loopy_t = (short) ((loopy_t & 0x00FF) | ((value & 0x00FF) << 8));
+            loopy_t = (short) ((loopy_t & 0b000_00_00111_11111) | ((s_value & 0b1_11111) << 8));
         }
-        // Flip the flipflop
         w = !w;
     }
 
@@ -284,6 +289,7 @@ public class PPURegisters {
     }
 
     public void writePPUCTRL(byte value) {
+        short s_value = value;
         /*
         $2000 write
 
@@ -293,6 +299,6 @@ public class PPURegisters {
         PPUCTRL = value;
 
         // Set loopy_t nametable select
-        loopy_t = (short) ((loopy_t & 0b1111_00_11111_11111) | (value & 0b11) << 10);
+        loopy_t = (short) ((loopy_t & 0b1111_00_11111_11111) | ((s_value & 0b11) << 10));
     }
 }
