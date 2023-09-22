@@ -58,6 +58,10 @@ public class Common {
         return String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0');
     }
 
+    public static String shortToBinary(short s) {
+        return String.format("%16s", Integer.toBinaryString(s & 0xFFFF)).replace(' ', '0');
+    }
+
     public static String byteToHex(byte b, boolean prefix_0x) {
         if (prefix_0x)
             return String.format("0x%02X", b & 0xFF);
