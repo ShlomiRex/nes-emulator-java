@@ -128,6 +128,19 @@ public class PPU {
             registers.PPUSTATUS = Common.Bits.setBit(registers.PPUSTATUS, 7, false);
         }
 
+        // Scanline 0-239: Visible scanlines
+        if (scanline >= 0 && scanline < 240) {
+            // Visible scanline
+
+            if (cycle == 256) {
+                // If rendering is enabled (show background or sprites)
+                if (Common.Bits.getBit(registers.PPUMASK, 3) || Common.Bits.getBit(registers.PPUMASK, 4)) {
+                    // Increment coarse Y
+                    //registers.loopy_v =
+                }
+            }
+        }
+
         if (scanline == 241 && cycle == 1) {
             // VBlank start
 
