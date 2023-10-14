@@ -179,6 +179,7 @@ public class PPURegisters {
         loopy_v += (short) (Common.Bits.getBit(PPUCTRL, 2) ? 32 : 1);
 
         // Wrap around to 0x3FFF.
+        // TODO: I did not see other emulators do this
         if (loopy_v > 0x3FFF) {
             loopy_v &= 0x3FFF;
         }

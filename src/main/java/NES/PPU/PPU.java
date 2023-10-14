@@ -1,8 +1,6 @@
 package NES.PPU;
 
 import NES.Bus.Bus;
-import NES.Bus.PPUBus;
-import NES.Cartridge.Mirroring;
 import NES.Common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
-import java.awt.image.Raster;
 
 public class PPU {
     private final Logger logger = LoggerFactory.getLogger(PPU.class);
@@ -104,40 +101,43 @@ public class PPU {
      * Clock tick for PPU.
      */
     public void clock_tick() {
+        // Clamp frame between 0 and 60
         if (frame == 60) {
             frame = 0;
             return;
         }
 
+        // Reset scanline back to 0 after 261 scanlines
         if (scanline == 262) {
             scanline = 0;
             frame ++;
             return;
         }
 
-        if (cycle == 340) {
+        // End of scanline, reset cycle and increment scanline
+        if (cycle > 340) {
             cycle = 0;
             scanline ++;
             return;
         }
 
-        if (scanline == -1 && cycle == 1) {
-            // Pre-render scanline
-
-            // Clear vblank flag
-            registers.PPUSTATUS = Common.Bits.setBit(registers.PPUSTATUS, 7, false);
-        }
-
         // Scanline 0-239: Visible scanlines
         if (scanline >= 0 && scanline < 240) {
-            // Visible scanline
+            // Look at timing diagram: https://www.nesdev.org/w/images/default/4/4f/Ppu.svg
+            // In cycld 256, 257 the red tile it shows: Inc vert(v), horz(v) and hori(v)=hori(t)
+            // In all cycles that are divisible by 8, we increment horizontal scroll
+
+            if (cycle % 8 == 0 &&
+                    (Common.Bits.getBit(registers.PPUMASK, 3)
+                            || Common.Bits.getBit(registers.PPUMASK, 4))) {
+                incHorizontalScroll();
+            }
 
             if (cycle == 256) {
-                // If rendering is enabled (show background or sprites)
-                if (Common.Bits.getBit(registers.PPUMASK, 3) || Common.Bits.getBit(registers.PPUMASK, 4)) {
-                    // Increment coarse Y
-                    //registers.loopy_v =
-                }
+                incVerticalScroll();
+            }
+            else if (cycle == 257) {
+                transferHorizontalScroll();
             }
         }
 
@@ -164,10 +164,16 @@ public class PPU {
                 trigger_game_canvas_repaint.run();
         }
 
-        // Scanline 261: Post render scanline
-        if (scanline == 261 && cycle == 1) {
-            // VBlank end
-            registers.PPUSTATUS = Common.Bits.setBit(registers.PPUSTATUS, 7, false);
+        // Scanline 261: Pre render line
+        if (scanline == 261) {
+            if (cycle == 1) {
+                // VBlank end
+                registers.PPUSTATUS = Common.Bits.setBit(registers.PPUSTATUS, 7, false);
+            }
+            // vert(v) = vert(t) for each tick of cycle 280-304
+            else if (cycle >= 280 && cycle <= 304) {
+                transferVerticalScroll();
+            }
         }
 
         cycle ++;
@@ -486,5 +492,94 @@ public class PPU {
             }
         }
         return final_pixels;
+    }
+
+    /**
+     * Y Scroll is composed of 2 components: fine Y and coarse Y.
+     * This is why its quite complex to just increment Y scroll.
+     * First we increment fine Y and if it wraps around, we increment coarse Y.
+     * We also deal with wrapping around the nametable.
+     */
+    private void incVerticalScroll() {
+        // If rendering is enabled (show background or sprites)
+        if (Common.Bits.getBit(registers.PPUMASK, 3) || Common.Bits.getBit(registers.PPUMASK, 4)) {
+            // Increment coarse Y
+            int coarse_y = (registers.loopy_v & 0b11111_00000) >> 5;
+
+            // Check wrapping: https://www.nesdev.org/wiki/PPU_scrolling#Wrapping_around
+            if ((registers.loopy_v & 0x7000) == 0x7000) // if fine Y < 7
+            {
+                registers.loopy_v += 0x1000; // increment fine Y
+            } else {
+                registers.loopy_v &= ~0x7000; // fine Y = 0
+                int y = (registers.loopy_v & 0x03E0) >> 5; // let y = coarse Y
+                if (y == 29) {
+                    y = 0; // coarse Y = 0
+                    registers.loopy_v ^= 0x0800; // switch vertical nametable
+                } else if (y == 31) {
+                    y = 0; // coarse Y = 0, nametable not switched
+                } else {
+                    y += 1; // increment coarse Y
+                }
+                registers.loopy_v = (short) ((registers.loopy_v & ~0x03E0) | (y << 5));     // put coarse Y back into v
+            }
+
+            coarse_y += 1;
+            if (coarse_y == 0b11111) {
+                // TODO: Check for wrapping. https://www.nesdev.org/wiki/PPU_scrolling#Wrapping_around
+                //coarse_y = 0;
+                // Switch vertical nametable
+                //registers.loopy_v = (short) (registers.loopy_v ^ 0b10000_0000000000);
+            }
+            registers.loopy_v = (short) ((registers.loopy_v & 0b11111_00000_11111) | (coarse_y << 5));
+        }
+    }
+
+    private void incHorizontalScroll() {
+        // If rendering is enabled (show background or sprites)
+        if (Common.Bits.getBit(registers.PPUMASK, 3) || Common.Bits.getBit(registers.PPUMASK, 4)) {
+            // Increment coarse X
+            int coarse_x = registers.loopy_v & 0b11111;
+
+            // Check wrapping: https://www.nesdev.org/wiki/PPU_scrolling#Wrapping_around
+            if (coarse_x == 31) {
+                coarse_x = 0; // coarse X = 0
+                registers.loopy_v ^= 0b00010_0000000000; // switch horizontal nametable
+            } else {
+                coarse_x += 1; // increment coarse X
+            }
+            registers.loopy_v = (short) ((registers.loopy_v & ~0b11111) | coarse_x); // put coarse X back into v
+        }
+    }
+
+    /**
+     * If rendering is enabled, the PPU copies all bits related to horizontal position from t to v:
+     * v: ....A.. ...BCDEF <- t: ....A.. ...BCDEF
+     */
+    private void transferHorizontalScroll() {
+        if (Common.Bits.getBit(registers.PPUMASK, 3) || Common.Bits.getBit(registers.PPUMASK, 4)) {
+            // At dot 257 of each scanline
+            // v: ....A.. ...BCDEF <- t: ....A.. ...BCDEF
+            registers.loopy_v = (short) (registers.loopy_v & 0b11110_11111_00000);
+            registers.loopy_v |= (short) (registers.loopy_t & 0b00001_00000_11111);
+        }
+    }
+
+    /**
+     * During dots 280 to 304 of the pre-render scanline (end of vblank)
+     *
+     * If rendering is enabled, at the end of vblank,
+     * shortly after the horizontal bits are copied from t to v at dot 257,
+     * the PPU will repeatedly copy the vertical bits from t to v from dots 280 to 304,
+     * completing the full initialization of v from t:
+     *
+     * v: GHIA.BC DEF..... <- t: GHIA.BC DEF.....
+     */
+    private void transferVerticalScroll() {
+        if (Common.Bits.getBit(registers.PPUMASK, 3) || Common.Bits.getBit(registers.PPUMASK, 4)) {
+            // v: GHIA.BC DEF..... <- t: GHIA.BC DEF.....
+            registers.loopy_v = (short) (registers.loopy_v & 0b00001_00000_11111);
+            registers.loopy_v |= (short) (registers.loopy_t & 0b11110_11111_00000);
+        }
     }
 }
