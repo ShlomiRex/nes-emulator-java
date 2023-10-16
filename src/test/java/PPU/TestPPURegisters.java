@@ -3,47 +3,20 @@ package PPU;
 import NES.Bus.Bus;
 import NES.Bus.PPUBus;
 import NES.Cartridge.Cartridge;
-import NES.Cartridge.Mirroring;
 import NES.Cartridge.iNESHeader;
+import NES.NES;
 import NES.PPU.PPU;
 import Utils.Helper;
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class TestPPURegisters {
-
-    private PPU ppu;
-    private Bus bus;
-
-    private final byte[] prg_rom = new byte[1024 * 32];
-    private final byte[] chr_rom = new byte[1024 * 8];
-
     @Before
     public void setUp() {
-        bus = new Bus();
-        ppu = new PPU();
 
-        iNESHeader header = new iNESHeader(
-                1,
-                1,
-                0,
-                Mirroring.HORIZONTAL,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                0,
-                iNESHeader.TVSystem.NTSC,
-                iNESHeader.TVSystem.NTSC,
-                false,
-                false);
-        ppu.attachBus(bus);
-        bus.attachPPUBus(new PPUBus(ppu.registers, new Cartridge(header, prg_rom, chr_rom)));
     }
 
     /**
@@ -74,6 +47,16 @@ public class TestPPURegisters {
 
     @Test
     public void test_palette_write() {
+        Bus bus = new Bus();
+        PPU ppu = new PPU();
+
+        byte[] prg_rom = new byte[1024 * 32];
+        byte[] chr_rom = new byte[1024 * 8];
+
+        iNESHeader header = Utils.Helper.dummyiNESHeader();
+        ppu.attachBus(bus);
+        bus.attachPPUBus(new PPUBus(ppu.registers, new Cartridge(header, prg_rom, chr_rom)));
+
         ppu.registers.writePPUADDR((byte) 0x3F);
         ppu.registers.writePPUADDR((byte) 0x00);
         ppu.registers.writePPUDATA((byte) 0x29);
@@ -85,10 +68,64 @@ public class TestPPURegisters {
      * Test all loopy writes: <a href="https://www.nesdev.org/wiki/PPU_scrolling#Summary">wiki</a>
      */
     @Test
-    public void test_loopy() {
-        // TODO: Run the program
+    public void test_loopy_2000_write() {
+        // TODO: Assembler needed. For now I just manually set the program bytes.
         String[] program = {"LDA #$00", "STA $2000"};
         Cartridge cartridge = Helper.createCustomCartridge(program);
-        assertEquals(((ppu.registers.loopy_t >> 10) & 0b11), 0); // nametable select = 0
+
+        NES nes = new NES(cartridge);
+
+        // set all bits to 1 so we can see if indeed the bits are set correctly after execution
+        nes.ppu.registers.loopy_t = ~0;
+        assertEquals(((nes.ppu.registers.loopy_t >> 10) & 0b11), 0b11); // nametable select
+
+        // Without forcing PC, I need to set reset interrupt routine. This way its easier
+        nes.cpu.registers.PC = (short) 0x8000;
+
+        // LDA #$00
+        nes.cpu.bus.cpuBus.cpu_write((short) 0x8000, (byte) 0xA9);
+        nes.cpu.bus.cpuBus.cpu_write((short) 0x8001, (byte) 0x00);
+
+        // STA $2000
+        nes.cpu.bus.cpuBus.cpu_write((short) 0x8002, (byte) 0x8D);
+        nes.cpu.bus.cpuBus.cpu_write((short) 0x8003, (byte) 0x00);
+        nes.cpu.bus.cpuBus.cpu_write((short) 0x8004, (byte) 0x20);
+
+        nes.cpu.clock_tick();
+        nes.cpu.clock_tick();
+
+        assertEquals(((nes.ppu.registers.loopy_t >> 10) & 0b11), 0); // nametable select = 0
+    }
+
+    /**
+     * Test all loopy writes: <a href="https://www.nesdev.org/wiki/PPU_scrolling#Summary">wiki</a>
+     */
+    @Test
+    public void test_loopy_2002_read() {
+        // TODO: Assembler needed. For now I just manually set the program bytes.
+        String[] program = {"LDA $2002"};
+        Cartridge cartridge = Helper.createCustomCartridge(program);
+
+        NES nes = new NES(cartridge);
+
+        assertEquals(((nes.ppu.registers.loopy_t >> 10) & 0b11), 0b00);
+
+        nes.cpu.registers.PC = (short) 0x8000;
+
+        // LDA $2002
+        nes.cpu.bus.cpuBus.cpu_write((short) 0x8000, (byte) 0xAD);
+        nes.cpu.bus.cpuBus.cpu_write((short) 0x8001, (byte) 0x02);
+        nes.cpu.bus.cpuBus.cpu_write((short) 0x8002, (byte) 0x20);
+
+        // W is reset
+        nes.cpu.clock_tick();
+        assertEquals(((nes.ppu.registers.loopy_t >> 10) & 0b11), 0);
+        assertFalse(nes.ppu.registers.w);
+
+        // W is reset again
+        nes.cpu.registers.PC = (short) 0x8000;
+        nes.ppu.registers.w = true;
+        nes.cpu.clock_tick();
+        assertFalse(nes.ppu.registers.w);
     }
 }

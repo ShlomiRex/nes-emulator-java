@@ -23,7 +23,7 @@ public class CPU {
     public long instructions = 0; // counter number of instructions executed
     private byte fetched_data; // Set in addressing modes, used afterwards.
     private short fetched_addr; // Set in addressing modes, used afterwards.
-    private final Bus bus;
+    public final Bus bus;
 
     /**
      *
@@ -40,11 +40,11 @@ public class CPU {
     }
 
     public void clock_tick() {
-        //logger.debug("Tick, cycle: " + this.cycles);
-        //logger.debug(registers.toString());
+        logger.debug("Tick, cycle: " + this.cycles);
+        logger.debug(registers.toString());
 
         // Log current PC
-        //logger.debug("PC: " + Common.shortToHex(registers.PC, true));
+        logger.debug("PC: " + Common.shortToHex(registers.PC, true));
 
         // We can't ignore the NMI interrupt which is called when PPU VBlank starts.
         if (bus.nmi_line) {
@@ -64,15 +64,16 @@ public class CPU {
 
         Instructions instr = instr_info.instr;
         AddressingMode addrmode = instr_info.addrmode;
-//        int bytes = instr_info.bytes;
-//        int cycles = instr_info.cycles;
-//        Decoder.OopsCycle oops_cycle = instr_info.oopsCycle;
-//        logger.debug(
-//                instr.toString()+"("+Common.byteToHex(opcode, true)+")\t"
-//                +addrmode+"\tBytes: "
-//                +bytes+"\tCycles: "
-//                +cycles+"\tOops cycle: "
-//                +oops_cycle);
+
+        int bytes = instr_info.bytes;
+        int cycles = instr_info.cycles;
+        Decoder.OopsCycle oops_cycle = instr_info.oopsCycle;
+        logger.debug(
+                instr.toString()+"("+Common.byteToHex(opcode, true)+")\t"
+                +addrmode+"\tBytes: "
+                +bytes+"\tCycles: "
+                +cycles+"\tOops cycle: "
+                +oops_cycle);
 
         // Execute
         execute_instruction(instr, addrmode);
@@ -81,8 +82,8 @@ public class CPU {
 
         instructions ++;
 
-//        logger.debug(registers.toString());
-//        logger.debug("End of tick");
+        logger.debug(registers.toString());
+        logger.debug("End of tick");
     }
 
     private byte read_memory(short addr) {

@@ -43,7 +43,7 @@ public class PPURegisters {
      * As for PPUSCROLL, This flipflop is used to determine whether to write to high byte (horizontal scroll offset)
      * or low byte (vertical scroll offset) of PPUSCROLL.
      */
-    private boolean w;
+    public boolean w;
 
     /**
      * Current VRAM address (15 bits).
