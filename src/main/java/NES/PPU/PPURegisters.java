@@ -62,7 +62,7 @@ public class PPURegisters {
     /**
      * Fine X scroll (3 bits).
      */
-    private byte fine_x_scroll;
+    public byte fine_x_scroll;
 
     /**
      * This buffer is used to store the value of PPUDATA read from the PPU.
