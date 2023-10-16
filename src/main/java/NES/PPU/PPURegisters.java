@@ -144,8 +144,6 @@ public class PPURegisters {
     }
 
     public void writePPUADDR(byte value) {
-        short s_value = value;
-
         if (w) {
             /*
             $2006 second write (w is 1)
@@ -165,7 +163,7 @@ public class PPURegisters {
             t: Z...... ........ <- 0 (bit Z is cleared)
             w:                  <- 1
              */
-            loopy_t = (short) ((loopy_t & 0b000_00_00111_11111) | ((s_value & 0b1_11111) << 8));
+            loopy_t = (short) ((loopy_t & 0b000_00_00111_11111) | (((short) value & 0b1_11111) << 8));
         }
         w = !w;
     }
@@ -290,7 +288,6 @@ public class PPURegisters {
     }
 
     public void writePPUCTRL(byte value) {
-        short s_value = value;
         /*
         $2000 write
 
@@ -300,6 +297,6 @@ public class PPURegisters {
         PPUCTRL = value;
 
         // Set loopy_t nametable select
-        loopy_t = (short) ((loopy_t & 0b1111_00_11111_11111) | ((s_value & 0b11) << 10));
+        loopy_t = (short) ((loopy_t & 0b1111_00_11111_11111) | (((short) value & 0b11) << 10));
     }
 }
