@@ -14,13 +14,18 @@ public class PPU {
     public final PPURegisters registers;
 
     /**
-     * PPU cycles. Reset to zero after 341 cycles.
+     * PPU cycles of current scanline only.
+     * Reset to zero after 341 cycles.
      */
     public int cycle;
+
+    public long total_cycles;
+
     /**
      * PPU scanlines. Reset to zero after 262 scanlines.
      */
     public int scanline;
+
     /**
      * PPU frames. Reset to zero after 60 frames.
      */
@@ -55,6 +60,18 @@ public class PPU {
      * Address: 0x3F00 - 0x3F1F
      */
     protected final byte[] oam;
+
+
+    //////////////////////////////////////////////////
+    private byte fetched_nt, fetched_at;
+    private byte fetched_bg_lsb, fetched_bg_msb;
+    /**
+     * Even/odd frame flag.
+     * True: if frame is even.
+     * False: if frame is odd.
+     */
+    private boolean is_even = true;
+    private boolean rendering_enabled;
 
     public PPU() {
 //        if (chr_rom.length != 1024 * 8)
@@ -99,64 +116,84 @@ public class PPU {
 
     /**
      * Clock tick for PPU.
+     * Heavily inspired by the <a href="https://www.nesdev.org/w/images/default/4/4f/Ppu.svg">timing diagram</a>
      */
     public void clock_tick() {
+        // End of scanline, reset cycle and increment scanline
+        if (cycle > 340) {
+            cycle = 0;
+            scanline ++;
+            logger.debug("End of scanline, cycle: {}, scanline: {}, frame: {}", cycle, scanline, frame);
+            return;
+        }
+
+        // Reset scanline back to 0 after 261 scanlines
+        if (scanline == 262) {
+            if (total_cycles % 89342 != 0) {
+                logger.error("Long cycle is not divisible by 89342: {}", total_cycles);
+                System.exit(1);
+            }
+            scanline = 0;
+            frame ++;
+            is_even = !is_even;
+            logger.debug("End of frame, cycle: {}, scanline: {}, frame: {}", cycle, scanline, frame);
+            return;
+        }
+
         // Clamp frame between 0 and 60
         if (frame == 60) {
             frame = 0;
             return;
         }
 
-        // Reset scanline back to 0 after 261 scanlines
-        if (scanline == 262) {
-            scanline = 0;
-            frame ++;
+        total_cycles++;
+
+        if (scanline == 0 && cycle == 0) {
+            // "Odd frame" cycle skip
+            cycle ++;
             return;
         }
 
-        // End of scanline, reset cycle and increment scanline
-        if (cycle > 340) {
-            cycle = 0;
-            scanline ++;
-            return;
-        }
+        rendering_enabled = Common.Bits.getBit(registers.PPUMASK, 3)
+                || Common.Bits.getBit(registers.PPUMASK, 4);
 
-        // Scanline 0-239: Visible scanlines
+        // Scanline 0-239 (including): Visible scanlines
         if (scanline >= 0 && scanline < 240) {
-            // Look at timing diagram: https://www.nesdev.org/w/images/default/4/4f/Ppu.svg
-            // In cycld 256, 257 the red tile it shows: Inc vert(v), horz(v) and hori(v)=hori(t)
-            // In all cycles that are divisible by 8, we increment horizontal scroll
-
-            if (cycle % 8 == 0 &&
-                    (Common.Bits.getBit(registers.PPUMASK, 3)
-                            || Common.Bits.getBit(registers.PPUMASK, 4))) {
+            if (cycle % 8 == 0 && rendering_enabled) {
+                logger.debug("inc hori(v)");
                 incHorizontalScroll();
             }
 
-            if (cycle == 256) {
+            if (cycle == 1) {
+                logger.debug("NT fetch");
+                fetchNameTableByte();
+                logger.debug("Fetched NT: " + Common.byteToHex(fetched_nt, true));
+            }
+            else if (cycle == 256) {
+                logger.debug("inc vert(v)");
                 incVerticalScroll();
             }
+
             else if (cycle == 257) {
+                logger.debug("hori(v) = hori(t)");
                 transferHorizontalScroll();
             }
         }
 
-        if (scanline == 241 && cycle == 1) {
+        else if (scanline == 241 && cycle == 1) {
             // VBlank start
 
-            //logger.debug("VBlank start");
+            logger.debug("VBlank start");
 
             registers.PPUSTATUS = Common.Bits.setBit(registers.PPUSTATUS, 7, true);
 
-            /**
+            /*
              * Bit 7 of PPUCTRL: Generate an NMI at the start of the vertical blanking interval (0: off; 1: on)
              * The PPUCTRL controls the NMI line.
              */
             if (Common.Bits.getBit(registers.getPPUCTRL(), 7)) {
                 bus.nmi_line = true;
-                //logger.debug("Generating NMI interrupt");
-            } else {
-                //logger.debug("Not generating NMI interrupt");
+                logger.debug("Generating NMI interrupt");
             }
 
             // Repaint the game canvas
@@ -165,41 +202,60 @@ public class PPU {
         }
 
         // Scanline 261: Pre render line
-        if (scanline == 261) {
+        else if (scanline == 261) {
             if (cycle == 1) {
                 // VBlank end
-                registers.PPUSTATUS = Common.Bits.setBit(registers.PPUSTATUS, 7, false);
+                logger.debug("Clear VBlank, Sprite 0, Overflow");
+                registers.PPUSTATUS = Common.Bits.setBit(registers.PPUSTATUS, 7, false); // Clear Vblank
+                registers.PPUSTATUS = Common.Bits.setBit(registers.PPUSTATUS, 5, false); // Clear sprite overflow
+                registers.PPUSTATUS = Common.Bits.setBit(registers.PPUSTATUS, 6, false); // Clear sprite 0 hit
             }
             // vert(v) = vert(t) for each tick of cycle 280-304
             else if (cycle >= 280 && cycle <= 304) {
                 transferVerticalScroll();
             }
+        } else {
+            logger.error("Unexpected scanline: {}", scanline);
         }
 
         cycle ++;
     }
 
-    /**
-     * Called from within JavaSwing GUI thread.
-     * @param g
-     * @param width The container width
-     * @param height The container height
-     */
-    public void draw_frame(Graphics g, int width, int height) {
-        // Draw backgrounds
-        for (int tile_row = 0; tile_row < 30; tile_row++) {
-            for (int tile_col = 0; tile_col < 32; tile_col++) {
-                draw_tile(tile_row, tile_col);
-            }
-        }
+    private void fetchNameTableByte() {
+        int nt_select = (registers.loopy_t & 0b11) == 0 ? 0x2000 : 0x2400;
+        int nt_addr = nt_select + (registers.loopy_v & 0x0FFF);
+        fetched_nt = read((short) nt_addr);
+    }
 
-        // Draw sprites
-        boolean bank = Common.Bits.getBit(registers.PPUCTRL, 3);
-        boolean sprite_size = Common.Bits.getBit(registers.PPUCTRL, 5);
-        for (int sprite_index = 0; sprite_index < 64; sprite_index++) {
-            draw_sprite(sprite_index, bank, sprite_size);
-        }
+//    /**
+//     * Called from within JavaSwing GUI thread.
+//     * @param g
+//     * @param width The container width
+//     * @param height The container height
+//     */
+//    public void draw_frame(Graphics g, int width, int height) {
+//        logger.debug("Drawing frame");
+//
+//        // Draw backgrounds
+//        for (int tile_row = 0; tile_row < 30; tile_row++) {
+//            for (int tile_col = 0; tile_col < 32; tile_col++) {
+//                draw_tile(tile_row, tile_col);
+//            }
+//        }
+//
+//        // Draw sprites
+//        boolean bank = Common.Bits.getBit(registers.PPUCTRL, 3);
+//        boolean sprite_size = Common.Bits.getBit(registers.PPUCTRL, 5);
+//        for (int sprite_index = 0; sprite_index < 64; sprite_index++) {
+//            draw_sprite(sprite_index, bank, sprite_size);
+//        }
+//
+//        // Flush graphics using the buffered image
+//        g.drawImage(bufferedImage, 0, 0, width, height, null);
+//    }
 
+    public void flush_graphics(Graphics g, int width, int height) {
+        // Flush graphics using the buffered image
         g.drawImage(bufferedImage, 0, 0, width, height, null);
     }
 
@@ -502,7 +558,7 @@ public class PPU {
      */
     private void incVerticalScroll() {
         // If rendering is enabled (show background or sprites)
-        if (Common.Bits.getBit(registers.PPUMASK, 3) || Common.Bits.getBit(registers.PPUMASK, 4)) {
+        if (rendering_enabled) {
             // Increment coarse Y
             int coarse_y = (registers.loopy_v & 0b11111_00000) >> 5;
 
@@ -537,7 +593,7 @@ public class PPU {
 
     private void incHorizontalScroll() {
         // If rendering is enabled (show background or sprites)
-        if (Common.Bits.getBit(registers.PPUMASK, 3) || Common.Bits.getBit(registers.PPUMASK, 4)) {
+        if (rendering_enabled) {
             // Increment coarse X
             int coarse_x = registers.loopy_v & 0b11111;
 
@@ -557,7 +613,7 @@ public class PPU {
      * v: ....A.. ...BCDEF <- t: ....A.. ...BCDEF
      */
     private void transferHorizontalScroll() {
-        if (Common.Bits.getBit(registers.PPUMASK, 3) || Common.Bits.getBit(registers.PPUMASK, 4)) {
+        if (rendering_enabled) {
             // At dot 257 of each scanline
             // v: ....A.. ...BCDEF <- t: ....A.. ...BCDEF
             registers.loopy_v = (short) (registers.loopy_v & 0b11110_11111_00000);
@@ -576,7 +632,7 @@ public class PPU {
      * v: GHIA.BC DEF..... <- t: GHIA.BC DEF.....
      */
     private void transferVerticalScroll() {
-        if (Common.Bits.getBit(registers.PPUMASK, 3) || Common.Bits.getBit(registers.PPUMASK, 4)) {
+        if (rendering_enabled) {
             // v: GHIA.BC DEF..... <- t: GHIA.BC DEF.....
             registers.loopy_v = (short) (registers.loopy_v & 0b00001_00000_11111);
             registers.loopy_v |= (short) (registers.loopy_t & 0b11110_11111_00000);

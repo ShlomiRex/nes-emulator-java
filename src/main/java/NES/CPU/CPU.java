@@ -40,11 +40,11 @@ public class CPU {
     }
 
     public void clock_tick() {
-        logger.debug("Tick, cycle: " + this.cycles);
-        logger.debug(registers.toString());
+//        logger.debug("CPU Tick, cycle: " + this.cycles);
+//        logger.debug(registers.toString());
 
         // Log current PC
-        logger.debug("PC: " + Common.shortToHex(registers.PC, true));
+//        logger.debug("PC: " + Common.shortToHex(registers.PC, true));
 
         // We can't ignore the NMI interrupt which is called when PPU VBlank starts.
         if (bus.nmi_line) {
@@ -68,12 +68,12 @@ public class CPU {
         int bytes = instr_info.bytes;
         int cycles = instr_info.cycles;
         Decoder.OopsCycle oops_cycle = instr_info.oopsCycle;
-        logger.debug(
-                instr.toString()+"("+Common.byteToHex(opcode, true)+")\t"
-                +addrmode+"\tBytes: "
-                +bytes+"\tCycles: "
-                +cycles+"\tOops cycle: "
-                +oops_cycle);
+//        logger.debug(
+//                instr.toString()+"("+Common.byteToHex(opcode, true)+")\t"
+//                +addrmode+"\tBytes: "
+//                +bytes+"\tCycles: "
+//                +cycles+"\tOops cycle: "
+//                +oops_cycle);
 
         // Execute
         execute_instruction(instr, addrmode);
@@ -82,8 +82,8 @@ public class CPU {
 
         instructions ++;
 
-        logger.debug(registers.toString());
-        logger.debug("End of tick");
+//        logger.debug(registers.toString());
+//        logger.debug("End of tick");
     }
 
     private byte read_memory(short addr) {

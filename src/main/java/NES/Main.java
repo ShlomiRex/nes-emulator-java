@@ -22,8 +22,9 @@ public class Main {
         String donkey_kong_mapper3 = "6502_programs/donkey_kong/Donkey Kong Classics (U).nes";
         String donkey_kong_mapper0 = "6502_programs/donkey_kong/Donkey Kong (USA) (GameCube Edition).nes";
         String pacman = "6502_programs/pacman/Pac-Man (USA) (Namco).nes";
+        String scroll_test = "6502_programs/scroll_test/scroll.nes";
 
-        String program = pacman;
+        String program = greenscreen;
 
         Cartridge cartridge = ROMParser.parse_rom(program);
 
