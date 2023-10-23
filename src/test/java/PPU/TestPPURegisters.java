@@ -15,37 +15,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class TestPPURegisters {
-    @Before
-    public void setUp() {
-
-    }
-
-    /**
-     * PPUADDR is loopy_v, however when I write to PPUADDR, I write to loopy_t.
-     */
-//    @Test
-//    public void test_PPUADDR_write() {
-//        ppu.registers.writePPUADDR((byte) 0x12);
-//        ppu.registers.writePPUADDR((byte) 0x34);
-//        assertEquals(ppu.registers.getPPUADDR() & 0xFFFF, 0x1234);
-//
-//        ppu.registers.writePPUADDR((byte) 0x56);
-//        ppu.registers.writePPUADDR((byte) 0x78);
-//        assertEquals(ppu.registers.getPPUADDR() & 0xFFFF, 0x5678);
-//
-//        ppu.registers.writePPUADDR((byte) 0x9A);
-//        assertEquals(ppu.registers.getPPUADDR() & 0xFFFF, 0x9A78);
-//
-//        ppu.registers.writePPUADDR((byte) 0xBC);
-//        assertEquals(ppu.registers.getPPUADDR() & 0xFFFF, 0x9ABC);
-//
-//        ppu.registers.writePPUADDR((byte) 0xDE);
-//        assertEquals(ppu.registers.getPPUADDR() & 0xFFFF, 0xDEBC);
-//
-//        ppu.registers.writePPUADDR((byte) 0xF0);
-//        assertEquals(ppu.registers.getPPUADDR() & 0xFFFF, 0xDEF0);
-//    }
-
     @Test
     public void test_palette_write() {
         Bus bus = new Bus();
@@ -236,5 +205,125 @@ public class TestPPURegisters {
         assertFalse(nes.ppu.registers.w);
         assertEquals(nes.ppu.registers.fine_x_scroll, 0b101);
         assertEquals(nes.ppu.registers.loopy_v, 0b011110111110000);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * https://www.nesdev.org/wiki/PPU_scrolling#Details
+     */
+    @Test
+    public void test_split_xy_scroll_1() {
+        // TODO: Assembler needed. For now I just manually set the program bytes.
+        String[] program = {"LDA #$04", "STA $2006"};
+        Cartridge cartridge = Helper.createCustomCartridge(program);
+
+        NES nes = new NES(cartridge);
+
+        nes.cpu.registers.PC = (short) 0x8000;
+        nes.ppu.registers.loopy_t = 0;
+        nes.ppu.registers.loopy_v = 0;
+        nes.ppu.registers.fine_x_scroll = 0;
+        nes.ppu.registers.w = false;
+
+        nes.cpu.bus.cpuBus.cpu_write((short) 0x8000, (byte) 0xA9);
+        nes.cpu.bus.cpuBus.cpu_write((short) 0x8001, (byte) 0x04);
+
+        nes.cpu.bus.cpuBus.cpu_write((short) 0x8002, (byte) 0x8D);
+        nes.cpu.bus.cpuBus.cpu_write((short) 0x8003, (byte) 0x06);
+        nes.cpu.bus.cpuBus.cpu_write((short) 0x8004, (byte) 0x20);
+
+        nes.cpu.clock_tick();
+        nes.cpu.clock_tick();
+
+        assertEquals((nes.ppu.registers.loopy_t >> 8) & 0b1111111, 0b0000100);
+        assertTrue(nes.ppu.registers.w);
+    }
+
+    @Test
+    public void test_split_xy_scroll_2() {
+        // TODO: Assembler needed. For now I just manually set the program bytes.
+        String[] program = {"LDA #$3E", "STA $2005"};
+        Cartridge cartridge = Helper.createCustomCartridge(program);
+
+        NES nes = new NES(cartridge);
+
+        nes.cpu.registers.PC = (short) 0x8000;
+        nes.ppu.registers.loopy_t = 0b000010000000000;
+        nes.ppu.registers.loopy_v = 0;
+        nes.ppu.registers.fine_x_scroll = 0;
+        nes.ppu.registers.w = true;
+
+        nes.cpu.bus.cpuBus.cpu_write((short) 0x8000, (byte) 0xA9);
+        nes.cpu.bus.cpuBus.cpu_write((short) 0x8001, (byte) 0x3E);
+
+        nes.cpu.bus.cpuBus.cpu_write((short) 0x8002, (byte) 0x8D);
+        nes.cpu.bus.cpuBus.cpu_write((short) 0x8003, (byte) 0x05);
+        nes.cpu.bus.cpuBus.cpu_write((short) 0x8004, (byte) 0x20);
+
+        nes.cpu.clock_tick();
+        nes.cpu.clock_tick();
+
+        assertEquals((nes.ppu.registers.loopy_t >> 5) & 0b1111111111, 0b1100100111);
+        assertFalse(nes.ppu.registers.w);
+    }
+
+    @Test
+    public void test_split_xy_3() {
+        // TODO: Assembler needed. For now I just manually set the program bytes.
+        String[] program = {"LDA #$7D", "STA $2005"};
+        Cartridge cartridge = Helper.createCustomCartridge(program);
+
+        NES nes = new NES(cartridge);
+
+        nes.cpu.registers.PC = (short) 0x8000;
+        nes.ppu.registers.loopy_t = 0b110010011100000;
+        nes.ppu.registers.loopy_v = 0;
+        nes.ppu.registers.fine_x_scroll = 0;
+        nes.ppu.registers.w = false;
+
+        nes.cpu.bus.cpuBus.cpu_write((short) 0x8000, (byte) 0xA9);
+        nes.cpu.bus.cpuBus.cpu_write((short) 0x8001, (byte) 0x7D);
+
+        nes.cpu.bus.cpuBus.cpu_write((short) 0x8002, (byte) 0x8D);
+        nes.cpu.bus.cpuBus.cpu_write((short) 0x8003, (byte) 0x05);
+        nes.cpu.bus.cpuBus.cpu_write((short) 0x8004, (byte) 0x20);
+
+        nes.cpu.clock_tick();
+        nes.cpu.clock_tick();
+
+        assertEquals(nes.ppu.registers.loopy_t, 0b110010011101111);
+        assertTrue(nes.ppu.registers.w);
+        assertEquals(nes.ppu.registers.fine_x_scroll, 0b101);
+    }
+
+    @Test
+    public void test_split_xy_4() {
+        // TODO: Assembler needed. For now I just manually set the program bytes.
+        String[] program = {"LDA #$EF", "STA $2006"};
+        Cartridge cartridge = Helper.createCustomCartridge(program);
+
+        NES nes = new NES(cartridge);
+
+        nes.cpu.registers.PC = (short) 0x8000;
+        nes.ppu.registers.loopy_t = 0b110010011101111;
+        nes.ppu.registers.loopy_v = 0;
+        nes.ppu.registers.fine_x_scroll = 0b101;
+        nes.ppu.registers.w = true;
+
+        nes.cpu.bus.cpuBus.cpu_write((short) 0x8000, (byte) 0xA9);
+        nes.cpu.bus.cpuBus.cpu_write((short) 0x8001, (byte) 0xEF);
+
+        nes.cpu.bus.cpuBus.cpu_write((short) 0x8002, (byte) 0x8D);
+        nes.cpu.bus.cpuBus.cpu_write((short) 0x8003, (byte) 0x06);
+        nes.cpu.bus.cpuBus.cpu_write((short) 0x8004, (byte) 0x20);
+
+        nes.cpu.clock_tick();
+        nes.cpu.clock_tick();
+
+        assertEquals(nes.ppu.registers.loopy_t, 0b110010011101111);
+        assertEquals(nes.ppu.registers.loopy_v, 0b110010011101111);
+        assertFalse(nes.ppu.registers.w);
+        assertEquals(nes.ppu.registers.fine_x_scroll, 0b101);
     }
 }
