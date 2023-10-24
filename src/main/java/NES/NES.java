@@ -69,18 +69,33 @@ public class NES {
     }
 
     public void run() {
-        is_running = true;
+        try {
+            is_running = true;
 
-        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-        executor.scheduleAtFixedRate(() -> {
-            if(!is_running)
-                executor.shutdown();
+            ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+            executor.scheduleAtFixedRate(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if (!is_running)
+                            executor.shutdown();
 
-            cpu.clock_tick();
-            ppu.clock_tick();
-            ppu.clock_tick();
-            ppu.clock_tick();
-        }, 0, (long)(559 * SPEED_MODIFIER), TimeUnit.NANOSECONDS);
+                        cpu.clock_tick();
+                        ppu.clock_tick();
+                        ppu.clock_tick();
+                        ppu.clock_tick();
+                    } catch(Exception e) {
+                        logger.error("Error in NES.run() executor: ", e);
+                        is_running = false;
+                    }
+                }
+            }, 0, (long) (559 * SPEED_MODIFIER), TimeUnit.NANOSECONDS);
+//            executor.scheduleAtFixedRate(() -> {
+//
+//            }, 0, (long) (559 * SPEED_MODIFIER), TimeUnit.NANOSECONDS);
+        } catch(Throwable t) {
+            logger.error("Error in NES.run()", t);
+        }
     }
 
     public void stop() {

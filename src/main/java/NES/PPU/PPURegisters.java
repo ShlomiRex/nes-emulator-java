@@ -118,7 +118,6 @@ public class PPURegisters {
     }
 
     public void writePPUSCROLL(byte value) {
-        short s_value = value;
         if (w) {
             /*
             $2005 second write (w is 1)
@@ -126,8 +125,8 @@ public class PPURegisters {
             t: FGH..AB CDE..... <- d: ABCDEFGH
             w:                  <- 0
              */
-            loopy_t = (short) ((loopy_t & 0b000_11_11111_11111) | ((s_value & 0b111) << 12)); // fine_y
-            loopy_t = (short) ((loopy_t & 0b111_11_00000_11111) | ((s_value & 0b11111_000) << 2)); // coarse_y
+            loopy_t = (short) ((loopy_t & 0b000_11_11111_11111) | (((short) value & 0b111) << 12)); // fine_y
+            loopy_t = (short) ((loopy_t & 0b111_11_00000_11111) | (((short) value & 0b11111_000) << 2)); // coarse_y
         } else {
             /*
             $2005 first write (w is 0)
@@ -136,8 +135,8 @@ public class PPURegisters {
             x:              FGH <- d: .....FGH
             w:                  <- 1
              */
-            fine_x_scroll = (byte) (s_value & 0b111); // fine_x
-            loopy_t = (short) ((loopy_t & 0b111_11_11111_00000) | (s_value >> 3)); // coarse_x
+            fine_x_scroll = (byte) ((short) value & 0b111); // fine_x
+            loopy_t = (short) ((loopy_t & 0b111_11_11111_00000) | ((short) value >> 3)); // coarse_x
         }
 
         w = !w;
