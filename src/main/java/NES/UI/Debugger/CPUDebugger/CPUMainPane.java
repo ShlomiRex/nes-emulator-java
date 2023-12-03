@@ -16,7 +16,6 @@ public class CPUMainPane extends JPanel {
 
     public CPUMainPane(NES nes, AssemblyTextPane assembly_text_pane) {
         setBorder(BorderFactory.createTitledBorder("CPU"));
-        //setPreferredSize(new Dimension(400, 250));
 
         CPU cpu = nes.cpu;
         Bus bus = nes.bus;
@@ -37,7 +36,11 @@ public class CPUMainPane extends JPanel {
 
         box_pane.add(cycles_pane);
         box_pane.add(num_instr_pane);
-        add(box_pane);
+
+        JScrollPane scroll_pane = new JScrollPane(box_pane);
+
+
+        add(scroll_pane);
     }
 
     // Called when we need to update the PPU panel

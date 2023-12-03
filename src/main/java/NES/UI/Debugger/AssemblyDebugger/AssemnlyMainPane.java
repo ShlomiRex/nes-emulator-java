@@ -10,7 +10,6 @@ public class AssemnlyMainPane extends JPanel {
     public final AssemblyTextPane assembly_text_area;
 
     public AssemnlyMainPane(NES nes) {
-
         setBorder(BorderFactory.createLoweredBevelBorder());
 
         assembly_text_area = new AssemblyTextPane(nes);
@@ -19,8 +18,9 @@ public class AssemnlyMainPane extends JPanel {
         assembly_text_area.highlight_current_instruction();
 
         JScrollPane scrollPane = new JScrollPane(assembly_text_area);
-        assembly_text_area.setScrollPane(scrollPane);
         scrollPane.setPreferredSize(new Dimension(300, 600));
+        assembly_text_area.setScrollPane(scrollPane);
+
         add(scrollPane);
     }
 

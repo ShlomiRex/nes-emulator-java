@@ -4,27 +4,31 @@ import NES.Common;
 import NES.PPU.PPU;
 
 import javax.swing.*;
-import javax.swing.plaf.metal.MetalToolTipUI;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class PatternTilePane extends JPanel {
     private final PPU ppu;
-    private byte tile_index;
-    private final boolean is_left_pattern_table;
+    public byte tile_index;
+    public int palette_index; // 0-3
 
     private final int panel_width, panel_height;
+
+    private int[][] pattern = new int[8][8]; // Each pixel is 0-3 (which represents the color index in the palette)
 
     public PatternTilePane(PPU ppu,
                            int panel_width,
                            int panel_height,
                            byte tile_index,
+                           int palette_index,
                            boolean is_left_pattern_table,
                            JLabel selected_tile_label) {
         this.ppu = ppu;
         this.tile_index = tile_index;
-        this.is_left_pattern_table = is_left_pattern_table;
+        this.palette_index = palette_index;
+        if (palette_index != 0)
+            System.out.println(palette_index);
 
         this.panel_width = panel_width;
         this.panel_height = panel_height;
@@ -49,10 +53,12 @@ public class PatternTilePane extends JPanel {
         });
 
         setToolTipText("");
+
+        ppu.set_pattern_tile(tile_index, is_left_pattern_table, pattern);
     }
 
-    public PatternTilePane(PPU ppu, byte tile_index, boolean is_left_pattern_table, JLabel selected_tile_label) {
-        this(ppu, 16, 16, tile_index, is_left_pattern_table, selected_tile_label);
+    public PatternTilePane(PPU ppu, byte tile_index, int palette_index, boolean is_left_pattern_table, JLabel selected_tile_label) {
+        this(ppu, 16, 16, tile_index, palette_index, is_left_pattern_table, selected_tile_label);
     }
 
     /**
@@ -62,20 +68,13 @@ public class PatternTilePane extends JPanel {
      * @param container_height
      */
     protected void paintTile(Graphics g, int container_width, int container_height) {
-
-        Color[][] pixels = ppu.get_pattern_tile(tile_index, is_left_pattern_table);
-
-        Color first_background_color = ppu.get_palette(0).getB();
-        g.setColor(first_background_color);
-        g.fillRect(0, 0, container_width, container_height);
-
         int pixel_width = container_width / 8;
         int pixel_height = container_height / 8;
 
-        g.setColor(Color.WHITE); //TODO: Use color index instead of checking (pixel != 0)
         for (int row = 0; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
-                Color c = pixels[row][col];
+                int pixelValue = pattern[row][col];
+                Color c = ppu.get_palette(pixelValue + palette_index * 4).getB();
                 g.setColor(c);
                 g.fillRect(col * pixel_width, row * pixel_height, pixel_width, pixel_height);
             }
@@ -84,7 +83,7 @@ public class PatternTilePane extends JPanel {
 
     @Override
     protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
+        //super.paintComponent(g);
         paintTile(g, panel_width, panel_height);
     }
 
@@ -96,5 +95,9 @@ public class PatternTilePane extends JPanel {
     public void change_tile_index(byte tile_index) {
         this.tile_index = tile_index;
         repaint();
+    }
+
+    public void set_palette(int paletteIndex) {
+        this.palette_index = paletteIndex;
     }
 }

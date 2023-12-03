@@ -35,6 +35,9 @@ public class PatternTileTooltip extends JToolTip {
             // Draw white border so it's easier to see
             g.setColor(Color.WHITE);
             g.drawRect(0, 0, WIDTH, HEIGHT);
+
+            g.drawString("Tile: $" + pattern_tile_pane.tile_index, 0, 10);
+            g.drawString("Palette: " + pattern_tile_pane.palette_index, 0, 20);
         }
 
         @Override

@@ -20,36 +20,24 @@ public class DebuggerWindow extends JFrame {
         Image img_icon = new ImageIcon("resources/NES_icon.png").getImage();
         setIconImage(img_icon);
 
-        JPanel main_pane = new JPanel();
-
-        main_pane.setLayout(new BoxLayout(main_pane, BoxLayout.PAGE_AXIS));
-
         AssemnlyMainPane assembly_main_pane = new AssemnlyMainPane(nes);
-        CPUMainPane main_cpu_debugging_pane = new CPUMainPane(nes, assembly_main_pane.assembly_text_area);
-        JPanel main_ppu_debugging_pane = new PPUMainPane(nes, main_cpu_debugging_pane, assembly_main_pane.assembly_text_area);
+        JSplitPane main_pane = createMainPane(nes, assembly_main_pane); // right to assembly pane
 
-        JScrollPane cpu_scroll_pane = new JScrollPane(main_cpu_debugging_pane);
-        JScrollPane ppu_scroll_pane = new JScrollPane(main_ppu_debugging_pane);
-
-        Runnable repaint_ppu_pane = main_ppu_debugging_pane::repaint;
-
-        main_cpu_debugging_pane.setRepaintPpuPane(repaint_ppu_pane);
-
-        main_pane.add(cpu_scroll_pane);
-        main_pane.add(ppu_scroll_pane);
-
-        add(assembly_main_pane, BorderLayout.LINE_START);
         add(main_pane, BorderLayout.CENTER);
 
-        //pack();
-        setExtendedState(JFrame.MAXIMIZED_BOTH);
-
-
+        setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
         setVisible(true);
         setLocationRelativeTo(null);
     }
 
-    public Runnable getUpdateRunnable() {
-        return this::repaint;
+    private JSplitPane createMainPane(NES nes, AssemnlyMainPane assembly_main_pane) {
+        CPUMainPane pane_cpu = new CPUMainPane(nes, assembly_main_pane.assembly_text_area);
+        PPUMainPane pane_ppu = new PPUMainPane(nes, pane_cpu, assembly_main_pane.assembly_text_area);
+        JSplitPane vert_split = new JSplitPane(JSplitPane.VERTICAL_SPLIT, pane_cpu, pane_ppu);
+        JSplitPane hori_split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, assembly_main_pane, vert_split);
+
+        pane_cpu.setRepaintPpuPane(pane_ppu::repaint);
+
+        return hori_split;
     }
 }

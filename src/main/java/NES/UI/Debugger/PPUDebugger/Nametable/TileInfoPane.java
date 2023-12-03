@@ -110,7 +110,8 @@ public class TileInfoPane extends JPanel {
         row8_pane.add(lbl_palette_addr);
         row8_pane.add(txt_palette_addr);
 
-        pattern_tile = new PatternTilePane(ppu, 8 * SCALE, 8 * SCALE, (byte)0, true, null);
+        int palette_index = 0; // TODO: Change this
+        pattern_tile = new PatternTilePane(ppu, 8 * SCALE, 8 * SCALE, (byte)0, palette_index, true, null);
         last_row_pane.add(pattern_tile);
 
         add(row1_pane);

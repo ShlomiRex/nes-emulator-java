@@ -21,6 +21,7 @@ public class AssemblyTextPane extends JTextPane {
 
     private final Highlighter highlighter;
     private final AssemblyStyledDocument styledDocument;
+    private final int lines_to_display = 1024 * 0;
 
     public AssemblyTextPane(NES nes) {
         this.cpuRegisters = nes.cpu.registers;
@@ -28,7 +29,7 @@ public class AssemblyTextPane extends JTextPane {
         this.highlighter = getHighlighter();
         this.highlightPainter = new DefaultHighlighter.DefaultHighlightPainter(Color.YELLOW);
         this.styledDocument = new AssemblyStyledDocument(
-                this, nes.cpu_memory, true, 1024 * 1);
+                this, nes.cpu_memory, true, lines_to_display);
 
         setEditable(false);
         setFont(new Font("monospaced", Font.PLAIN, 12));
@@ -48,7 +49,8 @@ public class AssemblyTextPane extends JTextPane {
                 = styledDocument.get_assembly_line(pc);
         if (structure == null) {
             // do not throw exception, the assembly line to highlight is not loaded.
-            logger.error("Assembly line to highlight is not loaded, PC: {}", Common.shortToHex(pc, true));
+            if (lines_to_display > 0)
+                logger.error("Assembly line to highlight is not loaded, PC: {}", Common.shortToHex(pc, true));
             return;
         }
         int start_offset = structure.document_offset();

@@ -1,8 +1,6 @@
 package NES.PPU;
 
 import NES.Bus.Bus;
-import NES.Bus.PPUBus;
-import NES.Cartridge.Mirroring;
 import NES.Common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
-import java.awt.image.Raster;
 
 public class PPU {
     private final Logger logger = LoggerFactory.getLogger(PPU.class);
@@ -431,29 +428,26 @@ public class PPU {
         this.bus = bus;
     }
 
-    public Color[][] get_pattern_tile(int tile_index, boolean is_left_nametable) {
+    public void set_pattern_tile(int tile_index, boolean is_left_nametable, int[][] dest_pattern) {
         // Each pattern tile is 16 bytes in size. We jump by 16 bytes.
         // The tile index can be 0x0-0xFF, but the actual bytes needed are 0xFF times 16, which fits in u16.
         short addr = (short) ((tile_index & 0xFF) * 16);
         if (!is_left_nametable)
             addr += (16 * 0xFF);
-        //TODO: This can cause regression problems. A lot of copying memory, each tile, for each frame?
-        // For now I leave this as is
-        // A tile (16 bytes), regular tile from CHR ROM.
+
+        // The pattern in bit planes (each plane = 8 bytes)
         byte[] tile = new byte[16];
         System.arraycopy(bus.ppuBus.chr_rom, (addr & 0xFFFF), tile, 0, 16);
-        //TODO: This may cause regression since we call this for each tile, for each frame.
-        // For now I leave this as is. I need to not create new objects for each tile.
-        byte[][] pixels = new byte[8][8]; // Each pixel is 1 byte with values 0,1,2 or 3. No more.
-        // Loop over bit planes (each plane = 8 bytes)
-        for(int i = 0; i < 8; i++) {
-            byte bit_plane_1_byte = tile[i];
-            byte bit_plane_2_byte = tile[8 + i];
-            // Loop over byte bits
-            for (int j = 0; j < 8; j++) {
-                boolean bit_plane_1 = Common.Bits.getBit(bit_plane_1_byte, j);
-                boolean bit_plane_2 = Common.Bits.getBit(bit_plane_2_byte, j);
-                byte pixelValue = 0; // both are on
+
+        // Set final pixels
+        for (int row = 0; row < 8; row++) {
+            byte bit_plane_1_byte = tile[row];
+            byte bit_plane_2_byte = tile[8 + row];
+
+            for (int col = 0; col < 8; col++) {
+                boolean bit_plane_1 = Common.Bits.getBit(bit_plane_1_byte, col);
+                boolean bit_plane_2 = Common.Bits.getBit(bit_plane_2_byte, col);
+                int pixelValue = 0; // both are on
                 if (bit_plane_1 && !bit_plane_2) {
                     pixelValue = 1; // bit in bit plane 1 is on, bit in bit plane 2 is off
                 } else if (!bit_plane_1 && bit_plane_2) {
@@ -461,17 +455,9 @@ public class PPU {
                 } else if (bit_plane_1 && bit_plane_2) {
                     pixelValue = 3; // both are off
                 }
-                pixels[i][7 - j] = pixelValue;
+
+                dest_pattern[row][7 - col] = pixelValue;
             }
         }
-        Color[][] final_pixels = new Color[8][8];
-        for (int row = 0; row < 8; row++) {
-            for (int col = 0; col < 8; col++) {
-                byte color_index = pixels[row][col];
-                Color color = get_palette(color_index).getB();
-                final_pixels[row][col] = color;
-            }
-        }
-        return final_pixels;
     }
 }

@@ -42,12 +42,12 @@ public class PPUMainPane extends JPanel {
         JPanel cycles_pane = new CyclesPane(ppu);
         JPanel scanline_pane = new ScanlinePane(ppu);
         JPanel frame_pane = new FramePane(ppu);
-        JPanel registers_pane = new PPURegistersPan(ppu.registers);
-        JPanel vblank_pane = new VBlankPane(ppu);
-        JPanel pattern_tables_pane = new PatternTablesPane(ppu);
-        JPanel system_palette_pane = new SystemPalettePane();
-        JPanel palette_memory_pane = new PaletteMemoryPane(ppu);
-        JPanel nametable_pane = new NametablePane(ppu, header.getMirrorType());
+        JPanel registers_pane = new PPURegistersPan(ppu.registers); // PPU registers
+        JPanel vblank_pane = new VBlankPane(ppu); // VBlank flag checkbox
+        PatternTablesPane pattern_tables_pane = new PatternTablesPane(ppu); // 2 Pattern tables
+        JPanel system_palette_pane = new SystemPalettePane(); // System palette
+        JPanel palette_memory_pane = new PaletteMemoryPane(ppu, pattern_tables_pane); // Palette RAM
+        JPanel nametable_pane = new NametablePane(ppu, header.getMirrorType()); // 2 Nametables
 
         // Add panels
         status_info_pane.add(cycles_pane);
@@ -67,8 +67,9 @@ public class PPUMainPane extends JPanel {
 
         box_pane.add(top_flow_pane);
         box_pane.add(bottom_flow_pane);
-        box_pane.add(nametable_pane);
+//        box_pane.add(nametable_pane);
 
+//        JScrollPane scroll_pane = new JScrollPane(box_pane);
         add(box_pane);
     }
 }

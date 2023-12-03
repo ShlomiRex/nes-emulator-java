@@ -2,19 +2,19 @@ package NES.UI.Debugger.PPUDebugger.Palette;
 
 import NES.Common;
 import NES.PPU.PPU;
+import NES.UI.Debugger.PPUDebugger.PatternTable.PatternTablesPane;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 
 public class PaletteMemoryPane extends JPanel {
 
     private final PPU ppu;
     private final PaletteTilePane[] palette_tiles = new PaletteTilePane[32];
 
-    public PaletteMemoryPane(PPU ppu) {
+    public PaletteMemoryPane(PPU ppu, PatternTablesPane patternTablesPane) {
         this.ppu = ppu;
         TitledBorder titledBorder = BorderFactory.createTitledBorder("Palette RAM");
         setBorder(titledBorder);
@@ -65,6 +65,23 @@ public class PaletteMemoryPane extends JPanel {
 
             add(tile, gbc);
         }
+
+        add(new JSeparator(JSeparator.HORIZONTAL));
+        add(new JLabel("Use palette: "));
+        String[] comboOptions = {"1", "2", "3", "4"};
+        JComboBox comboBox = new JComboBox(comboOptions);
+
+        comboBox.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    String selected = (String) e.getItem();
+                    int palette = Integer.parseInt(selected) - 1; // Since index starts at 0
+                    patternTablesPane.changePalette(palette);
+                }
+            }
+        });
+        add(comboBox);
     }
 
     @Override
