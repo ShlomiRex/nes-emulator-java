@@ -1,9 +1,11 @@
 package NES.UI.Debugger.CPUDebugger;
 
 import NES.CPU.CPU;
+import NES.UI.Debugger.DebuggerWindow;
 
 import javax.swing.*;
 import java.awt.*;
+import java.text.DecimalFormat;
 
 public class CyclesPane extends JPanel {
 
@@ -21,6 +23,6 @@ public class CyclesPane extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        cpu_cycles.setText(""+cpu.cycles);
+        cpu_cycles.setText(DebuggerWindow.DECIMAL_FORMAT.format(cpu.cycles));
     }
 }

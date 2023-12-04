@@ -82,13 +82,14 @@ public class PaletteTilePane extends JPanel {
             g.drawString(Common.byteToHex((byte) tile_index, false), 0, container_height / 3);
         } else {
             // Tooltip draw as hex in the middle
-            g.setFont(new Font("Serif", Font.PLAIN, 22));
-            g.drawString(Common.byteToHex((byte) tile_index, true), container_width / 4, container_height / 2);
+            int bigFontSize = 22;
+            g.setFont(new Font("Serif", Font.PLAIN, bigFontSize));
+            g.drawString(Common.byteToHex((byte) tile_index, true), 0, bigFontSize);
 
-            g.setFont(new Font("Serif", Font.PLAIN, 16));
-
+            int smallFontSize = 16;
+            g.setFont(new Font("Serif", Font.PLAIN, smallFontSize));
             if (tile_index != 0x0D)
-                g.drawString("RGB: ("+color.getRed()+", "+color.getGreen()+", "+color.getBlue()+")", 0, container_height / 4 * 3);
+                g.drawString("RGB: ("+color.getRed()+", "+color.getGreen()+", "+color.getBlue()+")", 0, bigFontSize + smallFontSize);
             else
                 g.drawString("Blacker than black", 0, container_height / 4 * 3);
         }

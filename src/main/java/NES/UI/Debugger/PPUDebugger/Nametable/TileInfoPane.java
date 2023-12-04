@@ -65,7 +65,7 @@ public class TileInfoPane extends JPanel {
         txt_palette_addr.setEditable(false);
 
 
-        int palette_index = 0; // TODO: Change this
+        int palette_index = 0; // TODO: Change this, or get as parameter
         pattern_tile = new PatternTilePane(ppu,
                 8 * SCALE, 8 * SCALE, (byte)0,
                 palette_index, true);
@@ -74,7 +74,6 @@ public class TileInfoPane extends JPanel {
         JCheckBox chk_tile_grid = new JCheckBox("Show Tile Grid");
         JCheckBox chk_attr_grid = new JCheckBox("Show Attribute Grid");
 
-        chk_tile_grid.setSelected(true);
         chk_tile_grid.addActionListener(e -> {
             nametable_pane.setShowTileGrid(chk_tile_grid.isSelected());
         });

@@ -7,8 +7,11 @@ import NES.UI.Debugger.PPUDebugger.PPUMainPane;
 
 import javax.swing.*;
 import java.awt.*;
+import java.text.DecimalFormat;
 
 public class DebuggerWindow extends JFrame {
+
+    public static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#,###");
 
     public DebuggerWindow(NES nes) {
         setTitle("Java NES Emulator - Debugger");

@@ -1,6 +1,7 @@
 package NES.UI.Debugger.CPUDebugger;
 
 import NES.CPU.CPU;
+import NES.UI.Debugger.DebuggerWindow;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,6 +21,6 @@ public class NumInstructionsPane extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        num_instructions.setText(""+cpu.instructions);
+        num_instructions.setText(DebuggerWindow.DECIMAL_FORMAT.format(cpu.instructions));
     }
 }
