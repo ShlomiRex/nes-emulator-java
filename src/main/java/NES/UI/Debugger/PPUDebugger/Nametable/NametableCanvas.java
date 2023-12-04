@@ -40,9 +40,7 @@ public class NametableCanvas extends JPanel {
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, getWidth(), getHeight());
 
-        // TODO: Uncomment this to draw the nametable
-        //ppu.draw_nametable(g, table_index, getWidth(), getHeight());
-        ppu.draw_frame(g, getWidth(), getHeight());
+        draw_nametable(g);
 
         // Draw tile grid
         if (show_tile_grid) {
@@ -143,6 +141,14 @@ public class NametableCanvas extends JPanel {
         // Draw the hovered tile block
         g.setColor(color);
         g.drawRect(canvas_x + x_offset, canvas_y + y_offset, 8 * SCALE * 2, 8 * SCALE * 2);
+    }
+
+    private void draw_nametable(Graphics g) {
+        int width = getWidth();
+        int height = getHeight();
+
+        // TODO: This is not really rendering nametables. It's rendering the entire PPU frame.
+        ppu.draw_frame(g, width, height);
     }
 
     public void setShowTileGrid(boolean isShow) {

@@ -22,8 +22,7 @@ public class PatternTilePane extends JPanel {
                            int panel_height,
                            byte tile_index,
                            int palette_index,
-                           boolean is_left_pattern_table,
-                           JLabel selected_tile_label) {
+                           boolean is_left_pattern_table) {
         this.ppu = ppu;
         this.tile_index = tile_index;
         this.palette_index = palette_index;
@@ -34,31 +33,12 @@ public class PatternTilePane extends JPanel {
         this.panel_height = panel_height;
 
         setPreferredSize(new Dimension(panel_width, panel_height));
-        addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                super.mouseEntered(e);
-                setBorder(BorderFactory.createLineBorder(Color.BLUE, 2));
-                if (selected_tile_label != null)
-                    selected_tile_label.setText("Tile: $" + Common.byteToHex(tile_index, false));
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                super.mouseExited(e);
-                setBorder(BorderFactory.createEmptyBorder());
-                if (selected_tile_label != null)
-                    selected_tile_label.setText("Tile:");
-            }
-        });
-
-        setToolTipText("");
 
         ppu.set_pattern_tile(tile_index, is_left_pattern_table, pattern);
     }
 
-    public PatternTilePane(PPU ppu, byte tile_index, int palette_index, boolean is_left_pattern_table, JLabel selected_tile_label) {
-        this(ppu, 16, 16, tile_index, palette_index, is_left_pattern_table, selected_tile_label);
+    public PatternTilePane(PPU ppu, byte tile_index, int palette_index, boolean is_left_pattern_table) {
+        this(ppu, 16, 16, tile_index, palette_index, is_left_pattern_table);
     }
 
     /**
@@ -85,11 +65,6 @@ public class PatternTilePane extends JPanel {
     protected void paintComponent(Graphics g) {
         //super.paintComponent(g);
         paintTile(g, panel_width, panel_height);
-    }
-
-    @Override
-    public JToolTip createToolTip() {
-        return new PatternTileTooltip(this);
     }
 
     public void change_tile_index(byte tile_index) {

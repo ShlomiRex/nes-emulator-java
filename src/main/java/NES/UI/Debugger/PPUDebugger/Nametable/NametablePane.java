@@ -50,8 +50,6 @@ public class NametablePane extends JPanel {
         wrapper2.setBorder(BorderFactory.createTitledBorder("Nametable 3"));
         wrapper3.setBorder(BorderFactory.createTitledBorder("Nametable 4"));
 
-        info_pane.setBorder(BorderFactory.createTitledBorder("Tile info"));
-
         top_pane.add(wrapper0);
         top_pane.add(wrapper1);
 
@@ -90,12 +88,38 @@ public class NametablePane extends JPanel {
                 canvas.tile_selected = selected_tile;
                 mirrored.tile_selected = selected_tile;
 
+                // TODO: Get the other canvases, and 'clear' them
+                NametableCanvas other_canvas1 = null;
+                NametableCanvas other_canvas2 = null;
+                if (mirroring == Mirroring.HORIZONTAL) {
+                    if (table_index == 0 || table_index == 1) {
+                        other_canvas1 = canvas2;
+                        other_canvas2 = canvas3;
+                    } else {
+                        other_canvas1 = canvas0;
+                        other_canvas2 = canvas1;
+                    }
+                } else {
+                    if (table_index == 0 || table_index == 2) {
+                        other_canvas1 = canvas1;
+                        other_canvas2 = canvas3;
+                    } else {
+                        other_canvas1 = canvas0;
+                        other_canvas2 = canvas2;
+                    }
+                }
+
+                other_canvas1.tile_selected = -1;
+                other_canvas2.tile_selected = -1;
+
                 // Update info pane
                 info_pane.setSelectedTile(selected_tile, table_index);
 
                 // Repaint
                 canvas.repaint();
                 mirrored.repaint();
+                other_canvas1.repaint();
+                other_canvas2.repaint();
                 info_pane.repaint();
             }
 

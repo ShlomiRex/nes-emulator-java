@@ -88,7 +88,7 @@ public class PaletteTilePane extends JPanel {
             g.setFont(new Font("Serif", Font.PLAIN, 16));
 
             if (tile_index != 0x0D)
-                g.drawString("Color: ("+color.getRed()+", "+color.getGreen()+", "+color.getBlue()+")", 0, container_height / 4 * 3);
+                g.drawString("RGB: ("+color.getRed()+", "+color.getGreen()+", "+color.getBlue()+")", 0, container_height / 4 * 3);
             else
                 g.drawString("Blacker than black", 0, container_height / 4 * 3);
         }

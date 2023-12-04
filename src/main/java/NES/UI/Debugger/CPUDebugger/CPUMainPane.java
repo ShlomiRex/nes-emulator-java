@@ -37,10 +37,7 @@ public class CPUMainPane extends JPanel {
         box_pane.add(cycles_pane);
         box_pane.add(num_instr_pane);
 
-        JScrollPane scroll_pane = new JScrollPane(box_pane);
-
-
-        add(scroll_pane);
+        add(box_pane);
     }
 
     // Called when we need to update the PPU panel
