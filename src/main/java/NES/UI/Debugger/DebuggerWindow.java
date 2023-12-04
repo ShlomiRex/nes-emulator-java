@@ -33,7 +33,10 @@ public class DebuggerWindow extends JFrame {
     private JSplitPane createMainPane(NES nes, AssemnlyMainPane assembly_main_pane) {
         CPUMainPane pane_cpu = new CPUMainPane(nes, assembly_main_pane.assembly_text_area);
         PPUMainPane pane_ppu = new PPUMainPane(nes, pane_cpu, assembly_main_pane.assembly_text_area);
-        JSplitPane vert_split = new JSplitPane(JSplitPane.VERTICAL_SPLIT, pane_cpu, pane_ppu);
+
+        JScrollPane scrollPane = new JScrollPane(pane_ppu);
+
+        JSplitPane vert_split = new JSplitPane(JSplitPane.VERTICAL_SPLIT, pane_cpu, scrollPane);
         JSplitPane hori_split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, assembly_main_pane, vert_split);
 
         pane_cpu.setRepaintPpuPane(pane_ppu::repaint);

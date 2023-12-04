@@ -138,6 +138,7 @@ public class TileInfoPane extends JPanel {
     }
 
     public void setSelectedTile(int selected_tile_index, int table_index) {
+        logger.debug("Selected tile index: {}", selected_tile_index);
         int selected_col = selected_tile_index % 32;
         int selected_row = (selected_tile_index - selected_col) / 30;
 
@@ -168,7 +169,7 @@ public class TileInfoPane extends JPanel {
         //short attr_addr = (short) (ppu_addr - (ppu_addr % 0x400) + 0x3C0 + (selected_col / 4) + (selected_row / 4)*8); // TODO: Uncomment, calculation incorrect
 
 
-        byte patternTileIndex = ppu.read(ppu_addr);
+        byte patternTileIndex = (byte) (ppu.read(ppu_addr) & 0xFF);
         logger.debug("Selected pattern tile index: {}", patternTileIndex);
 
         // Update fields
@@ -183,5 +184,10 @@ public class TileInfoPane extends JPanel {
 
         // Update parameters
         this.selected_tile_index = patternTileIndex;
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
     }
 }

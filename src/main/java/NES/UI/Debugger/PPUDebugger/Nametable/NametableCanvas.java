@@ -18,13 +18,13 @@ public class NametableCanvas extends JPanel {
     private static final int ROWS = 30;
     private static final int COLUMNS = 32;
 
-    public static final int SCALE = 2;
+    public static final int SCALE = 1;
 
     protected int tile_hover = -1;
     protected int tile_selected = -1;
     public final int table_index;
     private final PPU ppu;
-    private boolean show_tile_grid = true;
+    private boolean show_tile_grid = false;
     private boolean show_attribute_grid = false;
 
     private final Stroke thickStroke = new BasicStroke(4);
@@ -42,6 +42,7 @@ public class NametableCanvas extends JPanel {
 
         // TODO: Uncomment this to draw the nametable
         //ppu.draw_nametable(g, table_index, getWidth(), getHeight());
+        ppu.draw_frame(g, getWidth(), getHeight());
 
         // Draw tile grid
         if (show_tile_grid) {

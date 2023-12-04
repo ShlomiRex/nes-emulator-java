@@ -45,10 +45,10 @@ public class NametablePane extends JPanel {
         wrapper2.add(canvas2);
         wrapper3.add(canvas3);
 
-        wrapper0.setBorder(BorderFactory.createTitledBorder("Nametable 0"));
-        wrapper1.setBorder(BorderFactory.createTitledBorder("Nametable 1"));
-        wrapper2.setBorder(BorderFactory.createTitledBorder("Nametable 2"));
-        wrapper3.setBorder(BorderFactory.createTitledBorder("Nametable 3"));
+        wrapper0.setBorder(BorderFactory.createTitledBorder("Nametable 1"));
+        wrapper1.setBorder(BorderFactory.createTitledBorder("Nametable 2"));
+        wrapper2.setBorder(BorderFactory.createTitledBorder("Nametable 3"));
+        wrapper3.setBorder(BorderFactory.createTitledBorder("Nametable 4"));
 
         info_pane.setBorder(BorderFactory.createTitledBorder("Tile info"));
 

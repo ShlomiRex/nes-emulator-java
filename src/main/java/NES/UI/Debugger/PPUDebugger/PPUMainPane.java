@@ -67,9 +67,8 @@ public class PPUMainPane extends JPanel {
 
         box_pane.add(top_flow_pane);
         box_pane.add(bottom_flow_pane);
-//        box_pane.add(nametable_pane);
+        box_pane.add(nametable_pane);
 
-//        JScrollPane scroll_pane = new JScrollPane(box_pane);
         add(box_pane);
     }
 }
