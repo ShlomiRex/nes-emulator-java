@@ -428,11 +428,11 @@ public class PPU {
         this.bus = bus;
     }
 
-    public void set_pattern_tile(int tile_index, boolean is_left_nametable, int[][] dest_pattern) {
+    public void set_pattern_tile(int tile_index, boolean is_left_pattern_table, int[][] dest_pattern) {
         // Each pattern tile is 16 bytes in size. We jump by 16 bytes.
         // The tile index can be 0x0-0xFF, but the actual bytes needed are 0xFF times 16, which fits in u16.
         short addr = (short) ((tile_index & 0xFF) * 16);
-        if (!is_left_nametable)
+        if (!is_left_pattern_table)
             addr += (16 * 0xFF);
 
         // The pattern in bit planes (each plane = 8 bytes)

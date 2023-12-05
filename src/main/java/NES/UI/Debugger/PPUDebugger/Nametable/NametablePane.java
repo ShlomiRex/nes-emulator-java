@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -20,8 +21,6 @@ public class NametablePane extends JPanel {
     public NametablePane(PPU ppu, Mirroring mirroring) {
         this.mirroring = mirroring;
 
-        JPanel top_pane = new JPanel();
-        JPanel bot_pane = new JPanel();
         JPanel box_pane = new JPanel();
         JPanel right_pane = new JPanel();
 
@@ -35,40 +34,37 @@ public class NametablePane extends JPanel {
         canvas2 = new NametableCanvas(ppu, 2);
         canvas3 = new NametableCanvas(ppu, 3);
 
-        JPanel wrapper0 = new JPanel();
-        JPanel wrapper1 = new JPanel();
-        JPanel wrapper2 = new JPanel();
-        JPanel wrapper3 = new JPanel();
+        GridBagLayout layout = new GridBagLayout();
+        GridBagConstraints gbc = createGbc(0, 0);
 
-        wrapper0.add(canvas0);
-        wrapper1.add(canvas1);
-        wrapper2.add(canvas2);
-        wrapper3.add(canvas3);
+        JPanel canvas_container = new JPanel(layout);
+        canvas_container.setBorder(BorderFactory.createTitledBorder("Nametables"));
 
-        wrapper0.setBorder(BorderFactory.createTitledBorder("Nametable 1"));
-        wrapper1.setBorder(BorderFactory.createTitledBorder("Nametable 2"));
-        wrapper2.setBorder(BorderFactory.createTitledBorder("Nametable 3"));
-        wrapper3.setBorder(BorderFactory.createTitledBorder("Nametable 4"));
-
-        top_pane.add(wrapper0);
-        top_pane.add(wrapper1);
-
-        bot_pane.add(wrapper2);
-        bot_pane.add(wrapper3);
-
-        box_pane.add(top_pane);
-        box_pane.add(bot_pane);
+        canvas_container.add(canvas0, createGbc(0, 0));
+        canvas_container.add(canvas1, createGbc(1, 0));
+        canvas_container.add(canvas2, createGbc(0, 1));
+        canvas_container.add(canvas3, createGbc(1, 1));
 
         right_pane.add(new JLabel("Mirroring: " + mirroring.toString()));
         right_pane.add(info_pane);
 
-        add(box_pane);
+        add(canvas_container);
         add(right_pane);
 
         bind_canvas_mouse_events(canvas0);
         bind_canvas_mouse_events(canvas1);
         bind_canvas_mouse_events(canvas2);
         bind_canvas_mouse_events(canvas3);
+    }
+
+    private static GridBagConstraints createGbc(int x, int y) {
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = x;
+        gbc.gridy = y;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        int gap = 3;
+        gbc.insets = new Insets(gap, gap, gap, gap);
+        return gbc;
     }
 
     private void bind_canvas_mouse_events(NametableCanvas canvas) {
@@ -88,9 +84,8 @@ public class NametablePane extends JPanel {
                 canvas.tile_selected = selected_tile;
                 mirrored.tile_selected = selected_tile;
 
-                // TODO: Get the other canvases, and 'clear' them
-                NametableCanvas other_canvas1 = null;
-                NametableCanvas other_canvas2 = null;
+                NametableCanvas other_canvas1;
+                NametableCanvas other_canvas2;
                 if (mirroring == Mirroring.HORIZONTAL) {
                     if (table_index == 0 || table_index == 1) {
                         other_canvas1 = canvas2;
@@ -113,7 +108,7 @@ public class NametablePane extends JPanel {
                 other_canvas2.tile_selected = -1;
 
                 // Update info pane
-                info_pane.setSelectedTile(selected_tile, table_index);
+                info_pane.change_pattern_and_palette(selected_tile, table_index);
 
                 // Repaint
                 canvas.repaint();

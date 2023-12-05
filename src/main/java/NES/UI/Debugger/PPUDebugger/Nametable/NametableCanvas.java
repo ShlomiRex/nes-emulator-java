@@ -27,7 +27,7 @@ public class NametableCanvas extends JPanel {
     private boolean show_tile_grid = false;
     private boolean show_attribute_grid = false;
 
-    private final Stroke thickStroke = new BasicStroke(4);
+    private final Stroke thickStroke = new BasicStroke(2);
 
     public NametableCanvas(PPU ppu, int table_index) {
         this.ppu = ppu;

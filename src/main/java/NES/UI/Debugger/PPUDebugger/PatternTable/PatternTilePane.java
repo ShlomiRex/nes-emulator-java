@@ -1,12 +1,9 @@
 package NES.UI.Debugger.PPUDebugger.PatternTable;
 
-import NES.Common;
 import NES.PPU.PPU;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
 public class PatternTilePane extends JPanel {
     private final PPU ppu;
@@ -26,8 +23,6 @@ public class PatternTilePane extends JPanel {
         this.ppu = ppu;
         this.tile_index = tile_index;
         this.palette_index = palette_index;
-        if (palette_index != 0)
-            System.out.println(palette_index);
 
         this.panel_width = panel_width;
         this.panel_height = panel_height;
@@ -67,12 +62,13 @@ public class PatternTilePane extends JPanel {
         paintTile(g, panel_width, panel_height);
     }
 
-    public void change_tile_index(byte tile_index) {
+    public void set_pattern(byte tile_index, boolean is_left_pattern_table) {
         this.tile_index = tile_index;
-        repaint();
+        // Left nametable = background
+        ppu.set_pattern_tile(tile_index, is_left_pattern_table, pattern);
     }
 
-    public void set_palette(int paletteIndex) {
-        this.palette_index = paletteIndex;
+    public void set_palette(int palette_index) {
+        this.palette_index = palette_index;
     }
 }
