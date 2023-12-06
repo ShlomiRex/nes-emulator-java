@@ -35,7 +35,6 @@ public class NametablePane extends JPanel {
         canvas3 = new NametableCanvas(ppu, 3);
 
         GridBagLayout layout = new GridBagLayout();
-        GridBagConstraints gbc = createGbc(0, 0);
 
         JPanel canvas_container = new JPanel(layout);
         canvas_container.setBorder(BorderFactory.createTitledBorder("Nametables"));

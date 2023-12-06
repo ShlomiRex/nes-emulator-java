@@ -460,4 +460,82 @@ public class PPU {
             }
         }
     }
+
+    /**
+     * Used in debugger only. Quickly draws nametable.
+     */
+    public void debugger_draw_nametable(Graphics g, int tableIndex, int canvas_width, int canvas_height) {
+        int pixel_width = (canvas_width / 32) / 8;
+        int pixel_height = (canvas_height / 30) / 8;
+        for (int tile_row = 0; tile_row < 30; tile_row++) {
+            for (int tile_col = 0; tile_col < 32; tile_col++) {
+                debugger_draw_tile(g, tile_row, tile_col, tableIndex, pixel_width, pixel_height);
+            }
+        }
+    }
+
+    /**
+     * Used in debugger only. Quickly draws a tile.
+     */
+    private void debugger_draw_tile(Graphics g, int tile_row, int tile_col, int tableIndex, int pixel_width, int pixel_height) {
+        int nametable_addr = 0x2000 + (tableIndex * 0x400);
+
+        //int nametable_addr = (registers.loopy_t.nametable_select & 0b11) == 0 ? 0x2000 : 0x2400;
+
+        short attributetable_addr = (short) (nametable_addr + 0x3C0);
+        short pattern_table_addr = (short) ((registers.PPUCTRL & 0b10000) == 0 ? 0x0000 : 0x1000);
+
+        // Read nametable byte - this is the index of the tile in the pattern table. This index points to 16 bytes of pattern data (2 bitmap planes).
+        byte patternIndex = read((short) (nametable_addr + tile_row * 32 + tile_col));
+
+        // Read corresponding attribute table byte - this is the palette index of 4x4 tiles.
+        byte attributeByte = read((short) (attributetable_addr + ((tile_row / 4) * 8) + (tile_col / 4)));
+
+        /*
+        Get the corresponding palette index from attribute byte - 2 bits per tile, the byte represents 4x4 tiles.
+        Bit 0,1 - top left tile, 2,3 - top right tile, 4,5 - bottom left tile, 6,7 - bottom right tile:
+        -------------
+        | 0 1 | 2 3 |
+        -------------
+        | 4 5 | 6 7 |
+        -------------
+         */
+        int bitOffset = (tile_row % 4 / 2) * 2 + (tile_col % 4 / 2);
+        int paletteIndex = (attributeByte >> (bitOffset * 2)) & 0b11;
+
+        // Read 16 bytes from pattern table - this will form the tile pixels, and their colors, which are chosen from the palette.
+        // To avoid copying 16 bytes (for regression reasons), we can just loop over each row, and do this bitmap calculation for each row.
+
+        short tile_base_addr = (short) (pattern_table_addr + (patternIndex & 0xFF) * 16);
+        for (int pixel_row = 0; pixel_row < 8; pixel_row ++) {
+            // Read 2 bitplanes (8 bits per bitplane) from pattern table
+            byte tile_lsb = read((short) (tile_base_addr + pixel_row));
+            byte tile_msb = read((short) (tile_base_addr + pixel_row + 8));
+
+            for (int pixel_col = 0; pixel_col < 8; pixel_col++) {
+                // Get pixel value (color) from bitplanes (the value must be between 0-3 since we add 2 bits and each can be 0 or 1)
+                byte colorIndex = (byte) ((tile_lsb & 1) + (tile_msb & 1) * 2);
+                tile_lsb >>= 1;
+                tile_msb >>= 1;
+
+                // Now we have the pixel value, we can get the color from the palette
+                // Read pixel color from palette RAM
+                byte pixelColor = read((short) (0x3F00 + paletteIndex * 4 + colorIndex));
+
+                int color_row = pixelColor / 16;
+                int color_col = pixelColor % 16;
+                int pixel_x = tile_col * 8 + (7- pixel_col);
+                int pixel_y = tile_row * 8 + pixel_row;
+
+                int color_index_in_system_palette = color_row * 16 + color_col;
+
+//                buffered_pixel_color[0] = color_index_in_system_palette;
+//                bufferedImage.getRaster().setPixel(pixel_x, pixel_y, buffered_pixel_color);
+
+                g.setColor(Bus.SYSTEM_PALETTE[color_index_in_system_palette]);
+                g.drawRect(pixel_x, pixel_y, pixel_width, pixel_height);
+            }
+        }
+    }
+
 }

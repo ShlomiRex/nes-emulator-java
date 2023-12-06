@@ -6,11 +6,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class NametableCanvas extends JPanel {
 
@@ -148,7 +143,8 @@ public class NametableCanvas extends JPanel {
         int height = getHeight();
 
         // TODO: This is not really rendering nametables. It's rendering the entire PPU frame.
-        ppu.draw_frame(g, width, height);
+//        ppu.draw_frame(g, width, height);
+        ppu.debugger_draw_nametable(g, table_index, width, height);
     }
 
     public void setShowTileGrid(boolean isShow) {
