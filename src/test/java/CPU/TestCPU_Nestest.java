@@ -3,6 +3,7 @@ package CPU;
 import NES.CPU.CPU;
 import NES.CPU.Decoder.Decoder;
 import NES.CPU.Registers.Flags;
+import NES.Cartridge.Cartridge;
 import NES.Cartridge.ROMParser;
 import NES.NES;
 import org.junit.BeforeClass;
@@ -28,8 +29,8 @@ public class TestCPU_Nestest {
         reader = new BufferedReader(new FileReader(file));
 
         String test_rom_path = "6502_programs/nestest/nestest2.nes";
-        ROMParser rom_parser = new ROMParser(test_rom_path);
-        nes = new NES(rom_parser);
+        Cartridge cartridge = ROMParser.parse_rom(test_rom_path);
+        nes = new NES(cartridge);
 
         // We have special mode of operation, we ignore RESET vector. Only for this test.
         nes.cpu.registers.PC = (short) 0xC000;

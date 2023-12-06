@@ -9,52 +9,60 @@ public class PPURegisters {
     private final Logger logger = LoggerFactory.getLogger(PPURegisters.class);
 
     /*
-     * PPU Registers:
-     * - $2000: PPUCTRL
-     * - $2001: PPUMASK
-     * - $2002: PPUSTATUS
-     * - $2003: OAMADDR
-     * - $2004: OAMDATA
-     * - $2005: PPUSCROLL
-     * - $2006: PPUADDR
-     * - $2007: PPUDATA
-     * - $4014: OAMDMA
+     PPU Registers:
+     $2000: PPUCTRL
+     $2001: PPUMASK
+     $2002: PPUSTATUS
+     $2003: OAMADDR
+     $2004: OAMDATA
+     $2005: PPUSCROLL
+     $2006: PPUADDR
+     $2007: PPUDATA
+     $4014: OAMDMA
+     */
+
+    /*
+    Internal PPU registers:
+    loopy_v: Current VRAM address (15 bits).
+    loopy_t: Temporary VRAM address (15 bits).
+    fine_x_scroll: Fine X scroll (3 bits).
+    w: This flipflop is used to determine whether to write to high byte or low byte of PPUADDR or PPUSCROLL.
      */
 
 
     // TODO: PPUCTRL - I useed lsb 2 bits inside loopy_t.nametable_select - maybe i need to remove PPUCTRL
     protected byte PPUCTRL, PPUMASK, PPUSTATUS, OAMADDR, PPUDATA;
 
-    private short PPUADDR;
-
     /**
      * This flipflop is used to determine whether to write to high byte or low byte of PPUADDR or PPUSCROLL.
      * This bitflag is shared among PPUSCROLL and PPUADDR (this is what the real hardware does).
      *
-     * Since to write to PPUADDR the CPU needs to write twice (once for high byte, once for low byte),
+     * When writing to PPUADDR the CPU needs to write twice (once for high byte, once for low byte),
      * we need to keep track of which byte we are writing to.
      *
      * As for PPUSCROLL, This flipflop is used to determine whether to write to high byte (horizontal scroll offset)
      * or low byte (vertical scroll offset) of PPUSCROLL.
      */
-    private boolean address_latch;
+    public boolean w;
 
     /**
      * Current VRAM address (15 bits).
      * Used for scrolling.
      */
-    public LoopyRegister loopy_v;
+    //public LoopyRegister loopy_v;
+    public short loopy_v;
 
     /**
      * Temporary VRAM address (15 bits).
      * Used for scrolling.
      */
-    public LoopyRegister loopy_t;
+    //public LoopyRegister loopy_t;
+    public short loopy_t;
 
     /**
      * Fine X scroll (3 bits).
      */
-    private byte fine_x_scroll;
+    public byte fine_x_scroll;
 
     /**
      * This buffer is used to store the value of PPUDATA read from the PPU.
@@ -67,9 +75,6 @@ public class PPURegisters {
 
     public PPURegisters(PPU ppu) {
         this.ppu = ppu;
-
-        loopy_v = new LoopyRegister();
-        loopy_t = new LoopyRegister();
     }
 
     public void reset() {
@@ -88,12 +93,14 @@ public class PPURegisters {
 
         w:                  <- 0
          */
+        w = false;
+
+
         byte before = PPUSTATUS;
 
         // Clear vblank flag
         PPUSTATUS = Common.Bits.setBit(PPUSTATUS, 7, false);
 
-        address_latch = false;
         return before;
     }
 
@@ -111,15 +118,15 @@ public class PPURegisters {
     }
 
     public void writePPUSCROLL(byte value) {
-        if (address_latch) {
+        if (w) {
             /*
             $2005 second write (w is 1)
 
             t: FGH..AB CDE..... <- d: ABCDEFGH
             w:                  <- 0
              */
-            loopy_t.coarse_y_scroll = (byte) (value & 0b11111);
-            loopy_t.fine_y_scroll = (byte) ((value >> 3) & 0b111);
+            loopy_t = (short) ((loopy_t & 0b000_11_11111_11111) | (((short) value & 0b111) << 12)); // fine_y
+            loopy_t = (short) ((loopy_t & 0b111_11_00000_11111) | (((short) value & 0b11111_000) << 2)); // coarse_y
         } else {
             /*
             $2005 first write (w is 0)
@@ -128,18 +135,24 @@ public class PPURegisters {
             x:              FGH <- d: .....FGH
             w:                  <- 1
              */
-            loopy_t.coarse_x_scroll = (byte) (value & 0b11111);
-            fine_x_scroll = (byte) ((value >> 3) & 0b111);
+            fine_x_scroll = (byte) ((short) value & 0b111); // fine_x
+            loopy_t = (short) ((loopy_t & 0b111_11_11111_00000) | ((short) value >> 3)); // coarse_x
         }
 
-        address_latch = !address_latch;
+        w = !w;
     }
 
     public void writePPUADDR(byte value) {
-        if (address_latch) {
-            // Write to low byte
-            PPUADDR = (short) ((PPUADDR & 0xFF00) | (value & 0x00FF));
+        if (w) {
+            /*
+            $2006 second write (w is 1)
 
+            t: ....... ABCDEFGH <- d: ABCDEFGH
+            v: <...all bits...> <- t: <...all bits...>
+            w:                  <- 0
+             */
+            loopy_t = (short) ((loopy_t & 0xFF00) | (value & 0x00FF));
+            loopy_v = loopy_t;
         } else {
             /*
             $2006 first write (w is 0)
@@ -149,33 +162,29 @@ public class PPURegisters {
             t: Z...... ........ <- 0 (bit Z is cleared)
             w:                  <- 1
              */
-            //TODO: Finish loopy
-//            loopy_t.fine_y_scroll = (byte) ((value >> 2) & 0b111);
-
-            // Write to high byte
-            PPUADDR = (short) ((PPUADDR & 0x00FF) | ((value & 0x00FF) << 8));
+            loopy_t = (short) ((loopy_t & 0b000_00_00111_11111) | (((short) value & 0b1_11111) << 8));
         }
-        // Flip the flipflop
-        address_latch = !address_latch;
+        w = !w;
     }
 
     public void writePPUDATA(byte value) {
         PPUDATA = value;
 
-        ppu.write(PPUADDR, value);
+        ppu.write(loopy_v, value);
 
         // Bit 2 of PPUCTRL determines whether to increment PPUADDR by 1 or 32 after each write to PPUDATA.
-        PPUADDR += (short) (Common.Bits.getBit(PPUCTRL, 2) ? 32 : 1);
+        loopy_v += (short) (Common.Bits.getBit(PPUCTRL, 2) ? 32 : 1);
 
         // Wrap around to 0x3FFF.
-        if (PPUADDR > 0x3FFF) {
-            PPUADDR &= 0x3FFF;
+        // TODO: I did not see other emulators do this
+        if (loopy_v > 0x3FFF) {
+            loopy_v &= 0x3FFF;
         }
     }
 
     public byte readPPUDATA() {
         byte ret = PPUDATA_read_buffer;
-        PPUDATA_read_buffer = ppu.read(PPUADDR);
+        PPUDATA_read_buffer = ppu.read(loopy_v);
 
         /*
         If address is in palette range, the data is not delayed.
@@ -187,17 +196,17 @@ public class PPURegisters {
         Reading palette data from $3F00–$3FFF works differently. The palette data is placed immediately on the data bus,
         and hence no priming read is required. Reading the palettes still updates the internal buffer though
          */
-        if (PPUADDR >= 0x3F00)
+        if (loopy_v >= 0x3F00)
             ret = PPUDATA_read_buffer;
 
         // VRAM address increment per CPU read/write of PPUDATA
         // (0: add 1, going across; 1: add 32, going down)
         boolean vram_addr_increment = Common.Bits.getBit(PPUCTRL, 2);
-        PPUADDR += (short) (vram_addr_increment ? 32 : 1);
+        loopy_v += (short) (vram_addr_increment ? 32 : 1);
 
         // Post fetch
-        if (PPUADDR > 0x3FFF) {
-            PPUADDR &= 0x3FFF;
+        if (loopy_v > 0x3FFF) {
+            loopy_v &= 0x3FFF;
         }
         return ret;
     }
@@ -267,7 +276,7 @@ public class PPURegisters {
      * Used only for testing, or debugging.
      */
     public short getPPUADDR() {
-        return PPUADDR;
+        return loopy_v;
     }
 
     /**
@@ -286,6 +295,7 @@ public class PPURegisters {
          */
         PPUCTRL = value;
 
-        loopy_t.nametable_select = (byte) (value & 0b11);
+        // Set loopy_t nametable select
+        loopy_t = (short) ((loopy_t & 0b1111_00_11111_11111) | (((short) value & 0b11) << 10));
     }
 }

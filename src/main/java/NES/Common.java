@@ -58,6 +58,10 @@ public class Common {
         return String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0');
     }
 
+    public static String shortToBinary(short s) {
+        return String.format("%16s", Integer.toBinaryString(s & 0xFFFF)).replace(' ', '0');
+    }
+
     public static String byteToHex(byte b, boolean prefix_0x) {
         if (prefix_0x)
             return String.format("0x%02X", b & 0xFF);
@@ -80,6 +84,12 @@ public class Common {
             return ((variable >> bitIndex) & 1) == 1;
         }
 
+        public static boolean getBit(short variable, int bitIndex) {
+            if (bitIndex < 0 || bitIndex > 15)
+                throw new IllegalArgumentException("Bit index must be between 0 and 15");
+            return ((variable >> bitIndex) & 1) == 1;
+        }
+
         public static byte setBit(byte variable, int bitIndex, boolean value) {
             if (bitIndex < 0 || bitIndex > 7)
                 throw new IllegalArgumentException("Bit index must be between 0 and 7");
@@ -87,6 +97,21 @@ public class Common {
                 return (byte) (variable | (1 << bitIndex));
             else
                 return (byte) (variable & ~(1 << bitIndex));
+        }
+
+        /**
+         * See: <a href="https://stackoverflow.com/questions/2602823/in-c-c-whats-the-simplest-way-to-reverse-the-order-of-bits-in-a-byte/2602885#2602885">stackoverflow</a>
+         * @param variable
+         * @return
+         */
+        public static byte reverseByte(byte variable) {
+
+            byte b = variable;
+
+            b = (byte) ((b & 0xF0) >> 4 | (b & 0x0F) << 4);
+            b = (byte) ((b & 0xCC) >> 2 | (b & 0x33) << 2);
+            b = (byte) ((b & 0xAA) >> 1 | (b & 0x55) << 1);
+            return b;
         }
     }
 

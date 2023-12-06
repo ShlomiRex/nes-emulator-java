@@ -6,3 +6,5 @@ test_resources/**
 .DS_Store
 *.log
 console.log
+*.cdl
+*.nes.deb

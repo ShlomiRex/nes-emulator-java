@@ -1,6 +1,7 @@
 package CPU;
 
 import NES.Bus.Bus;
+import NES.Bus.MemoryAccessRecord;
 import NES.CPU.CPU;
 import NES.CPU.Decoder.Decoder;
 import NES.CPU.Decoder.InstructionInfo;
@@ -50,7 +51,7 @@ public class TestCPU {
             logger.error("ProcessorTests repo not found (https://github.com/TomHarte/ProcessorTests), skipping tests");
         assumeTrue(processor_tests_repo_exist);
 
-        bus = new Bus(true, true, cpu_memory);
+        bus = new Bus();
         cpu_memory = new byte[64 * 1024];
         cpu = new CPU(bus, cpu_memory);
     }
@@ -335,7 +336,7 @@ public class TestCPU {
             JSONObject initial = (JSONObject) test_obj.get("initial");
             init_cpu(cpu, cpu_memory, initial);
             // Clear memory access records for next test
-            bus.recorded_memory.clear();
+            bus.cpuBus.recorded_memory.clear();
 
             cpu.clock_tick(); // Single tick
 
@@ -439,11 +440,11 @@ public class TestCPU {
 
         // Test cycles (Note: order of memory access records is important).
         // This shows that my emulator is cycle accurate.
-        List<Bus.MemoryAccessRecord> records = bus.recorded_memory;
+        List<MemoryAccessRecord> records = bus.cpuBus.recorded_memory;
         assertEquals(cycles.length(), records.size());
         for (int i = 0; i < cycles.length(); i++) {
             JSONArray cycle_record = (JSONArray) cycles.get(i);
-            Bus.MemoryAccessRecord cpu_record = records.get(i);
+            MemoryAccessRecord cpu_record = records.get(i);
 
             Integer cycle_address = (Integer) cycle_record.get(0);
             Integer cycle_value = (Integer) cycle_record.get(1);

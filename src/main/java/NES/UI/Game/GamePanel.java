@@ -21,6 +21,7 @@ public class GamePanel extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        ppu.draw_frame(g, getWidth(), getHeight());
+        //ppu.draw_frame(g, getWidth(), getHeight());
+        ppu.flush_graphics(g, getWidth(), getHeight());
     }
 }
