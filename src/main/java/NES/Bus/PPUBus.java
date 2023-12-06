@@ -61,33 +61,37 @@ public class PPUBus {
     }
 
     public byte ppu_read(short addr) {
-        addr &= (short) 0xFFFF;
-        if (addr >= 0x0000 && addr <= 0x1FFF) {
-            // CHR ROM / pattern table
-            return chr_rom[addr];
-        } else if (addr >= 0x2000 && addr <= 0x2FFF) {
-            // Name table
-            if (mirroring == Mirroring.HORIZONTAL) {
-                if (addr >= 0x2400 && addr <= 0x27FF)
-                    addr -= 0x400;
-                else if (addr >= 0x2C00)
-                    addr -= 0x800;
+        try {
+            addr &= (short) 0xFFFF;
+
+            if (addr >= 0x0000 && addr <= 0x1FFF) {
+                // CHR ROM / pattern table
+                return chr_rom[addr];
+            } else if (addr >= 0x2000 && addr <= 0x2FFF) {
+                // Name table
+                if (mirroring == Mirroring.HORIZONTAL) {
+                    if (addr >= 0x2800) {
+                        addr -= 0x800;
+                    }
+                } else {
+                    // Vertical
+                    if (addr >= 0x2800 && addr <= 0x2BFF)
+                        addr -= 0x400;
+                    else if (addr >= 0x2C00)
+                        addr -= 0x800;
+                }
+                return vram[addr - 0x2000];
+            } else if (addr >= 0x3000 && addr <= 0x3EFF) {
+                // Mirrors of 0x2000-0x2EFF
+                return ppu_read((short) (addr - 0x1000));
+            } else if (addr >= 0x3F00 && addr <= 0x3FFF) {
+                // Palette RAM
+                return palette_ram[addr - 0x3F00];
             } else {
-                // Vertical
-                if (addr >= 0x2800 && addr <= 0x2BFF)
-                    addr -= 0x400;
-                else if (addr >= 0x2C00)
-                    addr -= 0x800;
+                throw new RuntimeException("Invalid PPU memory address: " + Common.shortToHex(addr, true));
             }
-            return vram[addr - 0x2000];
-        } else if (addr >= 0x3000 && addr <= 0x3EFF) {
-            // Mirrors of 0x2000-0x2EFF
-            return ppu_read((short) (addr - 0x1000));
-        } else if (addr >= 0x3F00 && addr <= 0x3FFF) {
-            // Palette RAM
-            return palette_ram[addr - 0x3F00];
-        } else {
-            throw new RuntimeException("Invalid PPU memory address: " + Common.shortToHex(addr, true));
+        } catch (Exception e) {
+            throw new RuntimeException("Error reading from PPU memory address: " + Common.shortToHex(addr, true), e);
         }
     }
 

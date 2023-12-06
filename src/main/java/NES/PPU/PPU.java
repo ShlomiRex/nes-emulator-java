@@ -402,17 +402,17 @@ public class PPU {
 
                     sprite_pattern_addr_hi = (short) (sprite_pattern_addr_lo + 8);
 
-                    sprite_pattern_bits_lo = read(sprite_pattern_addr_lo);
-                    sprite_pattern_bits_hi = read(sprite_pattern_addr_hi);
+//                    sprite_pattern_bits_lo = read(sprite_pattern_addr_lo);
+//                    sprite_pattern_bits_hi = read(sprite_pattern_addr_hi);
 
                     // If flipped horizontally, we need to flip the pattern bits
                     if (Common.Bits.getBit(spriteScanline[i].attr, 6)) {
-                        sprite_pattern_bits_lo = Common.Bits.reverseByte(sprite_pattern_bits_lo);
-                        sprite_pattern_bits_hi = Common.Bits.reverseByte(sprite_pattern_bits_hi);
+//                        sprite_pattern_bits_lo = Common.Bits.reverseByte(sprite_pattern_bits_lo);
+//                        sprite_pattern_bits_hi = Common.Bits.reverseByte(sprite_pattern_bits_hi);
                     }
 
-                    sprite_shifter_pattern_lo[i] = sprite_pattern_bits_lo;
-                    sprite_shifter_pattern_hi[i] = sprite_pattern_bits_hi;
+//                    sprite_shifter_pattern_lo[i] = sprite_pattern_bits_lo;
+//                    sprite_shifter_pattern_hi[i] = sprite_pattern_bits_hi;
                 }
             }
         }
