@@ -24,7 +24,7 @@ public class Main {
         String pacman = "6502_programs/pacman/Pac-Man (USA) (Namco).nes";
         String scroll_test = "6502_programs/scroll_test/scroll.nes";
 
-        String program = greenscreen;
+        String program = nestest;
 
         Cartridge cartridge = ROMParser.parse_rom(program);
 

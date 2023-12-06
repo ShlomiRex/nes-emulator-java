@@ -74,6 +74,16 @@ Fixed sprite rendering glitch:
 Fixed palette and colors for sprites:
 ![](README-resources/Screenshot%202023-08-18%20232651.png)
 
+A lot of debugger improvements, including:
+
+- Palette selection: redraws the pattern tables when user selects a palette
+- Rendering nametables now works correctly, sprites are not displayed there
+- Added global controls for the debugger: Run/Stop and checkbox of maximum emulation speed
+
+![](README-resources/Screenshot%202023-12-06%20165127.png)
+
+![](README-resources/Screenshot%202023-12-06%20165109.png)
+
 # Resources
 
 The most used resorces:
