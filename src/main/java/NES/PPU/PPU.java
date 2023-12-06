@@ -480,6 +480,9 @@ public class PPU {
     private void debugger_draw_tile(Graphics g, int tile_row, int tile_col, int tableIndex, int pixel_width, int pixel_height) {
         int nametable_addr = 0x2000 + (tableIndex * 0x400);
 
+        //TODO: Fix this
+        if (tableIndex > 1)
+            return;
         //int nametable_addr = (registers.loopy_t.nametable_select & 0b11) == 0 ? 0x2000 : 0x2400;
 
         short attributetable_addr = (short) (nametable_addr + 0x3C0);
