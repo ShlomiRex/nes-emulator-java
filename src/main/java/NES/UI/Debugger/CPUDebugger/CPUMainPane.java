@@ -10,7 +10,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class CPUMainPane extends JPanel {
-    private final CPUButtonPane button_pane;
+    public final CPUButtonPane button_pane;
 
     public final JPanel stack_pane;
 

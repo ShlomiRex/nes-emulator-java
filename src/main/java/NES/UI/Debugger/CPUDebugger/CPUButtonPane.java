@@ -14,21 +14,17 @@ public class CPUButtonPane extends JPanel {
 
     private final Logger logger = LoggerFactory.getLogger(CPUButtonPane.class);
     private boolean is_running;
-    private final JPanel debugger_pane;
 
     private Runnable repaint_ppu_pane_runnable;
 
-    /**
-     * @param debugger_pane      The panel to repaint to update UI once the tick is done
-     */
-    public CPUButtonPane(CPU cpu, JPanel debugger_pane, AssemblyTextPane assembly_text_pane) {
-        this.debugger_pane = debugger_pane;
+    private final JButton btn_tick, btn_run, btn_stop, btn_run_custom_ticks;
 
-        JButton btn_tick = new JButton("Tick");
-        JButton btn_run = new JButton("Run");
-        JButton btn_stop = new JButton("Stop");
+    public CPUButtonPane(CPU cpu, JPanel cpu_debugger_pane, AssemblyTextPane assembly_text_pane) {
+        btn_tick = new JButton("Tick");
+        btn_run = new JButton("Run");
+        btn_stop = new JButton("Stop");
+        btn_run_custom_ticks = new JButton("Run custom ticks");
 
-        JButton btn_run_custom_ticks = new JButton("Run custom ticks");
         JTextField txt_custom_ticks = new JTextField("16");
         txt_custom_ticks.setColumns(4);
 
@@ -62,7 +58,7 @@ public class CPUButtonPane extends JPanel {
 
                     @Override
                     protected void done() {
-                        debugger_pane.repaint();
+                        cpu_debugger_pane.repaint();
                         repaint_ppu_pane_runnable.run();
                         assembly_text_pane.highlight_current_instruction();
                     }
@@ -80,8 +76,8 @@ public class CPUButtonPane extends JPanel {
                     @Override
                     protected Void doInBackground() {
                         is_running = true;
-                        btn_tick.setEnabled(false);
-                        btn_run.setEnabled(false);
+
+                        disableControls();
                         btn_stop.setEnabled(true);
 
                         while (is_running) {
@@ -93,13 +89,13 @@ public class CPUButtonPane extends JPanel {
 
                     @Override
                     protected void process(List<Void> chunks) {
-                        debugger_pane.repaint();
+                        cpu_debugger_pane.repaint();
                         assembly_text_pane.highlight_current_instruction();
                     }
 
                     @Override
                     protected void done() {
-                        debugger_pane.repaint();
+                        cpu_debugger_pane.repaint();
                         repaint_ppu_pane_runnable.run();
                     }
                 };
@@ -113,11 +109,11 @@ public class CPUButtonPane extends JPanel {
                 logger.debug("Stop clicked");
 
                 is_running = false;
-                btn_tick.setEnabled(true);
-                btn_run.setEnabled(true);
+
+                enableControls();
                 btn_stop.setEnabled(false);
 
-                debugger_pane.repaint();
+                cpu_debugger_pane.repaint();
             }
         });
 
@@ -139,7 +135,7 @@ public class CPUButtonPane extends JPanel {
 
                     @Override
                     protected void done() {
-                        debugger_pane.repaint();
+                        cpu_debugger_pane.repaint();
                         repaint_ppu_pane_runnable.run();
                         assembly_text_pane.highlight_current_instruction();
                     }
@@ -152,5 +148,19 @@ public class CPUButtonPane extends JPanel {
     // Called when we need to update the PPU panel
     public void setRepaintPpuPane(Runnable repaint_ppu_pane_runnable) {
         this.repaint_ppu_pane_runnable = repaint_ppu_pane_runnable;
+    }
+
+    public void disableControls() {
+        btn_tick.setEnabled(false);
+        btn_run.setEnabled(false);
+        btn_stop.setEnabled(false);
+        btn_run_custom_ticks.setEnabled(false);
+    }
+
+    public void enableControls() {
+        btn_tick.setEnabled(true);
+        btn_run.setEnabled(true);
+        btn_stop.setEnabled(false);
+        btn_run_custom_ticks.setEnabled(true);
     }
 }

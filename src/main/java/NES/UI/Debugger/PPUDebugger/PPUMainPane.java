@@ -18,6 +18,9 @@ import javax.swing.*;
 import java.awt.*;
 
 public class PPUMainPane extends JPanel {
+
+    public PPUButtonPane button_pane;
+
     public PPUMainPane(NES nes, CPUMainPane cpu_main_pane, AssemblyTextPane assemblyTextPane) {
         setBorder(BorderFactory.createTitledBorder("PPU"));
 
@@ -38,7 +41,7 @@ public class PPUMainPane extends JPanel {
         palette_pane.setLayout(new BoxLayout(palette_pane, BoxLayout.PAGE_AXIS));
 
         // Main panels
-        JPanel button_pane = new PPUButtonPane(ppu, top_flow_pane, cpu_main_pane, assemblyTextPane); // We don't need to update unrelated panels
+        button_pane = new PPUButtonPane(ppu, top_flow_pane, cpu_main_pane, assemblyTextPane); // We don't need to update unrelated panels
         JPanel cycles_pane = new CyclesPane(ppu);
         JPanel scanline_pane = new ScanlinePane(ppu);
         JPanel frame_pane = new FramePane(ppu);

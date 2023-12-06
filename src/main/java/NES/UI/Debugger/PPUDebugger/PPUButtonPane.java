@@ -17,22 +17,27 @@ public class PPUButtonPane extends JPanel {
     private final Logger logger = LoggerFactory.getLogger(PPUButtonPane.class);
     private boolean is_running;
 
+    private final JButton btn_tick, btn_run, btn_stop, btn_run_custom, btn_run_scanline_custom, btn_run_until_vblank;
+
     public PPUButtonPane(PPU ppu, JPanel ppu_debugger_pane, CPUMainPane cpu_main_pane, AssemblyTextPane assemblyTextPane) {
-        JButton btn_tick = new JButton("Tick");
-        JButton btn_run = new JButton("Run");
-        JButton btn_stop = new JButton("Stop");
+        btn_tick = new JButton("Tick");
+        btn_run = new JButton("Run");
+        btn_stop = new JButton("Stop");
+        btn_run_custom = new JButton("Run custom ticks");
+        btn_run_scanline_custom = new JButton("Run custom scanlines");
+        btn_run_until_vblank = new JButton("Run until VBlank");
+
         JPanel box_pane = new JPanel();
-        JSeparator separator = new JSeparator();
         JPanel box_pane2 = new JPanel();
         JPanel flow1_pane = new JPanel();
-        JButton btn_run_custom = new JButton("Run custom ticks");
-        JTextField txt_run_custom = new JTextField("50", 4);
         JPanel flow2_pane = new JPanel();
-        JButton btn_run_scanline_custom = new JButton("Run custom scanlines");
-        JTextField txt_run_scanline_custom = new JTextField("1", 4);
-        JButton btn_run_until_vblank = new JButton("Run until VBlank");
 
-        btn_stop.setEnabled(false);
+        JSeparator separator = new JSeparator();
+
+        JTextField txt_run_custom = new JTextField("50", 4);
+        JTextField txt_run_scanline_custom = new JTextField("1", 4);
+
+
         box_pane.setLayout(new BoxLayout(box_pane, BoxLayout.PAGE_AXIS));
         box_pane.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
         box_pane2.setLayout(new BoxLayout(box_pane2, BoxLayout.PAGE_AXIS));
@@ -52,6 +57,8 @@ public class PPUButtonPane extends JPanel {
         box_pane2.add(flow2_pane);
         box_pane2.add(btn_run_until_vblank);
         add(box_pane2);
+
+        btn_stop.setEnabled(false);
 
         btn_tick.addActionListener(new AbstractAction() {
             @Override
@@ -83,8 +90,8 @@ public class PPUButtonPane extends JPanel {
                     @Override
                     protected Void doInBackground() {
                         is_running = true;
-                        btn_tick.setEnabled(false);
-                        btn_run.setEnabled(false);
+
+                        disableControls();
                         btn_stop.setEnabled(true);
 
                         while (is_running) {
@@ -110,8 +117,7 @@ public class PPUButtonPane extends JPanel {
 
                 is_running = false;
 
-                btn_tick.setEnabled(true);
-                btn_run.setEnabled(true);
+                enableControls();
                 btn_stop.setEnabled(false);
 
                 ppu_debugger_pane.repaint();
@@ -129,8 +135,8 @@ public class PPUButtonPane extends JPanel {
                     @Override
                     protected Void doInBackground() {
                         is_running = true;
-                        btn_tick.setEnabled(false);
-                        btn_run.setEnabled(false);
+
+                        disableControls();
                         btn_stop.setEnabled(true);
 
                         int ticks = Integer.parseInt(txt_run_custom.getText());
@@ -140,9 +146,7 @@ public class PPUButtonPane extends JPanel {
                             ppu.clock_tick();
                             publish();
                         }
-                        btn_tick.setEnabled(true);
-                        btn_run.setEnabled(true);
-                        btn_stop.setEnabled(false);
+                        enableControls();
                         return null;
                     }
 
@@ -164,8 +168,8 @@ public class PPUButtonPane extends JPanel {
                         logger.debug("Run custom scanlines clicked with " + txt_run_scanline_custom.getText() + " scanlines");
 
                         is_running = true;
-                        btn_tick.setEnabled(false);
-                        btn_run.setEnabled(false);
+
+                        disableControls();
                         btn_stop.setEnabled(true);
 
                         int scanlines = Integer.parseInt(txt_run_scanline_custom.getText());
@@ -177,8 +181,7 @@ public class PPUButtonPane extends JPanel {
                             }
                             ppu_debugger_pane.repaint();
                         }
-                        btn_tick.setEnabled(true);
-                        btn_run.setEnabled(true);
+                        enableControls();
                         btn_stop.setEnabled(false);
                         return null;
                     }
@@ -230,4 +233,21 @@ public class PPUButtonPane extends JPanel {
     }
 
 
+    public void disableControls() {
+        btn_tick.setEnabled(false);
+        btn_run.setEnabled(false);
+        btn_stop.setEnabled(false);
+        btn_run_custom.setEnabled(false);
+        btn_run_scanline_custom.setEnabled(false);
+        btn_run_until_vblank.setEnabled(false);
+    }
+
+    public void enableControls() {
+        btn_tick.setEnabled(true);
+        btn_run.setEnabled(true);
+        btn_stop.setEnabled(false);
+        btn_run_custom.setEnabled(true);
+        btn_run_scanline_custom.setEnabled(true);
+        btn_run_until_vblank.setEnabled(true);
+    }
 }

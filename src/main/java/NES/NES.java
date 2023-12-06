@@ -21,8 +21,6 @@ public class NES {
     private final Logger logger = LoggerFactory.getLogger(NES.class);
     public final CPU cpu;
     public PPU ppu;
-    private boolean is_running;
-
 
     public final byte[] cpu_memory; // All 64KB addressable memory
     public final iNESHeader header;
@@ -30,8 +28,7 @@ public class NES {
     public final CPUBus cpuBus;
     public final PPUBus ppuBus;
 
-    // TODO: Do not touch, only for debugging
-    private final double SPEED_MODIFIER = 1;
+    private Boolean is_running = false;
 
     // We want to deal with creating the memory here, so its more manageable, and each component can take modular memory.
     public NES(Cartridge cartridge) {
@@ -69,21 +66,32 @@ public class NES {
     }
 
     public void run() {
+        run(false);
+    }
+
+    public void run(boolean max_speed) {
+        logger.debug("Running NES");
         is_running = true;
+
+        long delay = 559;
+        if (max_speed) {
+            delay = 1;
+        }
 
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
         executor.scheduleAtFixedRate(() -> {
-            if(!is_running)
+            if (!is_running)
                 executor.shutdown();
 
             cpu.clock_tick();
             ppu.clock_tick();
             ppu.clock_tick();
             ppu.clock_tick();
-        }, 0, (long)(559 * SPEED_MODIFIER), TimeUnit.NANOSECONDS);
+        }, 0, delay, TimeUnit.NANOSECONDS);
     }
 
     public void stop() {
+        logger.debug("Stopping NES");
         is_running = false;
     }
 }

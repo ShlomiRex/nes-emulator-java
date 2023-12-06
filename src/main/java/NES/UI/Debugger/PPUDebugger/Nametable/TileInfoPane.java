@@ -179,7 +179,8 @@ public class TileInfoPane extends JPanel {
         short pattern_addr = (short) (0x1000 * (patternTileIndex / 0x10) + (patternTileIndex % 0x10) * 16);
         short tile_addr = (short) (pattern_addr >> 0x10);
         short attr_addr = (short) (0x23C0 + (table_index * 0x400) + ((selected_row / 4) * 8) + (selected_col / 4));
-        short palette_addr = (short) (ppu.read(attr_addr) & 0x3);
+//        short palette_addr = (short) (ppu.read(attr_addr) & 0x3);
+        short palette_addr = 0; // TODO: Fix address wrong calculation
         int palette_index = palette_addr; // TODO: fix
         short nametable_base_addr = (short) ((table_index * 0x400) + 0x2000);
 
