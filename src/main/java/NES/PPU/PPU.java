@@ -72,7 +72,7 @@ public class PPU {
      * True: if PPUMASK bit 3 or 4 is set.
      * False: else.
      */
-    private boolean rendering_enabled;
+    private boolean is_rendering_enabled;
 
     /**
      * Background tile to be used for the current 8 pixels.
@@ -84,17 +84,13 @@ public class PPU {
      */
     private byte bg_next_tile_attrib;
 
-    private short bg_shifter_pattern_lo;
-    private short bg_shifter_pattern_hi;
+    private short bg_shifter_pattern_lo, bg_shifter_pattern_hi;
 
-    private short bg_shifter_attrib_lo;
-    private short bg_shifter_attrib_hi;
+    private short bg_shifter_attrib_lo, bg_shifter_attrib_hi;
 
-    private boolean spriteZeroHitPossible;
-    private boolean spriteZeroBeingRendered;
+    private boolean spriteZeroHitPossible, spriteZeroBeingRendered;
 
-    private byte bg_next_tile_lsb;
-    private byte bg_next_tile_msb;
+    private byte bg_next_tile_lsb, bg_next_tile_msb;
 
     private class OAEntry {
         public byte y;
@@ -181,11 +177,6 @@ public class PPU {
         // End of frame.
         // Reset scanline back to 0 after 261 scanlines
         if (scanline == 262) {
-            // TODO: Remove this check
-            if (total_cycles % 89342 != 0) {
-                logger.error("Long cycle is not divisible by 89342: {}", total_cycles);
-                System.exit(1);
-            }
             scanline = 0;
             frame ++;
             is_even = !is_even;
@@ -208,93 +199,39 @@ public class PPU {
             return;
         }
 
-        rendering_enabled = Common.Bits.getBit(registers.PPUMASK, 3) // Show background
+        is_rendering_enabled = Common.Bits.getBit(registers.PPUMASK, 3) // Show background
                 || Common.Bits.getBit(registers.PPUMASK, 4); // Show sprites
 
         // Scanline 0-239 (including): Visible scanlines
         // Heavily inspired by the PPU timing diagram
         if (scanline >= 0 && scanline < 240) {
             if (cycle <= 256) {
-//                logger.debug("Rendering cycle: {}", cycle);
-
                 update_shifters();
 
                 switch(cycle % 8) {
-                    // Load NT
-                    case 1 -> {
-                        load_BG_shifters();
-                        bg_next_tile_id = read((short) (0x2000 | (registers.loopy_v & 0x0FFF)));
-                    }
-
-                    // Load AT
-                    case 3 -> {
-                        bg_next_tile_attrib = read((short) (0x23C0                 // first nametable + attribute table offset
-                                | (registers.loopy_v & 0x0C00)                     // nametable X,Y
-                                | ((registers.loopy_v >> 4) & 0x38)                // coarse y
-                                | ((registers.loopy_v >> 2) & 0x07)));             // coarse X
-
-                        // Coarse Y second bit
-                        if (Common.Bits.getBit(registers.loopy_v, 6))
-                            bg_next_tile_attrib >>= 4;
-
-                        // Coarse X second bit
-                        if (Common.Bits.getBit(registers.loopy_v, 1))
-                            bg_next_tile_attrib >>= 2;
-
-                        bg_next_tile_attrib &= 0x03;
-                    }
-
-                    // Load BG lsbits
-                    case 5 -> {
-                        short addr = 0;
-
-                        // Background pattern table address (0: $0000; 1: $1000)
-                        if (Common.Bits.getBit(registers.PPUCTRL, 4))
-                            addr += 0x1000;
-
-                        addr += (short) (bg_next_tile_id & 0xFF << 4);
-                        addr += (short) ((registers.loopy_v & 0b111_00_00000_00000) >> 12);
-
-                        bg_next_tile_lsb = read(addr);
-                    }
-
-                    // Load BG msbits
-                    case 7 -> {
-                        short addr = 0;
-
-                        // Background pattern table address (0: $0000; 1: $1000)
-                        if (Common.Bits.getBit(registers.PPUCTRL, 4))
-                            addr += 0x1000;
-
-                        addr += (short) ((bg_next_tile_id & 0xFF) << 4);
-                        addr += (short) ((registers.loopy_v & 0b111_00_00000_00000) >> 12);
-                        addr += 8; // 8 plane offset
-
-                        bg_next_tile_msb = read(addr);
-                    }
+                    case 1 -> load_nt();
+                    case 3 -> load_at();
+                    case 5 -> load_bg_lsbits();
+                    case 7 -> load_bg_msbits();
                 }
             }
 
-            if (cycle != 0 && (cycle % 8 == 0)) {
-                //logger.debug("inc hori(v)");
+            if (cycle != 0 && (cycle % 8 == 0))
                 incHorizontalScroll();
-            }
 
-            if (cycle == 256) {
-                //logger.debug("inc vert(v)");
+            if (cycle == 256)
                 incVerticalScroll();
-            }
 
             if (cycle == 257) {
-                //logger.debug("hori(v) = hori(t)");
                 load_BG_shifters();
                 transferHorizontalScroll();
             }
 
             // Read next scanline NT byte
-            if (cycle == 338 || cycle == 340) {
-                bg_next_tile_id = read((short) (0x2000 | (registers.loopy_v & 0x0FFF)));
-            }
+            // TODO: Uncomment
+//            if (cycle == 338 || cycle == 340) {
+//                bg_next_tile_id = read((short) (0x2000 | (registers.loopy_v & 0x0FFF)));
+//            }
 
             // Foreground rendering after end of drawing scanline
             if (cycle == 257) {
@@ -443,116 +380,19 @@ public class PPU {
         // Scanline 261: Pre render line
         else if (scanline == 261) {
             if (cycle == 1) {
-                // VBlank end
-                //logger.debug("Clear VBlank, Sprite 0, Overflow");
                 registers.PPUSTATUS = Common.Bits.setBit(registers.PPUSTATUS, 7, false); // Clear Vblank
                 registers.PPUSTATUS = Common.Bits.setBit(registers.PPUSTATUS, 5, false); // Clear sprite overflow
                 registers.PPUSTATUS = Common.Bits.setBit(registers.PPUSTATUS, 6, false); // Clear sprite 0 hit
             }
-            // vert(v) = vert(t) for each tick of cycle 280-304
+
+            // vert(v) = vert(t)
+            // for each tick of cycle 280-304
             else if (cycle >= 280 && cycle <= 304) {
-                //logger.debug("vert(v) = vert(t)");
                 transferVerticalScroll();
             }
         }
 
-        // Drawing
-
-        byte bg_pixel = 0;
-        byte bg_palette = 0;
-
-        // If show background
-        if (Common.Bits.getBit(registers.PPUMASK, 3)) {
-            short bit_mux = (short) (0x8000 >> registers.fine_x_scroll);
-
-            byte p0_pixel = (byte) ((bg_shifter_pattern_lo & bit_mux) > 0 ? 1 : 0);
-            byte p1_pixel = (byte) ((bg_shifter_pattern_hi & bit_mux) > 0 ? 1 : 0);
-
-            bg_pixel = (byte) ((p1_pixel << 1) | p0_pixel);
-
-            byte bg_pal0 = (byte) ((bg_shifter_attrib_lo & bit_mux) > 0 ? 1 : 0);
-            byte bg_pal1 = (byte) ((bg_shifter_attrib_hi & bit_mux) > 0 ? 1 : 0);
-
-            bg_palette = (byte) ((bg_pal1 << 1) | bg_pal0);
-        }
-
-        byte fg_pixel = 0;
-        byte fg_palette = 0;
-        byte fg_priority = 0;
-
-        // If show foreground (sprites)
-        if (Common.Bits.getBit(registers.PPUMASK, 4)) {
-            spriteZeroBeingRendered = false;
-
-            for (int i = 0; i < sprite_count; i++) {
-                // Scanline cycle has "collided" with sprite, shifters taking over
-                if (spriteScanline[i].x == 0) {
-                    byte fg_pixel_lo = (byte) ((sprite_shifter_pattern_lo[i] & 0x80) > 0 ? 1 : 0);
-                    byte fg_pixel_hi = (byte) ((sprite_shifter_pattern_hi[i] & 0x80) > 0 ? 1 : 0);
-                    fg_pixel = (byte) ((fg_pixel_hi << 1) | fg_pixel_lo);
-
-                    fg_palette = (byte) ((byte) (spriteScanline[i].attr & 0x03) + 0x04);
-                    fg_priority = (byte) (((spriteScanline[i].attr & 0x20) == 0) ? 1 : 0);
-
-                    // If not transparent
-                    if (fg_pixel != 0) {
-                        if (i == 0) {
-                            spriteZeroBeingRendered = true;
-                        }
-
-                        break;
-                    }
-                }
-            }
-        }
-
-        byte pixel = 0;
-        byte palette = 0;
-
-        if (bg_pixel == 0 && fg_pixel == 0) {
-            pixel = 0;
-            palette = 0;
-        } else if (bg_pixel == 0 && fg_pixel > 0) {
-            pixel = fg_pixel;
-            palette = fg_palette;
-        } else if (bg_pixel > 0 && fg_pixel == 0) {
-            pixel = bg_pixel;
-            palette = bg_palette;
-        } else if (bg_pixel > 0 && fg_pixel > 0) {
-            if (fg_priority == 1) {
-                pixel = fg_pixel;
-                palette = fg_palette;
-            } else {
-                pixel = bg_pixel;
-                palette = bg_palette;
-            }
-
-            if (spriteZeroHitPossible && spriteZeroBeingRendered) {
-                if (rendering_enabled) {
-                    boolean render_background_left = Common.Bits.getBit(registers.PPUMASK, 1);
-                    boolean render_sprites_left = Common.Bits.getBit(registers.PPUMASK, 2);
-                    if (!(render_background_left || render_sprites_left)) {
-                        if (cycle >= 9 && cycle < 258) {
-                            // Sprite zero hit
-                            registers.PPUSTATUS = Common.Bits.setBit(registers.PPUSTATUS, 6, true);
-                        }
-                    } else {
-                        if (cycle >= 1 && cycle < 258) {
-                            // Sprite zero hit
-                            registers.PPUSTATUS = Common.Bits.setBit(registers.PPUSTATUS, 6, true);
-                        }
-                    }
-                }
-            }
-        }
-
-        if (cycle > 0 && cycle <= 256 && scanline >= 0 && scanline < 240) {
-            // Now we have a final pixel colour and palette
-            //logger.debug("Scanline: {}, \tRendering cycle: {}, \tpixel: {}, \tpalette: {}", scanline, cycle, pixel, palette);
-            buffered_pixel_color[0] = get_color_from_palette(palette, pixel);
-            bufferedImage.getRaster().setPixel(cycle - 1, scanline, buffered_pixel_color);
-            trigger_game_canvas_repaint.run(); // TODO: Remove. Only for debugging, check each pixel render correctly.
-        }
+        draw_frame();
 
         cycle ++;
     }
@@ -868,7 +708,7 @@ public class PPU {
      */
     private void incVerticalScroll() {
         // If rendering is enabled (show background or sprites)
-        if (rendering_enabled) {
+        if (is_rendering_enabled) {
             // Increment coarse Y
             int coarse_y = (registers.loopy_v & 0b11111_00000) >> 5;
 
@@ -903,7 +743,7 @@ public class PPU {
 
     private void incHorizontalScroll() {
         // If rendering is enabled (show background or sprites)
-        if (rendering_enabled) {
+        if (is_rendering_enabled) {
             // Increment coarse X
             int coarse_x = registers.loopy_v & 0b11111;
 
@@ -991,11 +831,14 @@ public class PPU {
      * v: ....A.. ...BCDEF <- t: ....A.. ...BCDEF
      */
     private void transferHorizontalScroll() {
-        if (rendering_enabled) {
+        if (is_rendering_enabled) {
             // At dot 257 of each scanline
             // v: ....A.. ...BCDEF <- t: ....A.. ...BCDEF
-            registers.loopy_v = (short) (registers.loopy_v & 0b11110_11111_00000);
-            registers.loopy_v |= (short) (registers.loopy_t & 0b00001_00000_11111);
+
+            short mask = (short) (0b00100_00000_11111);
+
+            registers.loopy_v &= (short) ~mask;
+            registers.loopy_v |= (short) (registers.loopy_t & mask);
         }
     }
 
@@ -1010,10 +853,164 @@ public class PPU {
      * v: GHIA.BC DEF..... <- t: GHIA.BC DEF.....
      */
     private void transferVerticalScroll() {
-        if (rendering_enabled) {
+        if (is_rendering_enabled) {
             // v: GHIA.BC DEF..... <- t: GHIA.BC DEF.....
-            registers.loopy_v = (short) (registers.loopy_v & 0b00001_00000_11111);
-            registers.loopy_v |= (short) (registers.loopy_t & 0b11110_11111_00000);
+
+            short mask = (short) (0b11110_11111_00000);
+
+            registers.loopy_v &= (short) ~mask;
+            registers.loopy_v |= (short) (registers.loopy_t & mask);
         }
+    }
+
+    /**
+     * Load nametable byte (see PPU timing)
+     */
+    private void load_nt() {
+        load_BG_shifters();
+        bg_next_tile_id = read((short) (0x2000 | (registers.loopy_v & 0x0FFF)));
+    }
+
+    /**
+     * Load attribute table byte (see PPU timing)
+     */
+    private void load_at() {
+        bg_next_tile_attrib = read((short) (0x23C0                 // first nametable + attribute table offset
+                | (registers.loopy_v & 0x0C00)                     // nametable X,Y
+                | ((registers.loopy_v >> 4) & 0x38)                // coarse y
+                | ((registers.loopy_v >> 2) & 0x07)));             // coarse X
+
+        // Coarse Y second bit
+        if (Common.Bits.getBit(registers.loopy_v, 6))
+            bg_next_tile_attrib >>= 4;
+
+        // Coarse X second bit
+        if (Common.Bits.getBit(registers.loopy_v, 1))
+            bg_next_tile_attrib >>= 2;
+
+        bg_next_tile_attrib &= 0x03;
+    }
+
+    private void load_bg_lsbits() {
+        short addr = 0;
+
+        // Background pattern table address (0: $0000; 1: $1000)
+        if (Common.Bits.getBit(registers.PPUCTRL, 4))
+            addr += 0x1000;
+
+        addr += (short) (bg_next_tile_id & 0xFF << 4);
+        addr += (short) ((registers.loopy_v & 0b111_00_00000_00000) >> 12);
+
+        bg_next_tile_lsb = read(addr);
+    }
+
+    private void load_bg_msbits() {
+        short addr = 0;
+
+        // Background pattern table address (0: $0000; 1: $1000)
+        if (Common.Bits.getBit(registers.PPUCTRL, 4))
+            addr += 0x1000;
+
+        addr += (short) ((bg_next_tile_id & 0xFF) << 4);
+        addr += (short) ((registers.loopy_v & 0b111_00_00000_00000) >> 12);
+        addr += 8; // 8 plane offset
+
+        bg_next_tile_msb = read(addr);
+    }
+
+    private void draw_frame() {
+        byte bg_pixel = 0;
+        byte bg_palette = 0;
+
+        // If show background
+        if (Common.Bits.getBit(registers.PPUMASK, 3)) {
+            short bit_mux = (short) (0x8000 >> registers.fine_x_scroll);
+
+            byte p0_pixel = (byte) ((bg_shifter_pattern_lo & bit_mux) > 0 ? 1 : 0);
+            byte p1_pixel = (byte) ((bg_shifter_pattern_hi & bit_mux) > 0 ? 1 : 0);
+
+            bg_pixel = (byte) ((p1_pixel << 1) | p0_pixel);
+
+            byte bg_pal0 = (byte) ((bg_shifter_attrib_lo & bit_mux) > 0 ? 1 : 0);
+            byte bg_pal1 = (byte) ((bg_shifter_attrib_hi & bit_mux) > 0 ? 1 : 0);
+
+            bg_palette = (byte) ((bg_pal1 << 1) | bg_pal0);
+        }
+
+        byte fg_pixel = 0;
+        byte fg_palette = 0;
+        byte fg_priority = 0;
+
+        // If show foreground (sprites)
+        if (Common.Bits.getBit(registers.PPUMASK, 4)) {
+            spriteZeroBeingRendered = false;
+
+            for (int i = 0; i < sprite_count; i++) {
+                // Scanline cycle has "collided" with sprite, shifters taking over
+                if (spriteScanline[i].x == 0) {
+                    byte fg_pixel_lo = (byte) ((sprite_shifter_pattern_lo[i] & 0x80) > 0 ? 1 : 0);
+                    byte fg_pixel_hi = (byte) ((sprite_shifter_pattern_hi[i] & 0x80) > 0 ? 1 : 0);
+                    fg_pixel = (byte) ((fg_pixel_hi << 1) | fg_pixel_lo);
+
+                    fg_palette = (byte) ((byte) (spriteScanline[i].attr & 0x03) + 0x04);
+                    fg_priority = (byte) (((spriteScanline[i].attr & 0x20) == 0) ? 1 : 0);
+
+                    // If not transparent
+                    if (fg_pixel != 0) {
+                        if (i == 0) {
+                            spriteZeroBeingRendered = true;
+                        }
+
+                        break;
+                    }
+                }
+            }
+        }
+
+        byte pixel = 0;
+        byte palette = 0;
+
+        if (bg_pixel == 0 && fg_pixel > 0) {
+            pixel = fg_pixel;
+            palette = fg_palette;
+        } else if (bg_pixel > 0 && fg_pixel == 0) {
+            pixel = bg_pixel;
+            palette = bg_palette;
+        } else if (bg_pixel > 0 && fg_pixel > 0) {
+            if (fg_priority == 1) {
+                pixel = fg_pixel;
+                palette = fg_palette;
+            } else {
+                pixel = bg_pixel;
+                palette = bg_palette;
+            }
+
+            if (spriteZeroHitPossible && spriteZeroBeingRendered) {
+                if (is_rendering_enabled) {
+                    boolean render_background_left = Common.Bits.getBit(registers.PPUMASK, 1);
+                    boolean render_sprites_left = Common.Bits.getBit(registers.PPUMASK, 2);
+                    if (!(render_background_left || render_sprites_left)) {
+                        if (cycle >= 9 && cycle < 258) {
+                            // Sprite zero hit
+                            registers.PPUSTATUS = Common.Bits.setBit(registers.PPUSTATUS, 6, true);
+                        }
+                    } else {
+                        if (cycle >= 1 && cycle < 258) {
+                            // Sprite zero hit
+                            registers.PPUSTATUS = Common.Bits.setBit(registers.PPUSTATUS, 6, true);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (cycle > 0 && cycle <= 256 && scanline >= 0 && scanline < 240) {
+            // Now we have a final pixel colour and palette
+            //logger.debug("Scanline: {}, \tRendering cycle: {}, \tpixel: {}, \tpalette: {}", scanline, cycle, pixel, palette);
+            buffered_pixel_color[0] = get_color_from_palette(palette, pixel);
+            bufferedImage.getRaster().setPixel(cycle - 1, scanline, buffered_pixel_color);
+            trigger_game_canvas_repaint.run(); // TODO: Remove. Only for debugging, check each pixel render correctly.
+        }
+
     }
 }
