@@ -663,7 +663,8 @@ public class PPU {
 
         // The pattern in bit planes (each plane = 8 bytes)
         byte[] tile = new byte[16];
-        System.arraycopy(bus.ppuBus.chr_rom, (addr & 0xFFFF), tile, 0, 16);
+        if (bus.ppuBus.chr_rom.length != 0)
+            System.arraycopy(bus.ppuBus.chr_rom, (addr & 0xFFFF), tile, 0, 16);
 
         // Set final pixels
         for (int row = 0; row < 8; row++) {

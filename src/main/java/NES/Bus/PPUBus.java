@@ -5,15 +5,32 @@ import NES.Cartridge.Mirroring;
 import NES.Common;
 import NES.PPU.PPURegisters;
 
+import java.util.Optional;
+
 public class PPUBus {
 
     public final PPURegisters ppuRegisters;
+
     /**
      * Contains 2 pattern tables, each is 4KB in size.
-     * This memory translates to sprites.
+     * Can be null if the cartridge has CHR ROM size 0.
      * Address: 0x0000 - 0x1FFF
      */
     public final byte[] chr_rom;
+
+    /**
+     * Contains 8KB of RAM. Only initialized if the cartridge does not have CHR ROM.
+     * Can be null if the cartridge has CHR ROM.
+     * Address: 0x0000 - 0x1FFF
+     */
+    public final byte[] chr_ram;
+
+    /**
+     * If the cartridge has CHR ROM, this is true.
+     * If the cartridge has CHR RAM, this is false.
+     * This flag is faster check than checking if chr_rom size is 0.
+     */
+    private final boolean is_chr_rom;
 
     /**
      * Contains 4 name tables, each is 1KB in size.
@@ -55,6 +72,8 @@ public class PPUBus {
         this.ppuRegisters = ppuRegisters;
         this.chr_rom = cartridge.chr_rom();
         this.mirroring = cartridge.header().getMirrorType();
+        this.chr_ram = cartridge.chr_ram();
+        this.is_chr_rom = (chr_rom.length > 0);
 
         this.palette_ram = new byte[32];
         this.vram = new byte[1024 * 2];
@@ -63,10 +82,9 @@ public class PPUBus {
     public byte ppu_read(short addr) {
         try {
             addr &= (short) 0xFFFF;
-
             if (addr >= 0x0000 && addr <= 0x1FFF) {
-                // CHR ROM / pattern table
-                return chr_rom[addr];
+                // CHR ROM / RAM for pattern tables
+                return is_chr_rom? chr_rom[addr] : chr_ram[addr];
             } else if (addr >= 0x2000 && addr <= 0x2FFF) {
                 // Name table
                 if (mirroring == Mirroring.HORIZONTAL) {
@@ -128,6 +146,8 @@ public class PPUBus {
         } else if (addr >= 0x3F00 && addr <= 0x3FFF) {
             // Palette RAM + Mirrors of 0x3F00-0x3F1F (0x3F20-0x3FFF is mirrors of 0x3F00-0x3F1F)
             palette_ram[(addr - 0x3F00) % 32] = value;
+        } else {
+            throw new RuntimeException("Invalid PPU write memory address: " + Common.shortToHex(addr, true));
         }
     }
 }

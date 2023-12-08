@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Optional;
 
 public class ROMParser {
 
@@ -27,6 +28,11 @@ public class ROMParser {
         iNESHeader header = parseHeader(fileInputStream);
         byte[] prg_rom = parse_prg_rom(header, fileInputStream);
         byte[] chr_rom = parse_chr_rom(header, fileInputStream);
+        byte[] chr_ram = null;
+        if (header.chr_rom_size == 0) {
+            chr_ram = new byte[8 * 1024];
+            logger.info("CHR RAM size: " + chr_ram.length / 1024 + "KB");
+        }
 
         // Here we read the rest of the file, and check that we read all the bytes.
         // We should have read all the bytes before, in parseHeader, parse_prg_rom and parse_chr_rom.
@@ -35,7 +41,7 @@ public class ROMParser {
             throw new ParsingException("Expected that I read all the bytes, however there are " +
                     bytes_left.length + " bytes left");
 
-        return new Cartridge(header, prg_rom, chr_rom);
+        return new Cartridge(header, prg_rom, chr_rom, chr_ram);
     }
 
     private static iNESHeader parseHeader(FileInputStream fileInputStream) throws ParsingException, IOException {

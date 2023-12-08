@@ -14,6 +14,7 @@ import java.io.IOException;
 public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
     public static void main(String[] args) throws IOException, ROMParser.ParsingException {
+        // My programs
         String nestest = "6502_programs/nestest/nestest.nes";
         String greenscreen = "6502_programs/greenscreen/greenscreen.nes";
         String single_sprite = "6502_programs/single_sprite/hb1.nes";
@@ -23,6 +24,11 @@ public class Main {
         String donkey_kong_mapper0 = "6502_programs/donkey_kong/Donkey Kong (USA) (GameCube Edition).nes";
         String pacman = "6502_programs/pacman/Pac-Man (USA) (Namco).nes";
         String scroll_test = "6502_programs/scroll_test/scroll.nes";
+
+        // Balrgg's tests
+        String palette_ram = "nes-test-roms/blargg_ppu_tests_2005.09.15b/palette_ram.nes";
+        String power_up_palette = "nes-test-roms/blargg_ppu_tests_2005.09.15b/power_up_palette.nes";
+
 
         String program = nestest;
 
