@@ -24,13 +24,15 @@ public class Main {
         String donkey_kong_mapper0 = "6502_programs/donkey_kong/Donkey Kong (USA) (GameCube Edition).nes";
         String pacman = "6502_programs/pacman/Pac-Man (USA) (Namco).nes";
         String scroll_test = "6502_programs/scroll_test/scroll.nes";
+        String hello = "6502_programs/hello/hello.nes";
+        String my_test = "6502_programs/test_cc65/bin/main.nes";
 
         // Balrgg's tests
         String palette_ram = "nes-test-roms/blargg_ppu_tests_2005.09.15b/palette_ram.nes";
         String power_up_palette = "nes-test-roms/blargg_ppu_tests_2005.09.15b/power_up_palette.nes";
 
 
-        String program = nestest;
+        String program = hello;
 
         Cartridge cartridge = ROMParser.parse_rom(program);
 

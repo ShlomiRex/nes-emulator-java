@@ -65,9 +65,9 @@ public class CPU {
         Instructions instr = instr_info.instr;
         AddressingMode addrmode = instr_info.addrmode;
 
-        int bytes = instr_info.bytes;
-        int cycles = instr_info.cycles;
-        Decoder.OopsCycle oops_cycle = instr_info.oopsCycle;
+//        int bytes = instr_info.bytes;
+//        int cycles = instr_info.cycles;
+//        Decoder.OopsCycle oops_cycle = instr_info.oopsCycle;
 //        logger.debug(
 //                instr.toString()+"("+Common.byteToHex(opcode, true)+")\t"
 //                +addrmode+"\tBytes: "

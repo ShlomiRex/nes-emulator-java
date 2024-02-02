@@ -4,12 +4,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import NES.NES;
-import NES.Common;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class GameWindow extends JFrame implements KeyListener {
 
@@ -18,6 +19,20 @@ public class GameWindow extends JFrame implements KeyListener {
 
     public GameWindow(NES nes, GamePanel panel) {
         this.nes = nes;
+
+        // Look and feel
+        try {
+            UIManager.setLookAndFeel(
+                    UIManager.getSystemLookAndFeelClassName());
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (InstantiationException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        } catch (UnsupportedLookAndFeelException e) {
+            throw new RuntimeException(e);
+        }
 
         add(panel);
 
@@ -28,6 +43,9 @@ public class GameWindow extends JFrame implements KeyListener {
         Image img_icon = new ImageIcon("resources/NES_icon.png").getImage();
         setIconImage(img_icon);
 
+        addMenuBar();
+        addBottomStatusBar();
+
         setVisible(true);
         pack();
         setLocationRelativeTo(null);
@@ -36,6 +54,66 @@ public class GameWindow extends JFrame implements KeyListener {
         ControllerGlassPane controllerGlassPane = new ControllerGlassPane(panel, nes.bus);
         this.setGlassPane(controllerGlassPane);
         controllerGlassPane.setVisible(true);
+    }
+
+    private void addMenuBar() {
+        JMenuBar menuBar = new JMenuBar();
+
+        // File menu
+        JMenu fileMenu = new JMenu("File");
+        JMenuItem openItem = new JMenuItem("Open ROM");
+        JMenuItem exitItem = new JMenuItem("Exit");
+        fileMenu.add(openItem);
+        fileMenu.add(exitItem);
+        menuBar.add(fileMenu);
+
+        // Debug menu
+        JMenu debugMenu = new JMenu("Debug");
+        JMenuItem nametable_gridlines = new JCheckBoxMenuItem("Show nametable gridlines");
+        JMenuItem nametable_hover = new JCheckBoxMenuItem("Show nametable cell outline");
+        JMenuItem pixel_hover = new JCheckBoxMenuItem("Show pixel outline");
+        debugMenu.add(nametable_gridlines);
+        debugMenu.add(nametable_hover);
+        debugMenu.add(pixel_hover);
+        menuBar.add(debugMenu);
+
+        // Read preferences and set the menu items accordingly
+        nametable_gridlines.setSelected(MenuBarStatePreferences.instance.isNametableGridlines());
+        nametable_hover.setSelected(MenuBarStatePreferences.instance.isNametableHover());
+        pixel_hover.setSelected(MenuBarStatePreferences.instance.isPixelHover());
+
+        // If user exits the menu, save the state of the menu items
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                super.windowClosing(e);
+                logger.info("Exiting the program");
+                MenuBarStatePreferences.instance.saveState(MenuBarStatePreferences.NAMETABLE_GRIDLINES, nametable_gridlines.isSelected());
+                MenuBarStatePreferences.instance.saveState(MenuBarStatePreferences.NAMETABLE_HOVER, nametable_hover.isSelected());
+                MenuBarStatePreferences.instance.saveState(MenuBarStatePreferences.PIXEL_HOVER, pixel_hover.isSelected());
+            }
+        });
+
+        // Add change listeners to the menu items
+        nametable_gridlines.addChangeListener(e -> {
+            MenuBarStatePreferences.instance.saveState(MenuBarStatePreferences.NAMETABLE_GRIDLINES, nametable_gridlines.isSelected());
+        });
+        nametable_hover.addChangeListener(e -> {
+            MenuBarStatePreferences.instance.saveState(MenuBarStatePreferences.NAMETABLE_HOVER, nametable_hover.isSelected());
+        });
+        pixel_hover.addChangeListener(e -> {
+            MenuBarStatePreferences.instance.saveState(MenuBarStatePreferences.PIXEL_HOVER, pixel_hover.isSelected());
+        });
+
+        exitItem.addActionListener(e -> {
+            dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
+        });
+
+        setJMenuBar(menuBar);
+    }
+
+    private void addBottomStatusBar() {
+        add(StatusBar.instance, BorderLayout.SOUTH);
     }
 
     @Override
