@@ -84,6 +84,10 @@ A lot of debugger improvements, including:
 
 ![](README-resources/Screenshot%202023-12-06%20165109.png)
 
+Trying to fix PPU rendering issues (left - my game, right - FCEUX emulator:
+
+![](README-resources/Screenshot%202024-02-02%20004954.png)
+
 # Resources
 
 The most used resorces:
