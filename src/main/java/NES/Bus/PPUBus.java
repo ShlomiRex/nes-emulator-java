@@ -81,22 +81,25 @@ public class PPUBus {
 
     public byte ppu_read(short addr) {
         try {
-            addr &= (short) 0xFFFF;
             if (addr >= 0x0000 && addr <= 0x1FFF) {
                 // CHR ROM / RAM for pattern tables
                 return is_chr_rom? chr_rom[addr] : chr_ram[addr];
             } else if (addr >= 0x2000 && addr <= 0x2FFF) {
                 // Name table
+                int nametable_id = (addr - 0x2000) / 0x400;
                 if (mirroring == Mirroring.HORIZONTAL) {
-                    if (addr >= 0x2800) {
+                    if (nametable_id >= 2) {
                         addr -= 0x800;
                     }
                 } else {
                     // Vertical
-                    if (addr >= 0x2800 && addr <= 0x2BFF)
+                    if (nametable_id == 1) {
                         addr -= 0x400;
-                    else if (addr >= 0x2C00)
+                    } else if (nametable_id == 2) {
+                        addr -= 0x400;
+                    } else if (nametable_id == 3) {
                         addr -= 0x800;
+                    }
                 }
                 return vram[addr - 0x2000];
             } else if (addr >= 0x3000 && addr <= 0x3EFF) {
@@ -128,32 +131,29 @@ public class PPUBus {
         if (addr >= 0x0000 && addr <= 0x1FFF) {
             // CHR ROM / pattern table
             throw new RuntimeException("Cannot write to CHR ROM");
-        } else if ((addr >= 0x2000 && addr <= 0x2FFF) ||
-                (addr >= 0x3000 && addr <= 0x3EFF)) {
-            // Name table (second if - mirrors of 0x2000-0x2EFF)
+        } else if (addr >= 0x2000 && addr <= 0x2FFF) {
+            // Nametables
 
-            // If mirror of 0x2000-0x2EFF
-            if (addr >= 0x3000)
-                addr -= 0x1000;
-
-            int nametable_id = 0;
-            if (addr >= 0x2400 && addr <= 0x27FF)
-                nametable_id = 1;
-            else if (addr >= 0x2800 && addr <= 0x2BFF)
-                nametable_id = 2;
-            else if (addr >= 0x2C00)
-                nametable_id = 3;
+            int nametable_id = (addr - 0x2000) / 0x400;
 
             if (mirroring == Mirroring.HORIZONTAL) {
-                if (nametable_id == 1 || nametable_id == 3)
-                    addr -= 0x400;
+                if (nametable_id >= 2) {
+                    addr -= 0x800;
+                }
             } else {
                 // Vertical
-                if (nametable_id == 2 || nametable_id == 3)
+                if (nametable_id == 1) {
+                    addr -= 0x400;
+                } else if (nametable_id == 2) {
+                    addr -= 0x400;
+                } else if (nametable_id == 3) {
                     addr -= 0x800;
+                }
             }
-            vram[((addr - 0x2000) % 0x400)] = value;
-            //logger.debug("Writing to name table at index: " + ((addr - 0x2000) % 0x400));
+            vram[addr - 0x2000] = value;
+        } else if (addr >= 0x3000 && addr <= 0x3EFF) {
+            // Nametables mirrors of 0x2000-0x2EFF
+            ppu_write((short) (addr - 0x1000), value);
         } else if (addr >= 0x3F00 && addr <= 0x3FFF) {
             // Palette RAM
 

@@ -736,6 +736,8 @@ public class PPU {
      */
     private void load_nt() {
         load_BG_shifters();
+        // TODO: Here is the problem
+        print_loopy_v();
         bg_next_tile_id = read((short) (0x2000 | (registers.loopy_v & 0x0FFF)));
     }
 
@@ -900,6 +902,17 @@ public class PPU {
 //            logger.debug("Max x: {}, Max y: {}, Min y: {}", max_x, max_y, min_y);
 //        }
         trigger_game_canvas_repaint.run(); // TODO: Remove. Only for debugging, check each pixel render correctly.
+    }
+
+    // For debugging.
+    private void print_loopy_v() {
+        String binary = Common.shortToBinary(registers.loopy_v);
+        int coarse_x_scroll = registers.loopy_v & 0b11111;
+        int coarse_y_scroll = (registers.loopy_v & 0b11111_00000) >> 5;
+        int nametable_select = registers.loopy_v & 0b11;
+        int fine_y_scroll = (registers.loopy_v & 0b111_00000_00000) >> 12;
+        logger.debug("loopy_v, Coarse X: {}, Coarse Y: {}, Nametable select: {}, Fine Y scroll: {}",
+                coarse_x_scroll, coarse_y_scroll, nametable_select, fine_y_scroll);
     }
 }
 
