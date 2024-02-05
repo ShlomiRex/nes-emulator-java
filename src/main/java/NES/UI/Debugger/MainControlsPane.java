@@ -9,6 +9,7 @@ import javax.swing.*;
 public class MainControlsPane extends JPanel {
 
     public MainControlsPane(NES.NES nes,
+                            Runnable repaint_cpu_pane_runnable,
                             Runnable repaint_ppu_pane_runnable,
                             CPUButtonPane cpuButtonPane,
                             PPUButtonPane ppuButtonPane,
@@ -23,7 +24,7 @@ public class MainControlsPane extends JPanel {
         btn_stop.setEnabled(false);
 
         btn_run.addActionListener(e -> {
-            nes.run(chk_max_speed.isSelected());
+            nes.run(chk_max_speed.isSelected(), repaint_cpu_pane_runnable);
 
             btn_run.setEnabled(false);
             btn_stop.setEnabled(true);

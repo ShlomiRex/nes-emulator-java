@@ -34,6 +34,7 @@ public class DebuggerWindow extends JFrame {
         left_panel.setLayout(new BoxLayout(left_panel, BoxLayout.Y_AXIS));
 
         MainControlsPane main_controls_pane = new MainControlsPane(nes,
+                cpu_pane::repaint,
                 ppu_pane::repaint,
                 cpu_pane.button_pane,
                 ppu_pane.button_pane,

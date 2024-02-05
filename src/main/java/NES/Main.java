@@ -26,6 +26,7 @@ public class Main {
         String scroll_test = "6502_programs/scroll_test/scroll.nes";
         String hello_sprites = "6502_programs/hello_sprites/hello.nes";
         String hello_backgrounds = "6502_programs/hello_backgrounds/example.nes";
+        String hello = "6502_programs/hello/hello.nes";
         String my_test = "6502_programs/test_cc65/bin/main.nes";
 
         // Balrgg's tests

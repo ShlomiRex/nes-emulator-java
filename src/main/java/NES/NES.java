@@ -66,28 +66,60 @@ public class NES {
     }
 
     public void run() {
-        run(false);
+        run(false, null);
     }
 
     public void run(boolean max_speed) {
+        run(max_speed, null);
+    }
+    public void run(Runnable post_run) {
+        run(false, post_run);
+    }
+
+    public void run(boolean max_speed, Runnable post_run) {
         logger.debug("Running NES");
         is_running = true;
 
-        long delay = 559;
-        if (max_speed) {
-            delay = 1;
+        if (!max_speed) {
+            long delay = 559;
+            ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+            executor.scheduleAtFixedRate(() -> {
+                if (!is_running) {
+                    if (post_run != null)
+                        post_run.run();
+
+                    executor.shutdown();
+                }
+
+                try {
+                    cpu.clock_tick();
+                    ppu.clock_tick();
+                    ppu.clock_tick();
+                    ppu.clock_tick();
+                } catch(Exception e) {
+                    logger.error("Exception in NES.run", e);
+                    System.exit(1); // Close other threads (swing)
+                }
+            }, 0, delay, TimeUnit.NANOSECONDS);
+        } else {
+            // We can't set delay to 0.
+            // This is code is a bit more efficient than setting delay to 1.
+            new Thread(() -> {
+                while (is_running) {
+                    try {
+                        cpu.clock_tick();
+                        ppu.clock_tick();
+                        ppu.clock_tick();
+                        ppu.clock_tick();
+                    } catch (Exception e) {
+                        logger.error("Exception in NES.run", e);
+                        System.exit(1); // Close other threads (swing)
+                    }
+                }
+                if (post_run != null)
+                    post_run.run();
+            }).start();
         }
-
-        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-        executor.scheduleAtFixedRate(() -> {
-            if (!is_running)
-                executor.shutdown();
-
-            cpu.clock_tick();
-            ppu.clock_tick();
-            ppu.clock_tick();
-            ppu.clock_tick();
-        }, 0, delay, TimeUnit.NANOSECONDS);
     }
 
     public void stop() {
