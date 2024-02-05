@@ -8,3 +8,5 @@ test_resources/**
 console.log
 *.cdl
 *.nes.deb
+**/.vscode/**
+*.o
