@@ -21,7 +21,7 @@ public class AssemblyTextPane extends JTextPane {
 
     private final Highlighter highlighter;
     private final AssemblyStyledDocument styledDocument;
-    private final int lines_to_display = 1024 * 0;
+    private final int lines_to_display = 1024 * 1;
 
     public AssemblyTextPane(NES nes) {
         this.cpuRegisters = nes.cpu.registers;

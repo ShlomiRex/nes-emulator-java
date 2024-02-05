@@ -104,6 +104,17 @@ public class PPUBus {
                 return ppu_read((short) (addr - 0x1000));
             } else if (addr >= 0x3F00 && addr <= 0x3FFF) {
                 // Palette RAM
+
+                // 0x3F04, 0x3F08, 0x3F0C are mirrors of 0x3F00
+                if (addr == 0x3F04 || addr == 0x3F08 || addr == 0x3F0C) {
+                    addr = 0x3F00;
+                }
+
+                // 0x3F10, 0x3F14, 0x3F18, 0x3F1C are mirrors of $3F00/$3F04/$3F08/$3F0C
+                if (addr == 0x3F10 || addr == 0x3F14 || addr == 0x3F18 || addr == 0x3F1C) {
+                    addr -= 0x10;
+                }
+
                 return palette_ram[addr - 0x3F00];
             } else {
                 throw new RuntimeException("Invalid PPU memory address: " + Common.shortToHex(addr, true));
@@ -144,7 +155,18 @@ public class PPUBus {
             vram[((addr - 0x2000) % 0x400)] = value;
             //logger.debug("Writing to name table at index: " + ((addr - 0x2000) % 0x400));
         } else if (addr >= 0x3F00 && addr <= 0x3FFF) {
-            // Palette RAM + Mirrors of 0x3F00-0x3F1F (0x3F20-0x3FFF is mirrors of 0x3F00-0x3F1F)
+            // Palette RAM
+
+            // 0x3F04, 0x3F08, 0x3F0C are mirrors of 0x3F00
+            if (addr == 0x3F04 || addr == 0x3F08 || addr == 0x3F0C) {
+                addr = 0x3F00;
+            }
+
+            // 0x3F10, 0x3F14, 0x3F18, 0x3F1C are mirrors of $3F00/$3F04/$3F08/$3F0C
+            if (addr == 0x3F10 || addr == 0x3F14 || addr == 0x3F18 || addr == 0x3F1C) {
+                addr -= 0x10;
+            }
+
             palette_ram[(addr - 0x3F00) % 32] = value;
         } else {
             throw new RuntimeException("Invalid PPU write memory address: " + Common.shortToHex(addr, true));

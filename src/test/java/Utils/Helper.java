@@ -8,7 +8,11 @@ import NES.Cartridge.iNESHeader;
 public class Helper {
     public static Cartridge createCustomCartridge(String[] program) {
         byte[] prg_rom = Assembler.assemble(program);
-        return new Cartridge(dummyiNESHeader(), prg_rom, new byte[1024 * 8]);
+        return new Cartridge(dummyiNESHeader(), prg_rom, new byte[1024 * 8], null);
+    }
+
+    public static Cartridge createDummyCartridge() {
+        return new Cartridge(dummyiNESHeader(), new byte[1024 * 16], new byte[1024 * 8], null);
     }
 
     public static iNESHeader dummyiNESHeader() {

@@ -1,5 +1,5 @@
 Shows a 'Hello' message on the center of screen.
-It uses background tiles.
+It uses sprite tiles.
 
 How to compile
 ===============
