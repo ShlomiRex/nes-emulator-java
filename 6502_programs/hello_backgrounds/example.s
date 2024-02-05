@@ -68,6 +68,12 @@ load_palettes:
 		cpx #$20     ; We have 0x20 (32) colors that are defined in 'palette' label
 		bne @loop
 
+enable_rendering:
+	; Enable NMI on VBlank and enable background rendering. Without this, we will not see any BG tiles.
+	lda #%10000000  ; Enable NMI
+	sta $2000
+	lda #%00001010  ; Enable background rendering, Show BG in left 8 pixels
+	sta $2001
 
 forever:
 	jmp forever
@@ -78,15 +84,15 @@ nmi:
 palettes:
 	; Background Palette
 	.byte $0f, $05, $28, $20
-	.byte $00, $00, $00, $00
-	.byte $00, $00, $00, $00
-	.byte $00, $00, $00, $00
+	.byte $0f, $00, $00, $00
+	.byte $0f, $00, $00, $00
+	.byte $0f, $00, $00, $00
 
 	; Sprite Palette
-	.byte $00, $00, $00, $00
-	.byte $00, $00, $00, $00
-	.byte $00, $00, $00, $00
-	.byte $00, $00, $00, $00
+	.byte $0f, $00, $00, $00
+	.byte $0f, $00, $00, $00
+	.byte $0f, $00, $00, $00
+	.byte $0f, $00, $00, $00
 
 ; Character memory
 .segment "CHARS"

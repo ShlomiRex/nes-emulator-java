@@ -1,13 +1,8 @@
 package PPU;
 
-import NES.Bus.Bus;
-import NES.Bus.PPUBus;
 import NES.Cartridge.Cartridge;
-import NES.Cartridge.iNESHeader;
 import NES.NES;
-import NES.PPU.PPU;
 import Utils.Helper;
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
