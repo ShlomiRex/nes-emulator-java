@@ -15,25 +15,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class TestPPURegisters {
-    // TODO: Uncomment and fix coverage
-//    @Test
-//    public void test_palette_write() {
-//        Bus bus = new Bus();
-//        PPU ppu = new PPU();
-//
-//        byte[] prg_rom = new byte[1024 * 32];
-//        byte[] chr_rom = new byte[1024 * 8];
-//
-//        iNESHeader header = Utils.Helper.dummyiNESHeader();
-//        ppu.attachBus(bus);
-//        bus.attachPPUBus(new PPUBus(ppu.registers, new Cartridge(header, prg_rom, chr_rom)));
-//
-//        ppu.registers.writePPUADDR((byte) 0x3F);
-//        ppu.registers.writePPUADDR((byte) 0x00);
-//        ppu.registers.writePPUDATA((byte) 0x29);
-//
-//        assertEquals(ppu.read((short) 0x3F00), 0x29);
-//    }
+    @Test
+    public void test_palette_write() {
+        Cartridge cartridge = Helper.createDummyCartridge();
+        NES nes = new NES(cartridge);
+
+        nes.ppu.registers.writePPUADDR((byte) 0x3F);
+        nes.ppu.registers.writePPUADDR((byte) 0x00);
+        nes.ppu.registers.writePPUDATA((byte) 0x29);
+
+        assertEquals(nes.ppu.read((short) 0x3F00), 0x29);
+    }
 
     /**
      * Test all loopy writes: <a href="https://www.nesdev.org/wiki/PPU_scrolling#Summary">wiki</a>

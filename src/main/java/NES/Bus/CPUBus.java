@@ -1,5 +1,6 @@
 package NES.Bus;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CPUBus {
@@ -31,6 +32,9 @@ public class CPUBus {
         this.is_testing_mode = is_testing_mode;
         this.is_record_memory = is_record_memory;
         this.cpu_memory = cpu_memory;
+
+        if (is_testing_mode)
+            recorded_memory = new ArrayList<>();
     }
 
 

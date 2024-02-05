@@ -31,8 +31,6 @@ public class PPU {
      */
     public int frame;
 
-    private int last_frame;
-
     private Runnable trigger_game_canvas_repaint;
 
     protected Bus bus;
