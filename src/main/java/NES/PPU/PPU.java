@@ -31,6 +31,8 @@ public class PPU {
      */
     public int frame;
 
+    private int last_frame;
+
     private Runnable trigger_game_canvas_repaint;
 
     protected Bus bus;
@@ -191,7 +193,18 @@ public class PPU {
             return;
         }
 
-        total_cycles++;
+        if (frame != last_frame) {
+            //logger.debug("Frame: {}", frame);
+            last_frame = frame;
+        }
+
+        if (frame == 10 && scanline == 109 + 8 && cycle > 124 + 5) {
+            //logger.debug("After letter E reached");
+            int a = 3; // dummy breakpoint
+
+            int nametable_addr = 0x2000;
+            debug_log_nametable(nametable_addr);
+        }
 
         if (scanline == 0 && cycle == 0) {
             // "Odd frame" cycle skip
@@ -229,9 +242,9 @@ public class PPU {
 
             // Read next scanline NT byte
             // TODO: Uncomment
-//            if (cycle == 338 || cycle == 340) {
-//                bg_next_tile_id = read((short) (0x2000 | (registers.loopy_v & 0x0FFF)));
-//            }
+            if (cycle == 338 || cycle == 340) {
+                bg_next_tile_id = read((short) (0x2000 | (registers.loopy_v & 0x0FFF)));
+            }
 
             // Foreground rendering after end of drawing scanline
             if (cycle == 257) {
@@ -395,6 +408,15 @@ public class PPU {
         draw_frame();
 
         cycle ++;
+    }
+
+    private void debug_log_nametable(int nametable_addr_start) {
+        for (int i = 0; i < 32 * 30; i++) {
+            int addr = nametable_addr_start + i;
+            byte tile = read((short) addr);
+            if (tile != 0)
+                logger.debug("[{}] = {}", Common.shortToHex((short) addr, true), tile);
+        }
     }
 
     private void update_shifters() {
