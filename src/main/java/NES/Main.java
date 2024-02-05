@@ -27,13 +27,13 @@ public class Main {
         String hello_sprites = "6502_programs/hello_sprites/hello.nes";
         String hello_backgrounds = "6502_programs/hello_backgrounds/example.nes";
         String hello = "6502_programs/hello/hello.nes";
-        String my_test = "6502_programs/test_cc65/bin/main.nes";
+        String single_bt_tile_at_start = "6502_programs/single_bg_tile_at_start/example.nes";
 
         // Balrgg's tests
         String palette_ram = "nes-test-roms/blargg_ppu_tests_2005.09.15b/palette_ram.nes";
         String power_up_palette = "nes-test-roms/blargg_ppu_tests_2005.09.15b/power_up_palette.nes";
 
-        String program = hello_backgrounds;
+        String program = single_bt_tile_at_start;
 
         Cartridge cartridge = ROMParser.parse_rom(program);
 

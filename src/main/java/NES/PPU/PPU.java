@@ -199,7 +199,7 @@ public class PPU {
             last_frame = frame;
         }
 
-        if (frame == 3 && scanline == 109 + 8 && cycle > 124 + 5) {
+        if (frame == 10) {
             //logger.debug("After letter E reached");
             int a = 3; // dummy breakpoint
         }
