@@ -1,15 +1,13 @@
 package PPU;
 
-import NES.Bus.Bus;
 import NES.Cartridge.Cartridge;
 import NES.NES;
-import NES.PPU.PPU;
 import Utils.Helper;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class TestPPUWrite {
+public class TestPPUPalette {
     @Test
     public void test_palette_write() {
         Cartridge cartridge = Helper.createDummyCartridge();

@@ -90,6 +90,8 @@ Trying to fix PPU rendering issues (left - my game, right - FCEUX emulator:
 
 # Resources
 
+![](README-resources/ppu_diagram.svg)
+
 The most used resorces:
 
 - Online emulator for quick testing of the CPU: [here](https://skilldrick.github.io/easy6502/#first-program)
