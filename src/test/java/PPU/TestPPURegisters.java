@@ -168,10 +168,7 @@ public class TestPPURegisters {
 
     @Test
     public void test_loopy_2006_write_2() {
-        // TODO: Assembler needed. For now I just manually set the program bytes.
-        String[] program = {"LDA #$F0", "STA $2006"};
-        Cartridge cartridge = Helper.createCustomCartridge(program);
-
+        Cartridge cartridge = Helper.createDummyCartridge();
         NES nes = new NES(cartridge);
 
         nes.cpu.registers.PC = (short) 0x8000;
@@ -189,10 +186,10 @@ public class TestPPURegisters {
         nes.cpu.clock_tick();
         nes.cpu.clock_tick();
 
-        assertEquals(nes.ppu.registers.loopy_t, 0b011110111110000);
+        assertEquals(0b011110111110000, nes.ppu.registers.loopy_t);
         assertFalse(nes.ppu.registers.w);
-        assertEquals(nes.ppu.registers.fine_x_scroll, 0b101);
-        assertEquals(nes.ppu.registers.loopy_v, 0b011110111110000);
+        assertEquals(0b101, nes.ppu.registers.fine_x_scroll);
+        assertEquals(0b011110111110000, nes.ppu.registers.loopy_v);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -287,10 +284,7 @@ public class TestPPURegisters {
 
     @Test
     public void test_split_xy_4() {
-        // TODO: Assembler needed. For now I just manually set the program bytes.
-        String[] program = {"LDA #$EF", "STA $2006"};
-        Cartridge cartridge = Helper.createCustomCartridge(program);
-
+        Cartridge cartridge = Helper.createDummyCartridge();
         NES nes = new NES(cartridge);
 
         nes.cpu.registers.PC = (short) 0x8000;

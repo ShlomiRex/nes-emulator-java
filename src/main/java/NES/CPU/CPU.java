@@ -43,9 +43,6 @@ public class CPU {
 //        logger.debug("CPU Tick, cycle: " + this.cycles);
 //        logger.debug(registers.toString());
 
-        // Log current PC
-//        logger.debug("PC: " + Common.shortToHex(registers.PC, true));
-
         // We can't ignore the NMI interrupt which is called when PPU VBlank starts.
         if (bus.nmi_line) {
             bus.nmi_line = false;
@@ -74,6 +71,8 @@ public class CPU {
 //                +bytes+"\tCycles: "
 //                +cycles+"\tOops cycle: "
 //                +oops_cycle);
+
+        logger.debug("CPU Tick, PC: {}, OP: {}", Common.shortToHex(registers.PC, true), instr.toString());
 
         // Execute
         execute_instruction(instr, addrmode);

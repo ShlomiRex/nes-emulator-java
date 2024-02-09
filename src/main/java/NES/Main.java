@@ -26,6 +26,7 @@ public class Main {
         String scroll_test = "6502_programs/scroll_test/scroll.nes";
         String hello_sprites = "6502_programs/hello_sprites/hello.nes";
         String hello_backgrounds = "6502_programs/hello_backgrounds/example.nes";
+        String hello_backgrounds2 = "6502_programs/hello_backgrounds2/example.nes";
         String hello = "6502_programs/hello/hello.nes";
         String single_bt_tile_at_start = "6502_programs/single_bg_tile_at_start/example.nes";
 
@@ -33,7 +34,7 @@ public class Main {
         String palette_ram = "nes-test-roms/blargg_ppu_tests_2005.09.15b/palette_ram.nes";
         String power_up_palette = "nes-test-roms/blargg_ppu_tests_2005.09.15b/power_up_palette.nes";
 
-        String program = single_bt_tile_at_start;
+        String program = hello_backgrounds;
 
         Cartridge cartridge = ROMParser.parse_rom(program);
 

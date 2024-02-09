@@ -1,8 +1,14 @@
 package NES;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HexFormat;
 
 public class Common {
+
+    private static final Logger logger = LoggerFactory.getLogger(Common.class);
+
     public static byte[] hexStringToByteArray(String s) {
         StringBuilder new_s = new StringBuilder();
         for (int i = 0; i < s.length(); i+=5) {
@@ -74,6 +80,21 @@ public class Common {
             return String.format("%04X", s & 0xFFFF);
         else
             return String.format("0x%04X", s & 0xFFFF);
+    }
+
+    public static void debug_log_loopy(short loopy) {
+        int coarse_x_scroll = loopy & 0b11111;
+        int coarse_y_scroll = (loopy & 0b11111_00000) >> 5;
+        int nametable_select = (loopy & 0b11_00000_00000) >> 10;
+        int fine_y_scroll = (loopy & 0b111_00_00000_00000) >> 12;
+
+        String binary = Common.byteToBinary((byte) fine_y_scroll).substring(5, 8) + "_" +
+                Common.byteToBinary((byte) nametable_select).substring(6, 8) + "_" +
+                Common.byteToBinary((byte) coarse_y_scroll).substring(3, 8) + "_" +
+                Common.byteToBinary((byte) coarse_x_scroll).substring(3, 8);
+
+        logger.debug("loopy_v: {}, Coarse X: {}, Coarse Y: {}, Nametable select: {}, Fine Y scroll: {}",
+                binary, coarse_x_scroll, coarse_y_scroll, nametable_select, fine_y_scroll);
     }
 
     public static class Bits {

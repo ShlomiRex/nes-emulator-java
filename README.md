@@ -88,6 +88,11 @@ Trying to fix PPU rendering issues (left - my game, right - FCEUX emulator:
 
 ![](README-resources/Screenshot%202024-02-02%20004954.png)
 
+First time working render output using PPU timings, instead of directly reading the nametable, notice
+I still have some rendering problems (not drawing '1/2' pattern correctly):
+
+![](README-resources/Screenshot%202024-02-09%20222329.png)
+
 # Resources
 
 ![](README-resources/ppu_diagram.svg)

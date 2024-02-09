@@ -56,7 +56,6 @@ public class PPURegisters {
      * Temporary VRAM address (15 bits).
      * Used for scrolling.
      */
-    //public LoopyRegister loopy_t;
     public short loopy_t;
 
     /**
@@ -151,7 +150,7 @@ public class PPURegisters {
             v: <...all bits...> <- t: <...all bits...>
             w:                  <- 0
              */
-            loopy_t = (short) ((loopy_t & 0xFF00) | (value & 0x00FF));
+            loopy_t = (short) ((loopy_t & 0xFF00) | (short)value);
             loopy_v = loopy_t;
         } else {
             /*
@@ -162,7 +161,7 @@ public class PPURegisters {
             t: Z...... ........ <- 0 (bit Z is cleared)
             w:                  <- 1
              */
-            loopy_t = (short) ((loopy_t & 0b000_00_00111_11111) | (((short) value & 0b1_11111) << 8));
+            loopy_t = (short) ((loopy_t & 0x00FF) | (((short)value) << 8));
         }
         w = !w;
     }
@@ -264,14 +263,6 @@ public class PPURegisters {
         return ppu.oam[OAMADDR];
     }
 
-    //TODO: PPUSCROLL is not one register
-//    /**
-//     * Used only for testing, or debugging.
-//     */
-//    public short getPPUSCROLL() {
-//        return PPUSCROLL;
-//    }
-
     /**
      * Used only for testing, or debugging.
      */
@@ -296,6 +287,6 @@ public class PPURegisters {
         PPUCTRL = value;
 
         // Set loopy_t nametable select
-        loopy_t = (short) ((loopy_t & 0b1111_00_11111_11111) | (((short) value & 0b11) << 10));
+        loopy_t = (short) ((loopy_t & 0b111_00_11111_11111) | ((((short) value) & 0b11) << 10));
     }
 }
