@@ -215,12 +215,12 @@ public class PPU {
             int a = 3; // dummy breakpoint
         }
 
-        // Scanline 0-239 (including): Visible scanlines
+        // Visible scanlines
         // Heavily inspired by the PPU timing diagram
         if (scanline >= 0 && scanline < 240) {
+            // Either loat NT, AT, BG low, BG high
             if (cycle <= 256) {
                 update_shifters(); // TODO: Needs testing
-
                 switch(cycle % 8) {
                     case 1 -> load_nt();
                     case 3 -> load_at();
@@ -236,12 +236,12 @@ public class PPU {
                 incVerticalScroll();
 
             if (cycle == 257) {
+                // TODO: FIX
                 load_BG_shifters();
                 transferHorizontalScroll();
             }
 
             // Read next scanline NT byte
-            // TODO: Uncomment
             if (cycle == 338 || cycle == 340) {
                 bg_next_tile_id = read((short) (0x2000 | (registers.loopy_v & 0x0FFF)));
             }
@@ -455,29 +455,6 @@ public class PPU {
 
         bg_shifter_pattern_lo = (byte) ((bg_shifter_pattern_lo & 0x00FF) | ((bg_next_tile_attrib & 0xFF) << 8));
         bg_shifter_pattern_hi = (byte) ((bg_shifter_pattern_hi & 0x00FF) | ((bg_next_tile_attrib & 0xFF) << 8));
-
-
-        // New code:
-        /*
-                bg_shifter_pattern_lo = (short) ((bg_shifter_pattern_lo & 0xFF00) | (short)bg_next_tile_lsb);
-        bg_shifter_pattern_hi = (short) ((bg_shifter_pattern_hi & 0xFF00) | (short)bg_next_tile_msb);
-
-        int color = 0;
-        if (Common.Bits.getBit(bg_next_tile_attrib, 0)) {
-            color = 0xFF;
-        }
-        bg_shifter_attrib_lo = (short) ((bg_shifter_attrib_lo & 0xFF00) | (short)color);
-
-        color = 0;
-        if (Common.Bits.getBit(bg_next_tile_attrib, 1)) {
-            color = 0xFF;
-        }
-        bg_shifter_attrib_hi = (short) ((bg_shifter_attrib_hi & 0xFF00) | (short)color);
-         */
-
-        // TODO: This is a temporary fix. I don't want to deal with shifters right now. Only important for me is SOME pixel output.
-//        bg_shifter_attrib_lo = 0;
-//        bg_shifter_pattern_hi = 0;
     }
 
     /**
@@ -720,10 +697,9 @@ public class PPU {
         if (is_rendering_enabled) {
             // At dot 257 of each scanline
             // v: ....A.. ...BCDEF <- t: ....A.. ...BCDEF
+            short mask = (short) (0b000001_00000_11111);
 
-            short mask = (short) (0b00100_00000_11111);
-
-            registers.loopy_v &= (short) ~mask;
+            registers.loopy_v &= (short) ~mask; // clear bits of what we change
             registers.loopy_v |= (short) (registers.loopy_t & mask);
         }
     }
@@ -756,8 +732,7 @@ public class PPU {
      */
     private void load_nt() {
         load_BG_shifters();
-        //bg_next_tile_id = read((short) (0x2000 | (registers.loopy_v & 0x0FFF)));
-        bg_next_tile_id = 0; // TODO: Remove temporary fix
+        bg_next_tile_id = read((short) (0x2000 | (registers.loopy_v & 0x0FFF)));
     }
 
     /**

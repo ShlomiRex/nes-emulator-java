@@ -34,7 +34,7 @@ public class Main {
         String palette_ram = "nes-test-roms/blargg_ppu_tests_2005.09.15b/palette_ram.nes";
         String power_up_palette = "nes-test-roms/blargg_ppu_tests_2005.09.15b/power_up_palette.nes";
 
-        String program = hello_backgrounds;
+        String program = nestest;
 
         Cartridge cartridge = ROMParser.parse_rom(program);
 
