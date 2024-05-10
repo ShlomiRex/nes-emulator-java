@@ -172,7 +172,7 @@ public class PPURegisters {
         ppu.write(loopy_v, value);
 
         // Bit 2 of PPUCTRL determines whether to increment PPUADDR by 1 or 32 after each write to PPUDATA.
-        loopy_v += (short) (Common.Bits.getBit(PPUCTRL, 2) ? 32 : 1);
+        loopy_v += (short) (Common.Bits.getBit(PPUCTRL, 1) ? 32 : 1);
 
         // Wrap around to 0x3FFF.
         // TODO: I did not see other emulators do this
