@@ -124,8 +124,8 @@ public class PPURegisters {
             t: FGH..AB CDE..... <- d: ABCDEFGH
             w:                  <- 0
              */
-            loopy_t = (short) ((loopy_t & 0b000_11_11111_11111) | (((short) value & 0b111) << 12)); // fine_y
-            loopy_t = (short) ((loopy_t & 0b111_11_00000_11111) | (((short) value & 0b11111_000) << 2)); // coarse_y
+            loopy_t = (short) ((loopy_t & 0b000_11_11111_11111) | (((short) (value & 0xFF) & 0b111) << 12)); // fine_y
+            loopy_t = (short) ((loopy_t & 0b111_11_00000_11111) | (((short) (value & 0xFF) & 0b11111_000) << 2)); // coarse_y
         } else {
             /*
             $2005 first write (w is 0)
@@ -134,8 +134,8 @@ public class PPURegisters {
             x:              FGH <- d: .....FGH
             w:                  <- 1
              */
-            fine_x_scroll = (byte) ((short) value & 0b111); // fine_x
-            loopy_t = (short) ((loopy_t & 0b111_11_11111_00000) | ((short) value >> 3)); // coarse_x
+            fine_x_scroll = (byte) ((short) (value & 0xFF) & 0b111); // fine_x
+            loopy_t = (short) ((loopy_t & 0b111_11_11111_00000) | ((short) (value & 0xFF) >> 3)); // coarse_x
         }
 
         w = !w;
@@ -161,7 +161,7 @@ public class PPURegisters {
             t: Z...... ........ <- 0 (bit Z is cleared)
             w:                  <- 1
              */
-            loopy_t = (short) ((loopy_t & 0x00FF) | (((short)value) << 8));
+            loopy_t = (short) ((loopy_t & 0x00FF) | (((short)(value & 0xFF)) << 8));
         }
         w = !w;
     }
@@ -287,6 +287,6 @@ public class PPURegisters {
         PPUCTRL = value;
 
         // Set loopy_t nametable select
-        loopy_t = (short) ((loopy_t & 0b111_00_11111_11111) | ((((short) value) & 0b11) << 10));
+        loopy_t = (short) ((loopy_t & 0b111_00_11111_11111) | ((((short) (value & 0xFF)) & 0b11) << 10));
     }
 }
