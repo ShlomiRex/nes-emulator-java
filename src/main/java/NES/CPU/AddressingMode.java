@@ -15,3 +15,4 @@ public enum AddressingMode {
     INDIRECT_Y,
     IMMEDIATE,
 }
+
