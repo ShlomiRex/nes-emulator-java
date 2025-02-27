@@ -168,28 +168,40 @@ public class TestPPURegisters {
 
     @Test
     public void test_loopy_2006_write_2() {
+        // $2006 (PPUADDR) second write (w is 1)
+
+        /*
+        t: ....... ABCDEFGH <- d: ABCDEFGH
+        v: <...all bits...> <- t: <...all bits...>
+        w:                  <- 0
+         */
+
         Cartridge cartridge = Helper.createDummyCartridge();
         NES nes = new NES(cartridge);
 
         nes.cpu.registers.PC = (short) 0x8000;
-        nes.ppu.registers.loopy_t = 0b011110101101111;
+        nes.ppu.registers.loopy_t = 0b011_11_01011_01111;
         nes.ppu.registers.fine_x_scroll = 0b101;
         nes.ppu.registers.w = true;
 
-        nes.cpu.bus.cpuBus.cpu_write((short) 0x8000, (byte) 0xA9);
+        nes.cpu.bus.cpuBus.cpu_write((short) 0x8000, (byte) 0xA9); // LDA #$F0 (1111 0000)
         nes.cpu.bus.cpuBus.cpu_write((short) 0x8001, (byte) 0xF0);
 
-        nes.cpu.bus.cpuBus.cpu_write((short) 0x8002, (byte) 0x8D);
+        nes.cpu.bus.cpuBus.cpu_write((short) 0x8002, (byte) 0x8D); // STA $2006
         nes.cpu.bus.cpuBus.cpu_write((short) 0x8003, (byte) 0x06);
         nes.cpu.bus.cpuBus.cpu_write((short) 0x8004, (byte) 0x20);
 
         nes.cpu.clock_tick();
         nes.cpu.clock_tick();
 
-        assertEquals(0b011110111110000, nes.ppu.registers.loopy_t);
+
+
+        assertEquals(0b011_11_01111_10000, nes.ppu.registers.loopy_t);
         assertFalse(nes.ppu.registers.w);
         assertEquals(0b101, nes.ppu.registers.fine_x_scroll);
-        assertEquals(0b011110111110000, nes.ppu.registers.loopy_v);
+        assertEquals(0b011_11_01111_10000, nes.ppu.registers.loopy_v);
+
+        Helper.assertFirst15BitsEqual(nes.ppu.registers.loopy_t, nes.ppu.registers.loopy_v);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

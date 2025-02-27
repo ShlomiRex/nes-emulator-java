@@ -150,7 +150,7 @@ public class PPURegisters {
             v: <...all bits...> <- t: <...all bits...>
             w:                  <- 0
              */
-            loopy_t = (short) ((loopy_t & 0xFF00) | (short)value);
+            loopy_t = (short) ((loopy_t & 0xFF00) | (short) (value & 0xFF));
             loopy_v = loopy_t;
         } else {
             /*

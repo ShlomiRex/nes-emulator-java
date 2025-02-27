@@ -310,6 +310,7 @@ public class CPU {
                 registers.setFlag(INTERRUPT, false);
                 break;
             case STA:
+                // TODO: Problem writing to 0x2006 on STA when A = 0xF0
                 write_memory(fetched_addr, registers.A);
                 break;
             case TAX:

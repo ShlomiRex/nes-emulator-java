@@ -5,6 +5,10 @@ import NES.Cartridge.Cartridge;
 import NES.Cartridge.Mirroring;
 import NES.Cartridge.iNESHeader;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class Helper {
     public static Cartridge createCustomCartridge(String[] program) {
         byte[] prg_rom = Assembler.assemble(program);
@@ -40,5 +44,9 @@ public class Helper {
                 iNESHeader.TVSystem.NTSC,
                 false,
                 false);
+    }
+
+    public static void assertFirst15BitsEqual(short a, short b) {
+        assertEquals((a & 0x7FFF), (b & 0x7FFF));
     }
 }
