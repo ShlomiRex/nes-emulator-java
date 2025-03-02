@@ -20,7 +20,8 @@ public class Decoder {
         InstructionInfo[] abc = new InstructionInfo[256];
         abc[0x00] = new InstructionInfo((byte)0x00, Instructions.BRK, AddressingMode.IMPLIED, 1, 2, OopsCycle.NONE);
         abc[0x01] = new InstructionInfo((byte)0x01, Instructions.ORA, AddressingMode.INDIRECT_X, 2, 6, OopsCycle.NONE);
-        abc[0x03] = new InstructionInfo((byte)0x03, Instructions.SLO, AddressingMode.INDIRECT_X, 2, 8, OopsCycle.NONE, true); // illegal
+//        abc[0x02] = new InstructionInfo((byte)0x02, Instructions.JAM, AddressingMode.IMPLIED, 0, 0, OopsCycle.NONE); // illegal. TODO: Unknown amount of bytes, addressing mode, cycles, oops cycle
+//        abc[0x03] = new InstructionInfo((byte)0x03, Instructions.SLO, AddressingMode.INDIRECT_X, 2, 8, OopsCycle.NONE, true); // illegal
         abc[0x04] = new InstructionInfo((byte)0x04, Instructions.NOP, AddressingMode.ZEROPAGE, 2, 3, OopsCycle.NONE, true); // illegal
         abc[0x05] = new InstructionInfo((byte)0x05, Instructions.ORA, AddressingMode.ZEROPAGE, 2, 3, OopsCycle.NONE);
         abc[0x06] = new InstructionInfo((byte)0x06, Instructions.ASL, AddressingMode.ZEROPAGE, 2, 5, OopsCycle.NONE);

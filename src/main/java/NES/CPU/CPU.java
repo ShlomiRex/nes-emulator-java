@@ -62,16 +62,18 @@ public class CPU {
         Instructions instr = instr_info.instr;
         AddressingMode addrmode = instr_info.addrmode;
 
-//        int bytes = instr_info.bytes;
-//        int cycles = instr_info.cycles;
-//        Decoder.OopsCycle oops_cycle = instr_info.oopsCycle;
-//        logger.debug(
-//                instr.toString()+"("+Common.byteToHex(opcode, true)+")\t"
-//                +addrmode+"\tBytes: "
-//                +bytes+"\tCycles: "
-//                +cycles+"\tOops cycle: "
-//                +oops_cycle);
-
+        // Debug info
+        {
+            int bytes = instr_info.bytes;
+            int cycles = instr_info.cycles;
+            Decoder.OopsCycle oops_cycle = instr_info.oopsCycle;
+            logger.debug(
+                    instr.toString() + "(" + Common.byteToHex(opcode, true) + ")\t"
+                            + addrmode + "\tBytes: "
+                            + bytes + "\tCycles: "
+                            + cycles + "\tOops cycle: "
+                            + oops_cycle);
+        }
         logger.debug("CPU Tick, PC: {}, OP: {}", Common.shortToHex(registers.PC, true), instr.toString());
 
         // Execute
@@ -1513,11 +1515,11 @@ public class CPU {
     }
 
     private void exec_jam() {
-
+        throw new RuntimeException("Not yet implemented");
     }
 
     private void exec_rra() {
-
+        throw new RuntimeException("Not yet implemented");
     }
 
     private void exec_slo(boolean is_accumulator) {
