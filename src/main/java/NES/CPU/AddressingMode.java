@@ -3,16 +3,16 @@ package NES.CPU;
 public enum AddressingMode {
     IMPLIED,
     ABSOLUTE,
-    ABSOLUTE_X,
-    ABSOLUTE_Y,
+    ABSOLUTE_X, // absolute,X
+    ABSOLUTE_Y, // absolute,Y
     ZEROPAGE,
-    ZEROPAGE_X,
+    ZEROPAGE_X, // zeropage,X
     ZEROPAGE_Y,
     RELATIVE,
     ACCUMULATOR,
     ABSOLUTE_INDIRECT,
-    INDIRECT_X,
-    INDIRECT_Y,
+    INDIRECT_X, // (indirect,X)
+    INDIRECT_Y, // (indirect),Y
     IMMEDIATE,
 }
 

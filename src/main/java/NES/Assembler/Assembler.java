@@ -115,6 +115,46 @@ public class Assembler {
             output_length_in_bytes = 2;
         } else {
             operandStartsWith = OperandStartsWith.Nothing;
+
+            // Expect two digits after hashtag
+            if (!Character.isDigit(asm_line.charAt(offset)) || !Character.isDigit(asm_line.charAt(offset + 1))) {
+                throw new IllegalArgumentException("Expected two digits after #");
+            }
+
+            operand_value = asm_line.substring(offset, offset + 2);
+            offset += 2;
+
+            logger.debug("Operand value: 0x" + operand_value);
+
+            // Expect we reached end of string
+            if (offset != asm_line.length()) {
+                throw new IllegalArgumentException("Expected end of string after operand value");
+            }
+
+            output[1] = (byte) Integer.parseInt(operand_value, 16);
+        }
+
+
+        switch(operandStartsWith){
+            case Hashtag:
+            case HashtagDollar:
+            case Dollar:
+            case HashtagPercent:
+                for (InstructionInfo ii : candidates) {
+                    if (ii.addrmode == AddressingMode.IMMEDIATE) {
+                        output[0] = ii.opcode;
+                        break;
+                    }
+                }
+                break;
+            case Nothing:
+                for (InstructionInfo ii : candidates) {
+                    if (ii.addrmode == AddressingMode.ZEROPAGE) {
+                        output[0] = ii.opcode;
+                        break;
+                    }
+                }
+                break;
         }
 
         // Check if we have ',' in the operand after offset
@@ -128,13 +168,17 @@ public class Assembler {
         ArrayList<InstructionInfo> new_candidates = new ArrayList<>();
         if (operand_is_indexed) {
             for (InstructionInfo ii : candidates) {
-                if (is_indexed(ii))
+                if (is_indexed(ii)) {
                     new_candidates.add(ii);
+                    logger.debug("Found new candidate: " + Common.byteToHex(ii.opcode, true));
+                }
             }
         } else {
             for (InstructionInfo ii : candidates) {
-                if (!is_indexed(ii))
+                if (!is_indexed(ii)) {
                     new_candidates.add(ii);
+                    logger.debug("Found new candidate: " + Common.byteToHex(ii.opcode, true));
+                }
             }
         }
         candidates = new_candidates; // Update candidates
@@ -144,7 +188,13 @@ public class Assembler {
     }
 
     private static boolean is_indexed(InstructionInfo ii) {
-        return ii.addrmode == AddressingMode.ABSOLUTE_X || ii.addrmode == AddressingMode.ABSOLUTE_Y ||
-                ii.addrmode == AddressingMode.INDIRECT_X || ii.addrmode == AddressingMode.INDIRECT_Y;
+        return ii.addrmode == AddressingMode.ABSOLUTE_X ||
+                ii.addrmode == AddressingMode.ABSOLUTE_Y ||
+
+                ii.addrmode == AddressingMode.INDIRECT_X ||
+                ii.addrmode == AddressingMode.INDIRECT_Y ||
+
+                ii.addrmode == AddressingMode.ZEROPAGE_X ||
+                ii.addrmode == AddressingMode.ZEROPAGE_Y;
     }
 }

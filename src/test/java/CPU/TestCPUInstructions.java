@@ -45,8 +45,9 @@ public class TestCPUInstructions {
     public static void setUp() {
         Path path = Paths.get("test_resources/ProcessorTests");
         boolean processor_tests_repo_exist = Files.exists(path);
-        if (!processor_tests_repo_exist)
+        if (!processor_tests_repo_exist) {
             logger.error("ProcessorTests repo not found (https://github.com/TomHarte/ProcessorTests), skipping tests");
+        }
         assumeTrue(processor_tests_repo_exist);
 
         bus = new Bus();

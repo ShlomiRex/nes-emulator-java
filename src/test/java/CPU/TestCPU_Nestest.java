@@ -51,6 +51,9 @@ public class TestCPU_Nestest {
             // Parse line
             CPUState state = parse_nestest_log_line(line);
 
+            // Tick
+            cpu.clock_tick();
+
             // Assert before clock tick, since it changes the state of the CPU
             assertEquals(state.pc, cpu.registers.PC);
             assertEquals(state.cycles, cpu.cycles);
@@ -59,9 +62,6 @@ public class TestCPU_Nestest {
             assertEquals(state.y, cpu.registers.Y);
             assertEquals(state.p, cpu.registers.P);
             assertEquals(state.sp, cpu.registers.S);
-
-            // Tick
-            cpu.clock_tick();
         }
     }
 
@@ -72,6 +72,7 @@ public class TestCPU_Nestest {
         int index_y = line.indexOf("Y:");
         int index_p = line.indexOf("P:");
         int index_sp = line.indexOf("SP:");
+        boolean is_illegal = line.contains("*");
 
         String str_pc = line.substring(0, index_pc);
         String str_a = line.substring(index_a, index_a+4);
@@ -90,9 +91,9 @@ public class TestCPU_Nestest {
         byte sp = (byte) Integer.parseInt(str_sp.substring(3), 16);
         long cycles = Long.parseLong(str_cycles.substring(4));
 
-        return new CPUState(pc, a, x, y, p, sp, cycles);
+        return new CPUState(pc, a, x, y, p, sp, cycles, is_illegal);
     }
 
-    record CPUState(short pc, byte a, byte x, byte y, byte p, byte sp, long cycles) {
+    record CPUState(short pc, byte a, byte x, byte y, byte p, byte sp, long cycles, boolean is_illegal) {
     }
 }

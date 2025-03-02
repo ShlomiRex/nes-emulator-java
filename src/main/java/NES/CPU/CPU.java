@@ -445,6 +445,9 @@ public class CPU {
             case RRA:
                 exec_rra();
                 break;
+            case SLO:
+                exec_slo(addrmode == AddressingMode.ACCUMULATOR);
+                break;
             default:
                 throw new RuntimeException("Instruction not implemented: " + instr);
         }
@@ -505,14 +508,14 @@ public class CPU {
                 fetched_data = read_memory(Common.makeShort(effective_addr_low, effective_addr_high));
                 break;
             // Read-Modify-Write instructions (SLO, SRE, RLA, RRA, ISB, DCP)
-//            case SLO:
+            case SLO:
 //            case SRE:
 //            case RLA:
 //            case RRA:
             case ISB:
             case DCP:
                 //TODO: Add illegal instructions to the switch-case when we want to support illegal instructions:
-                // SLO, SRE, RLA, RRA
+                // SRE, RLA, RRA
 
                 // fetch pointer address, increment PC
                 pointer_addr = read_memory(registers.PC);
@@ -1515,5 +1518,10 @@ public class CPU {
 
     private void exec_rra() {
 
+    }
+
+    private void exec_slo(boolean is_accumulator) {
+        exec_asl(is_accumulator);
+        exec_ora();
     }
 }

@@ -2,8 +2,6 @@ package NES.CPU.Decoder;
 
 import NES.CPU.AddressingMode;
 import NES.CPU.Instructions;
-import NES.Common;
-import NES.UI.Debugger.AssemblyDebugger.AssemblyLineRecord;
 
 public class Decoder {
 
@@ -22,6 +20,7 @@ public class Decoder {
         InstructionInfo[] abc = new InstructionInfo[256];
         abc[0x00] = new InstructionInfo((byte)0x00, Instructions.BRK, AddressingMode.IMPLIED, 1, 2, OopsCycle.NONE);
         abc[0x01] = new InstructionInfo((byte)0x01, Instructions.ORA, AddressingMode.INDIRECT_X, 2, 6, OopsCycle.NONE);
+        abc[0x03] = new InstructionInfo((byte)0x03, Instructions.SLO, AddressingMode.INDIRECT_X, 2, 8, OopsCycle.NONE, true); // illegal
         abc[0x04] = new InstructionInfo((byte)0x04, Instructions.NOP, AddressingMode.ZEROPAGE, 2, 3, OopsCycle.NONE, true); // illegal
         abc[0x05] = new InstructionInfo((byte)0x05, Instructions.ORA, AddressingMode.ZEROPAGE, 2, 3, OopsCycle.NONE);
         abc[0x06] = new InstructionInfo((byte)0x06, Instructions.ASL, AddressingMode.ZEROPAGE, 2, 5, OopsCycle.NONE);
@@ -31,6 +30,7 @@ public class Decoder {
         abc[0x0C] = new InstructionInfo((byte)0x0C, Instructions.NOP, AddressingMode.ABSOLUTE, 3, 4, OopsCycle.NONE, true); // illegal
         abc[0x0D] = new InstructionInfo((byte)0x0D, Instructions.ORA, AddressingMode.ABSOLUTE, 3, 4, OopsCycle.NONE);
         abc[0x0E] = new InstructionInfo((byte)0x0E, Instructions.ASL, AddressingMode.ABSOLUTE, 3, 6, OopsCycle.NONE);
+
         abc[0x10] = new InstructionInfo((byte)0x10, Instructions.BPL, AddressingMode.RELATIVE, 2, 2, OopsCycle.BranchOccursOn);
         abc[0x11] = new InstructionInfo((byte)0x11, Instructions.ORA, AddressingMode.INDIRECT_Y, 2, 5, OopsCycle.PageBoundaryCrossed);
         abc[0x14] = new InstructionInfo((byte)0x14, Instructions.NOP, AddressingMode.ZEROPAGE_X, 2, 4, OopsCycle.NONE, true); // illegal
@@ -42,6 +42,7 @@ public class Decoder {
         abc[0x1C] = new InstructionInfo((byte)0x1C, Instructions.NOP, AddressingMode.ABSOLUTE_X, 3, 4, OopsCycle.PageBoundaryCrossed, true); // illegal
         abc[0x1D] = new InstructionInfo((byte)0x1D, Instructions.ORA, AddressingMode.ABSOLUTE_X, 3, 4, OopsCycle.PageBoundaryCrossed);
         abc[0x1E] = new InstructionInfo((byte)0x1E, Instructions.ASL, AddressingMode.ABSOLUTE_X, 3, 7, OopsCycle.NONE);
+
         abc[0x20] = new InstructionInfo((byte)0x20, Instructions.JSR, AddressingMode.ABSOLUTE, 3, 6, OopsCycle.NONE);
         abc[0x21] = new InstructionInfo((byte)0x21, Instructions.AND, AddressingMode.INDIRECT_X, 2, 6, OopsCycle.NONE);
         abc[0x24] = new InstructionInfo((byte)0x24, Instructions.BIT, AddressingMode.ZEROPAGE, 2, 3, OopsCycle.NONE);

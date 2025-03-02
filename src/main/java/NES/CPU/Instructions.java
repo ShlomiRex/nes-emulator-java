@@ -57,5 +57,7 @@ public enum Instructions {
     TXA, // transfer X to accumulator
     TXS, // transfer X to stack pointer
     LAX, SAX, DCP, TYA,  // transfer Y to accumulator
-    JAM, RRA, ISB, RLA, SRE, SLO, SHA, SHX, SHY, LAE, SHS,
+    JAM, RRA, ISB, RLA, SRE,
+    SLO, // ASL oper + ORA oper
+    SHA, SHX, SHY, LAE, SHS,
 }
