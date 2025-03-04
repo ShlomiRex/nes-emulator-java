@@ -1,0 +1,11 @@
+Fix ADC instruction not correct
+
+Fix RRA instruction not correct
+
+Fix NOP 0x32 0x3F
+
+Fix ISB not correct
+
+Fix JAM 0x92
+
+Run TestCPUInstructions

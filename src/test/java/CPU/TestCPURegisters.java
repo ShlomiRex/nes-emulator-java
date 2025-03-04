@@ -4,8 +4,7 @@ import NES.CPU.Registers.CPURegisters;
 import NES.Common;
 import org.junit.Test;
 
-import static NES.CPU.Registers.Flags.NEGATIVE;
-import static NES.CPU.Registers.Flags.ZERO;
+import static NES.CPU.Registers.Flags.*;
 import static org.junit.Assert.*;
 
 public class TestCPURegisters {
@@ -44,5 +43,25 @@ public class TestCPURegisters {
 
         cpuRegisters.modify_n((byte) 0x80);
         assertEquals(cpuRegisters.getFlag(NEGATIVE), true);
+    }
+
+    @Test
+    public void test_p_modify_c() {
+        CPURegisters cpuRegisters = new CPURegisters();
+
+        cpuRegisters.modify_c((byte) 0, (byte) 0, (byte) 0);
+        assertEquals(cpuRegisters.getFlag(CARRY), false);
+
+        cpuRegisters.modify_c((byte) 0xF0, (byte) 0xF0, (byte) 0);
+        assertEquals(cpuRegisters.getFlag(CARRY), true);
+
+        cpuRegisters.modify_c((byte) 0xFF, (byte) 0, (byte) 0);
+        assertEquals(cpuRegisters.getFlag(CARRY), false);
+
+        cpuRegisters.modify_c((byte) 0xFF, (byte) 0, (byte) 1);
+        assertEquals(cpuRegisters.getFlag(CARRY), true);
+
+        cpuRegisters.modify_c((byte) 0, (byte) 0xFF, (byte) 1);
+        assertEquals(cpuRegisters.getFlag(CARRY), true);
     }
 }

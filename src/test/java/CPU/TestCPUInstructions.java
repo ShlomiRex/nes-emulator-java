@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
@@ -41,13 +42,13 @@ public class TestCPUInstructions {
     private static Bus bus;
     private static byte[] cpu_memory;
 
+    private static final String TEST_DIR_NAME = "ProcessorTests/nes6502/v1";
+    private static final String TEST_DIR = Path.of("src", "test", "resources", TEST_DIR_NAME).toString();
+
     @BeforeAll
     public static void setUp() {
-        Path path = Paths.get("test_resources/ProcessorTests");
-        boolean processor_tests_repo_exist = Files.exists(path);
-        if (!processor_tests_repo_exist) {
-            logger.error("ProcessorTests repo not found (https://github.com/TomHarte/ProcessorTests), skipping tests");
-        }
+        boolean processor_tests_repo_exist = Files.exists(Path.of(TEST_DIR));
+
         assumeTrue(processor_tests_repo_exist);
 
         bus = new Bus();
@@ -122,9 +123,7 @@ public class TestCPUInstructions {
 
     private JSONArray read_test(int opcode) throws IOException {
         String opcode_hex = Common.byteToHex((byte) opcode, false);
-        Path path = Paths.get("test_resources/ProcessorTests/nes6502", "v1", opcode_hex + ".json");
-        //logger.debug("Reading test file: " + path);
-        String jsonContent = new String(Files.readAllBytes(path));
+        String jsonContent = new String(Files.readAllBytes(Path.of(TEST_DIR, opcode_hex + ".json")));
         return new JSONArray(jsonContent);
     }
 
