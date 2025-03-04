@@ -1,6 +1,6 @@
-; [submodule "nes-test-roms"]
-; 	path = src/test/resources/nes-test-roms
-; 	url = https://github.com/christopherpow/nes-test-roms
-; [submodule "ProcessorTests"]
-; 	path = src/test/resources/ProcessorTests
-; 	url = https://github.com/TomHarte/ProcessorTests
+[submodule "src/test/resources/nes-test-roms"]
+	path = src/test/resources/nes-test-roms
+	url = https://github.com/christopherpow/nes-test-roms
+[submodule "src/test/resources/ProcessorTests"]
+	path = src/test/resources/ProcessorTests
+	url = https://github.com/TomHarte/ProcessorTests
