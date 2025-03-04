@@ -1252,7 +1252,13 @@ public class CPU {
         registers.modify_n(result);
         registers.modify_z(result);
         registers.modify_c(registers.A, fetched_data, (byte) (registers.getFlag(CARRY) ? 1 : 0));
-        registers.setFlag(OVERFLOW, Common.Bits.getBit(result, 6));
+
+        int a = result_int ^ registers.A;
+        int b = result_int ^ fetched_data;
+        int c = a & b & 0x80;
+        boolean overflow = (c != 0);
+
+        registers.setFlag(OVERFLOW, overflow);
         registers.A = result;
     }
 
