@@ -10,6 +10,7 @@ import NES.PPU.PPU;
 import Utils.CPUState;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -76,7 +77,7 @@ public class TestProcessor {
     }
 
     private void test_json(String json_path) throws IOException {
-        logger.info("Testing: " + json_path);
+//        logger.info("Testing: " + json_path);
         String json = Files.readString(Path.of(json_path));
         JSONArray jsonArray = new JSONArray(json);
         for (int i = 0; i < jsonArray.length(); i++) {
@@ -88,7 +89,7 @@ public class TestProcessor {
             JSONArray cycles_json = jsonObject.getJSONArray("cycles");
 
             logger.info("Running test: "+ i + " (" + name + ")");
-            logger.debug("Initial json: " + initial_json);
+//            logger.debug("Initial json: " + initial_json);
 
             // Get initial state
             int p = initial_json.getInt("p");
@@ -99,12 +100,12 @@ public class TestProcessor {
             int y = initial_json.getInt("y");
             JSONArray initial_ram = initial_json.getJSONArray("ram");
 
-            {
-                CPUState cpuState = new CPUState(
-                        (short) pc, (byte) a, (byte) x, (byte) y, (byte) p, (byte) s);
-
-                logger.debug("Initial CPU state: " + cpuState);
-            }
+//            {
+//                CPUState cpuState = new CPUState(
+//                        (short) pc, (byte) a, (byte) x, (byte) y, (byte) p, (byte) s);
+//
+//                logger.debug("Initial CPU state: " + cpuState);
+//            }
 
             // Set initial RAM. The repository states the CPU has full-access to all 64kb of RAM
             byte[] ram = new byte[64 * 1024];
@@ -164,5 +165,12 @@ public class TestProcessor {
     @MethodSource("allOpcodesTestCases")
     void test_all_opcodes(String json_path) throws IOException {
         test_json(json_path);
+    }
+
+    @Test
+    @Ignore
+    // TODO: Delete this
+    public void custom_test() throws IOException {
+        test_json("6502_programs/ProcessorTests/6502/v1/69.json");
     }
 }

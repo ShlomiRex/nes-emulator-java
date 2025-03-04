@@ -9,9 +9,6 @@ import NES.Common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static NES.CPU.Registers.Flags.*;
 
 public class CPU {
@@ -63,18 +60,20 @@ public class CPU {
         AddressingMode addrmode = instr_info.addrmode;
 
         // Debug info
-        {
-            int bytes = instr_info.bytes;
-            int cycles = instr_info.cycles;
-            Decoder.OopsCycle oops_cycle = instr_info.oopsCycle;
-            logger.debug(
-                    instr.toString() + "(" + Common.byteToHex(opcode, true) + ")\t"
-                            + addrmode + "\tBytes: "
-                            + bytes + "\tCycles: "
-                            + cycles + "\tOops cycle: "
-                            + oops_cycle);
-        }
-        logger.debug("CPU Tick, PC: {}, OP: {}", Common.shortToHex(registers.PC, true), instr.toString());
+//        {
+//            int bytes = instr_info.bytes;
+//            int cycles = instr_info.cycles;
+//            Decoder.OopsCycle oops_cycle = instr_info.oopsCycle;
+//            logger.debug(
+//                    instr.toString() + "(" + Common.byteToHex(opcode, true) + ")\t"
+//                            + addrmode + "\tBytes: "
+//                            + bytes + "\tCycles: "
+//                            + cycles + "\tOops cycle: "
+//                            + oops_cycle);
+//        }
+        logger.debug("CPU Tick, PC: {}, OP: {} ({}), AddrMode: {}",
+                Common.shortToHex(registers.PC, true), instr.toString(),
+                Common.byteToHex(opcode, true), addrmode);
 
         // Execute
         execute_instruction(instr, addrmode);
@@ -1247,17 +1246,14 @@ public class CPU {
     }
 
     private void exec_adc() {
-        byte result = (byte) (registers.A + fetched_data + (registers.getFlag(CARRY) ? 1 : 0));
-
-        byte m_plus_a = (byte) (fetched_data + registers.A);
-        boolean is_carry = Common.isAdditionCarry(fetched_data, registers.A);
-        boolean is_carry2 = Common.isAdditionCarry(m_plus_a, (byte) (registers.getFlag(CARRY) ? 1 : 0));
-        boolean negative_flag_set = ((registers.A ^ result) & (fetched_data ^ result) & 0x80) != 0;
+        int result_int = registers.A + fetched_data + (registers.getFlag(CARRY) ? 1 : 0);
+        byte result = (byte) result_int;
 
         registers.modify_n(result);
         registers.modify_z(result);
-        registers.setFlag(CARRY, is_carry || is_carry2);
-        registers.setFlag(OVERFLOW, negative_flag_set);
+        registers.modify_c(registers.A, fetched_data, (registers.getFlag(CARRY) ? 1 : 0);
+        registers;modif
+        registers.setFlag(OVERFLOW, Common.Bits.getBit(result, 6));
         registers.A = result;
     }
 

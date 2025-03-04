@@ -55,4 +55,21 @@ public class CPURegisters {
         setFlag(Flags.ZERO, result == 0);
     }
 
+    /**
+     * Adds three numbers together and sets carry bit (if result > 0xFF wrapping around, unsigned overflow occurred)
+     * https://www.nesdev.org/wiki/Instruction_reference#ADC
+     */
+    public void modify_c(byte value1, byte value2, byte value3) {
+
+        throw new RuntimeException("Not implemented yet");
+    }
+
+    /**
+     * Adds three numbers together and sets overflow bit (if the result's sign is different from both A's and memory's, signed overflow (or underflow) occurred.)
+     * https://www.nesdev.org/wiki/Instruction_reference#ADC
+     */
+    public void modify_v(byte value1, byte value2, byte value3) {
+        throw new RuntimeException("Not implemented yet");
+    }
+
 }
