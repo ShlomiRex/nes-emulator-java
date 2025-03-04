@@ -11,13 +11,16 @@ import Utils.CPUState;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Ignore;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -28,8 +31,10 @@ import java.util.Arrays;
 import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
+ * Tests taken from:
  * https://github.com/SingleStepTests/ProcessorTests/tree/main/6502
  */
 public class TestProcessor {
@@ -46,9 +51,29 @@ public class TestProcessor {
 //        }
 //    }
 
+    private static final String TEST_DIR_NAME = Path.of("ProcessorTests", "6502", "v1").toString();
+    private static final String TEST_DIR = Path.of("src", "test", "resources", TEST_DIR_NAME).toString();
+
+    // Initialize ram, cpu, bus only one time per test case
+    private static Bus bus;
+    private static CPU cpu;
+    private static CPUBus cpuBus;
+    private static byte[] ram = new byte[64 * 1024]; // The repository states the CPU has full-access to all 64kb of RAM
+
+    @BeforeAll
+    static void check_resources() {
+        // Check directory exists
+        Assertions.assertTrue(new File(TEST_DIR).exists());
+
+        // Create the CPU and attach the bus with RAM, record memory accesses
+        bus = new Bus();
+        cpu = new CPU(bus, ram);
+        cpuBus = new CPUBus(bus, true, true, ram);
+        bus.attachCPUBus(cpuBus);
+    }
+
     private static Stream<String> filter_jsons(boolean only_legal_implemented) {
         ArrayList<String> result = new ArrayList<>();
-        String dir = "6502_programs/ProcessorTests/6502/v1";
         for (int i = 0; i < 255; i++) {
             if (only_legal_implemented) {
                 // Filter out illegal or unimplemented opcodes
@@ -62,7 +87,7 @@ public class TestProcessor {
                 }
             }
             String filename = Common.byteToHex((byte) i, false) + ".json";
-            String path = String.valueOf(Path.of(dir, filename));
+            String path = String.valueOf(Path.of(TEST_DIR, filename));
             result.add(path);
         }
         return result.stream();
@@ -89,6 +114,7 @@ public class TestProcessor {
             JSONArray cycles_json = jsonObject.getJSONArray("cycles");
 
             logger.info("Running test: "+ i + " (" + name + ")");
+            logger.debug(jsonObject.toString());
 //            logger.debug("Initial json: " + initial_json);
 
             // Get initial state
@@ -107,20 +133,13 @@ public class TestProcessor {
 //                logger.debug("Initial CPU state: " + cpuState);
 //            }
 
-            // Set initial RAM. The repository states the CPU has full-access to all 64kb of RAM
-            byte[] ram = new byte[64 * 1024];
+            // Set initial RAM
             for (int j = 0; j < initial_ram.length(); j++) {
                 JSONArray ram_j = initial_ram.getJSONArray(j);
                 int addr = ram_j.getInt(0);
                 int value = ram_j.getInt(1);
                 ram[addr] = (byte) value;
             }
-
-            // Create the CPU and attach the bus with RAM, record memory accesses
-            Bus bus = new Bus();
-            CPU cpu = new CPU(bus, ram);
-            CPUBus cpuBus = new CPUBus(bus, true, true, ram);
-            bus.attachCPUBus(cpuBus);
 
             // Set initial CPU state
             cpu.registers.PC = (short) (pc & 0xFFFF);
@@ -171,6 +190,8 @@ public class TestProcessor {
     @Ignore
     // TODO: Delete this
     public void custom_test() throws IOException {
-        test_json("6502_programs/ProcessorTests/6502/v1/69.json");
+        String test_file_name = "69.json";
+        String json_path = Path.of(TEST_DIR, test_file_name).toString();
+        test_json(json_path);
     }
 }

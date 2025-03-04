@@ -59,9 +59,13 @@ public class CPURegisters {
      * Adds three numbers together and sets carry bit (if result > 0xFF wrapping around, unsigned overflow occurred)
      * https://www.nesdev.org/wiki/Instruction_reference#ADC
      */
-    public void modify_c(byte value1, byte value2, byte value3) {
-
-        throw new RuntimeException("Not implemented yet");
+    public void modify_c(byte a, byte b, byte c) {
+        int v1 = a & 0xFF;
+        int v2 = b & 0xFF;
+        int v3 = c & 0xFF;
+        int sum = v1 + v2 + v3;
+        boolean carry = sum > 0xFF;
+        setFlag(Flags.CARRY, carry);
     }
 
     /**
