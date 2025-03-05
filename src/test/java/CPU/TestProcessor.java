@@ -160,7 +160,9 @@ public class TestProcessor {
             assertEquals(final_json.getInt("p"), cpu.registers.P & 0xFF);
             assertEquals(final_json.getInt("s"), cpu.registers.S & 0xFF);
 
-            // TODO: Assert cycles
+            // Check cycles, read write memory
+            assertEquals(cycles_json.length(), cpuBus.recorded_memory.size());
+
             for (int j = 0; j < cycles_json.length(); j++) {
                 MemoryAccessRecord memoryAccessRecord = cpuBus.recorded_memory.get(j);
                 JSONArray cycle_json_array = cycles_json.getJSONArray(j);
@@ -170,7 +172,9 @@ public class TestProcessor {
                 boolean is_read = cycle_json_array.get(2).equals("read");
                 assertEquals(is_read, memoryAccessRecord.is_read());
             }
-            assertEquals(cycles_json.length(), cpuBus.recorded_memory.size());
+
+            // Clear memory access records for next test case
+            cpuBus.recorded_memory.clear();
         }
     }
 
