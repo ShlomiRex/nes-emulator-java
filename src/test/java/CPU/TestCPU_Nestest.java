@@ -42,19 +42,34 @@ public class TestCPU_Nestest {
     public void test() throws IOException {
         CPU cpu = nes.cpu;
 
-        for (int i = 0; i < 10000; i ++) {
-            String line = reader.readLine();
+        // Assert first line (before executing the line)
+        String line = reader.readLine();
+        logger.debug("Running test: " + 0);
+        logger.debug(line);
+        CPUState state = parse_nestest_log_line(line);
 
-            logger.debug("Running test: " + (i+1));
-            logger.debug(""+line);
+        // Assert CPU state
+        assertEquals(state.pc, cpu.registers.PC);
+        assertEquals(state.cycles, cpu.cycles);
+        assertEquals(state.a, cpu.registers.A);
+        assertEquals(state.x, cpu.registers.X);
+        assertEquals(state.y, cpu.registers.Y);
+        assertEquals(state.p, cpu.registers.P);
+        assertEquals(state.sp, cpu.registers.S);
 
-            // Parse line
-            CPUState state = parse_nestest_log_line(line);
-
-            // Tick
+        for (int i = 1; i < 10000; i ++) {
+            // Tick, execute line
             cpu.clock_tick();
 
-            // Assert before clock tick, since it changes the state of the CPU
+            // Read next state
+            logger.debug("Running test: {}", i);
+            logger.debug(line);
+            line = reader.readLine();
+
+            // Parse line
+            state = parse_nestest_log_line(line);
+
+            // Assert CPU state
             assertEquals(state.pc, cpu.registers.PC);
             assertEquals(state.cycles, cpu.cycles);
             assertEquals(state.a, cpu.registers.A);
