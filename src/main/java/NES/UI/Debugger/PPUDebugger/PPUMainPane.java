@@ -47,6 +47,7 @@ public class PPUMainPane extends JPanel {
         JPanel frame_pane = new FramePane(ppu);
         JPanel registers_pane = new PPURegistersPan(ppu.registers); // PPU registers
         JPanel vblank_pane = new VBlankPane(ppu); // VBlank flag checkbox
+        JPanel internal_registers_pane = new PPUInternalRegistersPane(ppu); // Internal registers
         PatternTablesPane pattern_tables_pane = new PatternTablesPane(ppu); // 2 Pattern tables
         JPanel system_palette_pane = new SystemPalettePane(); // System palette
         JPanel palette_memory_pane = new PaletteMemoryPane(ppu, pattern_tables_pane); // Palette RAM
@@ -61,6 +62,7 @@ public class PPUMainPane extends JPanel {
         top_flow_pane.add(status_info_pane);
         top_flow_pane.add(registers_pane);
         top_flow_pane.add(vblank_pane);
+        top_flow_pane.add(internal_registers_pane);
 
         palette_pane.add(system_palette_pane);
         palette_pane.add(palette_memory_pane);
