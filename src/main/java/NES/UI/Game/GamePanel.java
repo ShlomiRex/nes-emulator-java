@@ -86,6 +86,9 @@ public class GamePanel extends JPanel {
         if (MenuBarStatePreferences.instance.isPixelHover()) {
             draw_pixel_hover(g);
         }
+        if (MenuBarStatePreferences.instance.isPPUPixel()) {
+            draw_ppu_pixel(g);
+        }
 //        draw_gridline((124 + 5) * SCALE, (109 + 8) * SCALE, g);
     }
 
@@ -113,5 +116,19 @@ public class GamePanel extends JPanel {
 
         g.setColor(Color.RED);
         g.drawRect((int) (nametable_x * 8 * SCALE_X), (int) (nametable_y * 8 * SCALE_Y), (int) (8 * SCALE_X), (int) (8 * SCALE_Y));
+    }
+
+    private void draw_ppu_pixel(Graphics g) {
+        // If in visible frame
+        if (ppu.scanline >= 0 && ppu.scanline < 240) {
+            // If inside screen (width)
+            if (ppu.cycle >= 0 && ppu.cycle <= 256) {
+                int x = ppu.cycle;
+                int y = ppu.scanline;
+
+                g.setColor(Color.GREEN);
+                g.fillRect(x * INITIAL_SCALE, y * INITIAL_SCALE, INITIAL_SCALE, INITIAL_SCALE);
+            }
+        }
     }
 }

@@ -11,6 +11,7 @@ public class MenuBarStatePreferences {
     public static final String NAMETABLE_GRIDLINES = "debug.pixel_grid";
     public static final String NAMETABLE_HOVER = "debug.nametable_hover";
     public static final String PIXEL_HOVER = "debug.pixel_hover";
+    public static final String PPU_PIXEL = "debug.ppu_pixel";
 
 
     private MenuBarStatePreferences() {
@@ -36,4 +37,6 @@ public class MenuBarStatePreferences {
     public boolean isNametableGridlines() {
         return getState(NAMETABLE_GRIDLINES);
     }
+
+    public boolean isPPUPixel() { return getState(PPU_PIXEL); }
 }

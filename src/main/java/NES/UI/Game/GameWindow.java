@@ -71,10 +71,12 @@ public class GameWindow extends JFrame implements KeyListener {
         JMenu debugMenu = new JMenu("Debug");
         JMenuItem nametable_gridlines = new JCheckBoxMenuItem("Show nametable gridlines");
         JMenuItem nametable_hover = new JCheckBoxMenuItem("Show nametable cell outline");
-        JMenuItem pixel_hover = new JCheckBoxMenuItem("Show pixel outline");
+        JMenuItem pixel_hover = new JCheckBoxMenuItem("Show pixel hover outline");
+        JMenuItem ppu_pixel = new JCheckBoxMenuItem("Show current processed pixel in PPU");
         debugMenu.add(nametable_gridlines);
         debugMenu.add(nametable_hover);
         debugMenu.add(pixel_hover);
+        debugMenu.add(ppu_pixel);
         menuBar.add(debugMenu);
 
         // Read preferences and set the menu items accordingly
@@ -103,6 +105,10 @@ public class GameWindow extends JFrame implements KeyListener {
         });
         pixel_hover.addChangeListener(e -> {
             MenuBarStatePreferences.instance.saveState(MenuBarStatePreferences.PIXEL_HOVER, pixel_hover.isSelected());
+        });
+
+        ppu_pixel.addChangeListener(e -> {
+            MenuBarStatePreferences.instance.saveState(MenuBarStatePreferences.PPU_PIXEL, ppu_pixel.isSelected());
         });
 
         exitItem.addActionListener(e -> {

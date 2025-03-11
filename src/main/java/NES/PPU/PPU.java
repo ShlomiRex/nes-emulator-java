@@ -84,12 +84,13 @@ public class PPU {
      */
     private byte bg_next_tile_attrib;
 
-    private byte bg_shifter_pattern_lo, bg_shifter_pattern_hi;
+//    private byte bg_shifter_pattern_lo, bg_shifter_pattern_hi;
 
-    private byte bg_shifter_attrib_lo, bg_shifter_attrib_hi;
+//    private byte bg_shifter_attrib_lo, bg_shifter_attrib_hi;
 
     private boolean spriteZeroHitPossible, spriteZeroBeingRendered;
 
+    // Internal registers
     private byte bg_next_tile_lsb, bg_next_tile_msb;
 
     private class OAEntry {
@@ -149,11 +150,11 @@ public class PPU {
         cycle = 0;
         scanline = 0;
 
-        bg_shifter_pattern_lo = 0;
-        bg_shifter_pattern_hi = 0;
-
-        bg_shifter_attrib_lo = 0;
-        bg_shifter_attrib_hi = 0;
+//        bg_shifter_pattern_lo = 0;
+//        bg_shifter_pattern_hi = 0;
+//
+//        bg_shifter_attrib_lo = 0;
+//        bg_shifter_attrib_hi = 0;
 
         bg_next_tile_lsb = 0;
         bg_next_tile_msb = 0;
@@ -220,7 +221,7 @@ public class PPU {
         if (scanline >= 0 && scanline < 240) {
             // Either loat NT, AT, BG low, BG high
             if (cycle <= 256) {
-                update_shifters(); // TODO: Needs testing
+//                update_shifters(); // TODO: Needs testing
                 switch(cycle % 8) {
                     case 1 -> load_nt();
                     case 3 -> load_at();
@@ -237,13 +238,13 @@ public class PPU {
 
             if (cycle == 257) {
                 // TODO: FIX
-                load_BG_shifters();
+//                load_BG_shifters();
                 transferHorizontalScroll();
             }
 
             // Read next scanline NT byte
             if (cycle == 338 || cycle == 340) {
-                bg_next_tile_id = read((short) (0x2000 | (registers.loopy_v & 0x0FFF)));
+                 bg_next_tile_id = read((short) (0x2000 | (registers.loopy_v & 0x0FFF)));
             }
 
             // Foreground rendering after end of drawing scanline
@@ -426,36 +427,36 @@ public class PPU {
         logger.debug("Frame: {}, Scanline: {}, Cycle: {}", frame, scanline, cycle);
     }
 
-    private void update_shifters() {
-        // Show background
-        if (Common.Bits.getBit(registers.PPUMASK, 3)) {
-            bg_shifter_pattern_lo <<= 1;
-            bg_shifter_pattern_hi <<= 1;
+//    private void update_shifters() {
+//        // Show background
+//        if (Common.Bits.getBit(registers.PPUMASK, 3)) {
+//            bg_shifter_pattern_lo <<= 1;
+//            bg_shifter_pattern_hi <<= 1;
+//
+//            bg_shifter_attrib_lo <<= 1;
+//            bg_shifter_attrib_hi <<= 1;
+//        }
+//
+//        // Show sprites
+//        if (Common.Bits.getBit(registers.PPUMASK, 4) && cycle >= 1 && cycle < 258) {
+//            for (int i = 0; i < sprite_count; i++) {
+//                if (spriteScanline[i].x > 0) {
+//                    spriteScanline[i].x --;
+//                } else {
+//                    sprite_shifter_pattern_lo[i] <<= 1;
+//                    sprite_shifter_pattern_hi[i] <<= 1;
+//                }
+//            }
+//        }
+//    }
 
-            bg_shifter_attrib_lo <<= 1;
-            bg_shifter_attrib_hi <<= 1;
-        }
-
-        // Show sprites
-        if (Common.Bits.getBit(registers.PPUMASK, 4) && cycle >= 1 && cycle < 258) {
-            for (int i = 0; i < sprite_count; i++) {
-                if (spriteScanline[i].x > 0) {
-                    spriteScanline[i].x --;
-                } else {
-                    sprite_shifter_pattern_lo[i] <<= 1;
-                    sprite_shifter_pattern_hi[i] <<= 1;
-                }
-            }
-        }
-    }
-
-    private void load_BG_shifters() {
-        bg_shifter_pattern_lo = (byte) ((bg_shifter_pattern_lo & 0xFF00) | bg_next_tile_lsb);
-        bg_shifter_pattern_hi = (byte) ((bg_shifter_pattern_hi & 0xFF00) | bg_next_tile_msb);
-
-        bg_shifter_pattern_lo = (byte) ((bg_shifter_pattern_lo & 0x00FF) | ((bg_next_tile_attrib & 0xFF) << 8));
-        bg_shifter_pattern_hi = (byte) ((bg_shifter_pattern_hi & 0x00FF) | ((bg_next_tile_attrib & 0xFF) << 8));
-    }
+//    private void load_BG_shifters() {
+//        bg_shifter_pattern_lo = (byte) ((bg_shifter_pattern_lo & 0xFF00) | bg_next_tile_lsb);
+//        bg_shifter_pattern_hi = (byte) ((bg_shifter_pattern_hi & 0xFF00) | bg_next_tile_msb);
+//
+//        bg_shifter_pattern_lo = (byte) ((bg_shifter_pattern_lo & 0x00FF) | ((bg_next_tile_attrib & 0xFF) << 8));
+//        bg_shifter_pattern_hi = (byte) ((bg_shifter_pattern_hi & 0x00FF) | ((bg_next_tile_attrib & 0xFF) << 8));
+//    }
 
     /**
      *
@@ -731,7 +732,7 @@ public class PPU {
      * Load nametable byte (see PPU timing)
      */
     private void load_nt() {
-        load_BG_shifters();
+//        load_BG_shifters();
         bg_next_tile_id = read((short) (0x2000 | (registers.loopy_v & 0x0FFF)));
     }
 
@@ -803,18 +804,21 @@ public class PPU {
         if (Common.Bits.getBit(registers.PPUMASK, 3)) {
             // If show background in leftmost 8 pixels of screen or cycle >= 9
             if (cycle >= 9 || Common.Bits.getBit(registers.PPUMASK, 1)) {
-                // Select pixel bit (from bit plane) depending on fine x scroll
-                short bit_mux = (short) (0x8000 >> registers.fine_x_scroll);
+                bg_next_tile_id
+
+//                // Select pixel bit (from bit plane) depending on fine x scroll
+//                short bit_mux = (short) (0x8000 >> registers.fine_x_scroll);
 
                 // Get pixel from shifter
-                byte p0_pixel = (byte) ((bg_shifter_pattern_lo & bit_mux) != 0 ? 1 : 0);
-                byte p1_pixel = (byte) ((bg_shifter_pattern_hi & bit_mux) != 0 ? 1 : 0);
-                bg_pixel = (byte) ((p1_pixel << 1) | p0_pixel);
-
-                // Get palette
-                byte bg_pal0 = (byte) ((bg_shifter_attrib_lo & bit_mux) != 0 ? 1 : 0);
-                byte bg_pal1 = (byte) ((bg_shifter_attrib_hi & bit_mux) != 0 ? 1 : 0);
-                bg_palette = (byte) ((bg_pal1 << 1) | bg_pal0);
+                // TODO: Dont use shifters use regular registers
+//                byte p0_pixel = (byte) ((bg_shifter_pattern_lo & bit_mux) != 0 ? 1 : 0);
+//                byte p1_pixel = (byte) ((bg_shifter_pattern_hi & bit_mux) != 0 ? 1 : 0);
+//                bg_pixel = (byte) ((p1_pixel << 1) | p0_pixel);
+//
+//                // Get palette
+//                byte bg_pal0 = (byte) ((bg_shifter_attrib_lo & bit_mux) != 0 ? 1 : 0);
+//                byte bg_pal1 = (byte) ((bg_shifter_attrib_hi & bit_mux) != 0 ? 1 : 0);
+//                bg_palette = (byte) ((bg_pal1 << 1) | bg_pal0);
             }
         }
 
