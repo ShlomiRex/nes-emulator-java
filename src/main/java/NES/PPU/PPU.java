@@ -77,12 +77,12 @@ public class PPU {
     /**
      * Background tile to be used for the current 8 pixels.
      */
-    private byte bg_next_tile_id;
+    public byte bg_next_tile_id;
 
     /**
      * Attribute table byte for the next 8 pixels.
      */
-    private byte bg_next_tile_attrib;
+    public byte bg_next_tile_attrib;
 
 //    private byte bg_shifter_pattern_lo, bg_shifter_pattern_hi;
 
@@ -829,31 +829,31 @@ public class PPU {
         byte fg_priority = 0;
 
         // If show foreground (sprites)
-        if (Common.Bits.getBit(registers.PPUMASK, 4)) {
-            if (cycle >= 9 || Common.Bits.getBit(registers.PPUMASK, 2)) {
-                spriteZeroBeingRendered = false;
-
-                for (int i = 0; i < sprite_count; i++) {
-                    // Scanline cycle has "collided" with sprite, shifters taking over
-                    if (spriteScanline[i].x == 0) {
-                        byte fg_pixel_lo = (byte) ((sprite_shifter_pattern_lo[i] & 0x80) > 0 ? 1 : 0);
-                        byte fg_pixel_hi = (byte) ((sprite_shifter_pattern_hi[i] & 0x80) > 0 ? 1 : 0);
-                        fg_pixel = (byte) ((fg_pixel_hi << 1) | fg_pixel_lo);
-
-                        fg_palette = (byte) ((byte) (spriteScanline[i].attr & 0x03) + 0x04);
-                        fg_priority = (byte) (((spriteScanline[i].attr & 0x20) == 0) ? 1 : 0);
-
-                        // If not transparent
-                        if (fg_pixel != 0) {
-                            if (i == 0) {
-                                spriteZeroBeingRendered = true;
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
-        }
+//        if (Common.Bits.getBit(registers.PPUMASK, 4)) {
+//            if (cycle >= 9 || Common.Bits.getBit(registers.PPUMASK, 2)) {
+//                spriteZeroBeingRendered = false;
+//
+//                for (int i = 0; i < sprite_count; i++) {
+//                    // Scanline cycle has "collided" with sprite, shifters taking over
+//                    if (spriteScanline[i].x == 0) {
+//                        byte fg_pixel_lo = (byte) ((sprite_shifter_pattern_lo[i] & 0x80) > 0 ? 1 : 0);
+//                        byte fg_pixel_hi = (byte) ((sprite_shifter_pattern_hi[i] & 0x80) > 0 ? 1 : 0);
+//                        fg_pixel = (byte) ((fg_pixel_hi << 1) | fg_pixel_lo);
+//
+//                        fg_palette = (byte) ((byte) (spriteScanline[i].attr & 0x03) + 0x04);
+//                        fg_priority = (byte) (((spriteScanline[i].attr & 0x20) == 0) ? 1 : 0);
+//
+//                        // If not transparent
+//                        if (fg_pixel != 0) {
+//                            if (i == 0) {
+//                                spriteZeroBeingRendered = true;
+//                            }
+//                            break;
+//                        }
+//                    }
+//                }
+//            }
+//        }
 
 
 
@@ -862,41 +862,44 @@ public class PPU {
         byte final_pixel = 0;
         byte final_palette = 0;
 
-        if (bg_pixel == 0 && fg_pixel == 0) {
-            // Both are transparent, draw background color
-            final_pixel = 0;
-            final_palette = 0;
-        } else if (bg_pixel == 0 && fg_pixel > 0) {
-            // Background is transparent, draw sprite pixel
-            final_pixel = fg_pixel;
-            final_palette = fg_palette;
-        } else if (bg_pixel > 0 && fg_pixel == 0) {
-            // Sprite is transparent, draw background pixel
-            final_pixel = bg_pixel;
-            final_palette = bg_palette;
-        } else if (bg_pixel > 0 && fg_pixel > 0) {
-            // Both are non-transparent, check sprite priority
-            if (fg_priority != 0) {
-                final_pixel = fg_pixel;
-                final_palette = fg_palette;
-            } else {
-                final_pixel = bg_pixel;
-                final_palette = bg_palette;
-            }
+//        if (bg_pixel == 0 && fg_pixel == 0) {
+//            // Both are transparent, draw background color
+//            final_pixel = 0;
+//            final_palette = 0;
+//        } else if (bg_pixel == 0 && fg_pixel > 0) {
+//            // Background is transparent, draw sprite pixel
+//            final_pixel = fg_pixel;
+//            final_palette = fg_palette;
+//        } else if (bg_pixel > 0 && fg_pixel == 0) {
+//            // Sprite is transparent, draw background pixel
+//            final_pixel = bg_pixel;
+//            final_palette = bg_palette;
+//        } else if (bg_pixel > 0 && fg_pixel > 0) {
+//            // Both are non-transparent, check sprite priority
+//            if (fg_priority != 0) {
+//                final_pixel = fg_pixel;
+//                final_palette = fg_palette;
+//            } else {
+//                final_pixel = bg_pixel;
+//                final_palette = bg_palette;
+//            }
+//
+//            // Check for sprite 0 hit
+//            if (spriteZeroHitPossible && spriteZeroBeingRendered) {
+//                if (cycle >= 1 && cycle < 258) {
+//                    // Sprite zero hit
+//                    registers.PPUSTATUS = Common.Bits.setBit(registers.PPUSTATUS, 6, true);
+//                }
+//            }
+//        }
 
-            // Check for sprite 0 hit
-            if (spriteZeroHitPossible && spriteZeroBeingRendered) {
-                if (cycle >= 1 && cycle < 258) {
-                    // Sprite zero hit
-                    registers.PPUSTATUS = Common.Bits.setBit(registers.PPUSTATUS, 6, true);
-                }
-            }
-        }
+        final_pixel = bg_pixel;
+        final_palette = bg_palette;
 
         // Now we have a final pixel colour and palette
         buffered_pixel_color[0] = get_color_index_from_palette(final_palette, final_pixel);
         bufferedImage.getRaster().setPixel(cycle - 1, scanline, buffered_pixel_color);
-        trigger_game_canvas_repaint.run(); // TODO: Remove. Only for debugging, check each pixel render correctly.
+//        trigger_game_canvas_repaint.run(); // TODO: Remove. Only for debugging, check each pixel render correctly.
     }
 
     private void renderBG() {
